@@ -16,8 +16,12 @@ according to this issue: https://github.com/ReactiveX/RxScala/issues/161
 Therefore, I went with [scala.rx](https://github.com/lihaoyi/scala.rx). It is not really the same as RxScala, but you
 can have reactive variables with it. It has a different API, but may be working in a similar way.
 
-## First video
+## Video 01
 
-As you cannot map with scala.rx but have `Var` and `Rx{}`, the code looks a bit different. Anyways, I think one can see
-the intention as it was in the courses video.
+As you cannot map with scala.rx but have `Var` and `Rx{}`, the code looks a bit different.
+
+## Video 02 - Main function and effects function
+
+To separate logic and effects, the code is split into two functions. As this was done, the next step is to use the sink
+(the `Rx[String]` in our case) and hand it over to multiple effects: Writing into DOM and writing into console.
 
