@@ -25,3 +25,9 @@ As you cannot map with scala.rx but have `Var` and `Rx{}`, the code looks a bit 
 To separate logic and effects, the code is split into two functions. As this was done, the next step is to use the sink
 (the `Rx[String]` in our case) and hand it over to multiple effects: Writing into DOM and writing into console.
 
+The main function is called `logic()` as `main()` is needed by `js.App` as main entry point.
+
+## Video 03 - Customizing effects from the main function
+
+In this case, the main function (called `logic` in our case) is split into separate sinks. This is done through a map in
+the video.
