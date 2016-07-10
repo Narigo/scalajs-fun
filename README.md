@@ -30,4 +30,5 @@ The main function is called `logic()` as `main()` is needed by `js.App` as main 
 ## Video 03 - Customizing effects from the main function
 
 In this case, the main function (called `logic` in our case) is split into separate sinks. This is done through a map in
-the video.
+the video. It's not possible to return `Obs` directly and use it as the value of the observed `Rx` is not passed into
+the callback.
