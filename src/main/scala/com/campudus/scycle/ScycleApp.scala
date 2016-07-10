@@ -46,12 +46,12 @@ object ScycleApp extends JSApp {
     }
   )
 
-  def domDriver(text: Rx[String]): Unit = Rx.unsafe {
+  def domDriver(text: Rx[String])(implicit ctx: Ctx.Owner): Unit = Rx {
     val container = dom.document.getElementById("app")
     container.textContent = text()
   }
 
-  def consoleLogDriver(log: Rx[String]): Unit = Rx.unsafe {
+  def consoleLogDriver(log: Rx[String])(implicit ctx: Ctx.Owner): Unit = Rx {
     dom.console.log(log())
   }
 
