@@ -13,13 +13,17 @@ object ScycleApp extends JSApp {
 
   @JSExport
   def main(): Unit = {
-    run(logic)
+    run(logic, Map(
+      "dom" -> domDriver,
+      "log" -> consoleLogDriver
+    ))
   }
 
-  def run(mainFn: () => Map[String, Rx[String]]): Unit = {
+  def run(mainFn: () => Map[String, Rx[String]], drivers: Map[String, Rx[String] => Unit]): Unit = {
     val sinks = mainFn()
-    domEffect(sinks("dom"))
-    consoleLogEffect(sinks("log"))
+    drivers foreach {
+      case (key, fn) => fn(sinks(key))
+    }
   }
 
   def logic()(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = Map(
@@ -42,12 +46,12 @@ object ScycleApp extends JSApp {
     }
   )
 
-  def domEffect(text: Rx[String]): Unit = Rx.unsafe {
+  def domDriver(text: Rx[String]): Unit = Rx.unsafe {
     val container = dom.document.getElementById("app")
     container.textContent = text()
   }
 
-  def consoleLogEffect(log: Rx[String]): Unit = Rx.unsafe {
+  def consoleLogDriver(log: Rx[String]): Unit = Rx.unsafe {
     dom.console.log(log())
   }
 
