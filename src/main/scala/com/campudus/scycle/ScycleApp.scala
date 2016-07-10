@@ -11,22 +11,30 @@ object ScycleApp extends JSApp {
 
   @JSExport
   def main(): Unit = {
-    val sink = logic()
-    domEffect(sink)
-    consoleLogEffect(sink)
+    val sinks = logic()
+    domEffect(sinks("dom"))
+    consoleLogEffect(sinks("log"))
   }
 
-  def logic(): Rx[String] = {
+  def logic(): Map[String, Rx[String]] = Map(
     // Logic (functional)
-    val i = Var(0)
-    dom.setInterval(() => {
-      i() = i() + 1
-    }, 1000)
+    "dom" -> {
+      val i = Var(0)
+      dom.setInterval(() => {
+        i() = i() + 1
+      }, 1000)
 
-    Rx {
-      s"Seconds elapsed ${i()}" // mapping the counter
+      Rx(s"Seconds elapsed ${i()}")
+    },
+    "log" -> {
+      val i = Var(0)
+      dom.setInterval(() => {
+        i() = i() + 2
+      }, 2000)
+
+      Rx(s"${i()}")
     }
-  }
+  )
 
   def domEffect(text: Rx[String]): Unit = {
     Obs(text) {
@@ -35,9 +43,9 @@ object ScycleApp extends JSApp {
     }
   }
 
-  def consoleLogEffect(text: Rx[String]): Unit = {
-    Obs(text) {
-      dom.console.log(text())
+  def consoleLogEffect(log: Rx[String]): Unit = {
+    Obs(log) {
+      dom.console.log(log())
     }
   }
 
