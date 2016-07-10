@@ -9,6 +9,8 @@ import scala.scalajs.js.annotation.JSExport
 @JSExport
 object ScycleApp extends JSApp {
 
+  implicit private val ctx = Ctx.Owner.safe()
+
   @JSExport
   def main(): Unit = {
     val sinks = logic()
@@ -16,7 +18,7 @@ object ScycleApp extends JSApp {
     consoleLogEffect(sinks("log"))
   }
 
-  def logic(): Map[String, Rx[String]] = Map(
+  def logic()(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = Map(
     // Logic (functional)
     "dom" -> {
       val i = Var(1)
@@ -24,17 +26,15 @@ object ScycleApp extends JSApp {
         i() = i.now + 1
       }, 1000)
 
-      Rx.unsafe(s"Seconds elapsed ${i()}")
+      Rx(s"Seconds elapsed ${i()}")
     },
     "log" -> {
-      val i = Var(0)
-      val obs = Rx.unsafe(s"${i()}")
+      val i = Var(1)
       dom.setInterval(() => {
-        i.update(i.now * 2)
-        obs.propagate()
-      }, 2000)
+        i() = i.now * 2
+      }, 1000)
 
-      obs
+      Rx(s"${i()}")
     }
   )
 
