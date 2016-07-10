@@ -34,3 +34,6 @@ the video. It's not possible to return `Obs` directly and use it as the value of
 the callback.
 
 Weird behavior: When using `i() = i() * 2` instead of `i() = i() + 2`, the `consoleLogEffect` does not fire anymore.
+After fiddling around with this a bit more, I realized that `i` was set to `Var(0)` initially. Every update `* 2` made
+it be `0` again, so it does not update internally and therefore does not fire again. To prevent that, one should use the
+`.propagate()` method on the `Rx` / `Obs` that listens on `i`.

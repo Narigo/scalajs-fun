@@ -19,7 +19,7 @@ object ScycleApp extends JSApp {
   def logic(): Map[String, Rx[String]] = Map(
     // Logic (functional)
     "dom" -> {
-      val i = Var(0)
+      val i = Var(1)
       dom.setInterval(() => {
         i() = i.now + 1
       }, 1000)
@@ -28,11 +28,13 @@ object ScycleApp extends JSApp {
     },
     "log" -> {
       val i = Var(0)
+      val obs = Rx.unsafe(s"${i()}")
       dom.setInterval(() => {
-        i() = i.now + 2
+        i.update(i.now * 2)
+        obs.propagate()
       }, 2000)
 
-      Rx.unsafe(s"${i()}")
+      obs
     }
   )
 
