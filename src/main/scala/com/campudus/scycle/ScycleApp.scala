@@ -13,7 +13,11 @@ object ScycleApp extends JSApp {
 
   @JSExport
   def main(): Unit = {
-    val sinks = logic()
+    run(logic)
+  }
+
+  def run(mainFn: () => Map[String, Rx[String]]): Unit = {
+    val sinks = mainFn()
     domEffect(sinks("dom"))
     consoleLogEffect(sinks("log"))
   }

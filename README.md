@@ -42,3 +42,7 @@ When using [scala.rx](https://github.com/lihaoyi/scala.rx) version `0.3.0+`, it 
 prevent creating leaky `Rx` when nesting them. The documentation doesn't really say how to create a safe context, so in
 the current code, the line `implicit private val ctx = Ctx.Owner.safe()` is added to the App object as it doesn't seem
 to be possible to create this in the `main()` method itself.
+
+## Video 04 - Introducing run() and driver functions
+
+
