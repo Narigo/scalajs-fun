@@ -21,32 +21,28 @@ object ScycleApp extends JSApp {
     "dom" -> {
       val i = Var(0)
       dom.setInterval(() => {
-        i() = i() + 1
+        i() = i.now + 1
       }, 1000)
 
-      Rx(s"Seconds elapsed ${i()}")
+      Rx.unsafe(s"Seconds elapsed ${i()}")
     },
     "log" -> {
       val i = Var(0)
       dom.setInterval(() => {
-        i() = i() * 2
+        i() = i.now + 2
       }, 2000)
 
-      Rx(s"${i()}")
+      Rx.unsafe(s"${i()}")
     }
   )
 
-  def domEffect(text: Rx[String]): Unit = {
-    Obs(text) {
-      val container = dom.document.getElementById("app")
-      container.textContent = text()
-    }
+  def domEffect(text: Rx[String]): Unit = Rx.unsafe {
+    val container = dom.document.getElementById("app")
+    container.textContent = text()
   }
 
-  def consoleLogEffect(log: Rx[String]): Unit = {
-    Obs(log) {
-      dom.console.log(log())
-    }
+  def consoleLogEffect(log: Rx[String]): Unit = Rx.unsafe {
+    dom.console.log(log())
   }
 
 }
