@@ -29,7 +29,7 @@ object ScycleApp extends JSApp {
     "log" -> {
       val i = Var(0)
       dom.setInterval(() => {
-        i() = i() + 2
+        i() = i() * 2
       }, 2000)
 
       Rx(s"${i()}")

@@ -32,3 +32,5 @@ The main function is called `logic()` as `main()` is needed by `js.App` as main 
 In this case, the main function (called `logic` in our case) is split into separate sinks. This is done through a map in
 the video. It's not possible to return `Obs` directly and use it as the value of the observed `Rx` is not passed into
 the callback.
+
+Weird behavior: When using `i() = i() * 2` instead of `i() = i() + 2`, the `consoleLogEffect` does not fire anymore.
