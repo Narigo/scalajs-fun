@@ -45,4 +45,6 @@ to be possible to create this in the `main()` method itself.
 
 ## Video 04 - Introducing run() and driver functions
 
-
+This is more or less a matter of renaming things: `effects` are called `drivers` now and there is a map to show the
+respective drivers that are at work right now. If one is not used / needed, one can comment it out without having to
+touch multiple lines now.
