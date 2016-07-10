@@ -37,3 +37,8 @@ Weird behavior: When using `i() = i() * 2` instead of `i() = i() + 2`, the `cons
 After fiddling around with this a bit more, I realized that `i` was set to `Var(0)` initially. Every update `* 2` made
 it be `0` again, so it does not update internally and therefore does not fire again. To prevent that, one should use the
 `.propagate()` method on the `Rx` / `Obs` that listens on `i`.
+
+When using [scala.rx](https://github.com/lihaoyi/scala.rx) version `0.3.0+`, it added Ownership context. This is used to
+prevent creating leaky `Rx` when nesting them. The documentation doesn't really say how to create a safe context, so in
+the current code, the line `implicit private val ctx = Ctx.Owner.safe()` is added to the App object as it doesn't seem
+to be possible to create this in the `main()` method itself.
