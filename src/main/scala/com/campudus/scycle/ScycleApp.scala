@@ -20,32 +20,41 @@ object ScycleApp extends JSApp {
     ))
   }
 
-  def run(mainFn: () => Map[String, Rx[String]], drivers: Map[String, Rx[String] => Rx[Option[Rx[Event]]]]): Unit = {
-    val sinks = mainFn()
+  def run(
+           mainFn: (collection.mutable.Map[String, Option[Rx[Event]]]) => Map[String, Rx[String]],
+           drivers: Map[String, Rx[String] => Rx[Option[Rx[Event]]]]
+         )(implicit ctx: Ctx.Owner): Unit = {
+    val proxySources = collection.mutable.Map[String, Option[Rx[Event]]]()
+    val sinks = mainFn(proxySources)
     drivers foreach {
-      case (key, fn) => fn(sinks(key))
+      case (key, fn) =>
+        val sources = fn(sinks(key))
+        proxySources.put(key, sources.now)
     }
   }
 
-  def logic()(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = Map(
-    // Logic (functional)
-    "dom" -> {
-      val i = Var(1)
-      dom.setInterval(() => {
-        i() = i.now + 1
-      }, 1000)
+  def logic(sources: collection.mutable.Map[String, Option[Rx[Event]]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
+    val domSource = sources.getOrElse("dom", null)
+    Map(
+      // Logic (functional)
+      "dom" -> {
+        val i = Var(1)
+        dom.setInterval(() => {
+          i() = i.now + 1
+        }, 1000)
 
-      Rx(s"Seconds elapsed ${i()}")
-    },
-    "log" -> {
-      val i = Var(1)
-      dom.setInterval(() => {
-        i() = i.now * 2
-      }, 1000)
+        Rx(s"Seconds elapsed ${i()} - domSource exists? ${domSource}")
+      },
+      "log" -> {
+        val i = Var(1)
+        dom.setInterval(() => {
+          i() = i.now * 2
+        }, 1000)
 
-      Rx(s"${i()}")
-    }
-  )
+        Rx(s"${i()}")
+      }
+    )
+  }
 
   def domDriver(text: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[MouseEvent]]] = Rx {
     val container = dom.document.getElementById("app")
@@ -56,7 +65,8 @@ object ScycleApp extends JSApp {
     Some(lastClick)
   }
 
-  def consoleLogDriver(log: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[Event]]] = Rx {dom.console.log(log())
+  def consoleLogDriver(log: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[Event]]] = Rx {
+    dom.console.log(log())
     None
   }
 
