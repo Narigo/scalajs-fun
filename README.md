@@ -16,7 +16,7 @@ according to this issue: https://github.com/ReactiveX/RxScala/issues/161
 Therefore, I went with [scala.rx](https://github.com/lihaoyi/scala.rx). It is not really the same as RxScala, but you
 can have reactive variables with it. It has a different API, but may be working in a similar way.
 
-## Video 01
+## Video 01 - The Cycle.js principle: separating logic from effects
 
 As you cannot map with scala.rx but have `Var` and `Rx{}`, the code looks a bit different.
 
@@ -48,3 +48,7 @@ to be possible to create this in the `main()` method itself.
 This is more or less a matter of renaming things: `effects` are called `drivers` now and there is a map to show the
 respective drivers that are at work right now. If one is not used / needed, one can comment it out without having to
 touch multiple lines now.
+
+## Video 05 - Read effects from the DOM: click events
+
+In this video, the drivers start returning sources.

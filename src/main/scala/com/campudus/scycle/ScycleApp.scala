@@ -1,6 +1,7 @@
 package com.campudus.scycle
 
 import org.scalajs.dom
+import org.scalajs.dom.{Event, MouseEvent}
 import rx._
 
 import scala.scalajs.js.JSApp
@@ -19,7 +20,7 @@ object ScycleApp extends JSApp {
     ))
   }
 
-  def run(mainFn: () => Map[String, Rx[String]], drivers: Map[String, Rx[String] => Unit]): Unit = {
+  def run(mainFn: () => Map[String, Rx[String]], drivers: Map[String, Rx[String] => Rx[Option[Rx[Event]]]]): Unit = {
     val sinks = mainFn()
     drivers foreach {
       case (key, fn) => fn(sinks(key))
@@ -46,13 +47,17 @@ object ScycleApp extends JSApp {
     }
   )
 
-  def domDriver(text: Rx[String])(implicit ctx: Ctx.Owner): Unit = Rx {
+  def domDriver(text: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[MouseEvent]]] = Rx {
     val container = dom.document.getElementById("app")
     container.textContent = text()
+
+    val lastClick = Var[MouseEvent](null)
+    dom.document.addEventListener("click", (ev: MouseEvent) => lastClick() = ev)
+    Some(lastClick)
   }
 
-  def consoleLogDriver(log: Rx[String])(implicit ctx: Ctx.Owner): Unit = Rx {
-    dom.console.log(log())
+  def consoleLogDriver(log: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[Event]]] = Rx {dom.console.log(log())
+    None
   }
 
 }
