@@ -1,7 +1,7 @@
 package com.campudus.scycle
 
 import org.scalajs.dom
-import org.scalajs.dom.{Event, MouseEvent}
+import org.scalajs.dom.MouseEvent
 import rx._
 
 import scala.scalajs.js.JSApp
@@ -15,59 +15,51 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     run(logic, Map(
-      "dom" -> domDriver,
-      "log" -> consoleLogDriver
+      "dom" -> domDriver _
     ))
   }
 
   def run(
-           mainFn: (collection.mutable.Map[String, Option[Rx[Event]]]) => Map[String, Rx[String]],
-           drivers: Map[String, Rx[String] => Rx[Option[Rx[Event]]]]
+           mainFn: (collection.mutable.Map[String, Var[MouseEvent]]) => Map[String, Rx[String]],
+           drivers: Map[String, (Rx[String], Var[MouseEvent]) => _]
          )(implicit ctx: Ctx.Owner): Unit = {
-    val proxySources = collection.mutable.Map[String, Option[Rx[Event]]]()
+    val proxySources = collection.mutable.Map[String, Var[MouseEvent]]("dom" -> Var(null))
     val sinks = mainFn(proxySources)
     drivers foreach {
       case (key, fn) =>
-        val sources = fn(sinks(key))
-        proxySources.put(key, sources.now)
+        fn(sinks(key), proxySources(key))
     }
   }
 
-  def logic(sources: collection.mutable.Map[String, Option[Rx[Event]]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
-    val domSource = sources.getOrElse("dom", null)
+  def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
     Map(
       // Logic (functional)
       "dom" -> {
-        val i = Var(1)
+        val source = sources("dom")
+        val i = Var[Int](0)
+
+        source.trigger {
+          i() = 1
+        }
+
         dom.setInterval(() => {
           i() = i.now + 1
         }, 1000)
 
-        Rx(s"Seconds elapsed ${i()} - domSource exists? ${domSource}")
-      },
-      "log" -> {
-        val i = Var(1)
-        dom.setInterval(() => {
-          i() = i.now * 2
-        }, 1000)
-
-        Rx(s"${i()}")
+        Rx {
+          s"Seconds elapsed ${i()} - domSource exists? ${source.now}"
+        }
       }
     )
   }
 
-  def domDriver(text: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[MouseEvent]]] = Rx {
+  def domDriver(input: Rx[String], outRx: Var[MouseEvent])(implicit ctx: Ctx.Owner): Unit = Rx {
     val container = dom.document.getElementById("app")
-    container.textContent = text()
+    container.textContent = input()
 
-    val lastClick = Var[MouseEvent](null)
-    dom.document.addEventListener("click", (ev: MouseEvent) => lastClick() = ev)
-    Some(lastClick)
-  }
-
-  def consoleLogDriver(log: Rx[String])(implicit ctx: Ctx.Owner): Rx[Option[Rx[Event]]] = Rx {
-    dom.console.log(log())
-    None
+    dom.document.addEventListener("click", { (ev: MouseEvent) =>
+      outRx() = ev
+    })
   }
 
 }

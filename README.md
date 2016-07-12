@@ -51,4 +51,5 @@ touch multiple lines now.
 
 ## Video 05 - Read effects from the DOM: click events
 
-In this video, the drivers start returning sources.
+In this video, the drivers start returning sources. The proxy logic is different to JavaScript as we are usually not
+passing around mutable state. It needs to be done in a more scala-like way.
