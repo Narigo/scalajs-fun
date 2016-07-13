@@ -53,3 +53,5 @@ touch multiple lines now.
 
 In this video, the drivers start returning sources. The proxy logic is different to JavaScript as we are usually not
 passing around mutable state. It needs to be done in a more scala-like way.
+
+The drivers have to use input and output parameters in order to use the same Variable as the proxySource.
