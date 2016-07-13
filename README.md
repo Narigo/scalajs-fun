@@ -54,4 +54,10 @@ touch multiple lines now.
 In this video, the drivers start returning sources. The proxy logic is different to JavaScript as we are usually not
 passing around mutable state. It needs to be done in a more scala-like way.
 
-The drivers have to use input and output parameters in order to use the same Variable as the proxySource.
+The drivers have to use input and output parameters in order to use the same Variable as the `proxySource`. Using the
+`.getOrElseUpdate()` method on the `proxySource` `Map`, we can initialize the sources in the `main` method. This keeps
+the whole logic and variable initialization inside the main method.
+
+## Video 06 - Generalizing run() function for more types of sources
+
+

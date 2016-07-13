@@ -23,7 +23,7 @@ object ScycleApp extends JSApp {
            mainFn: (collection.mutable.Map[String, Var[MouseEvent]]) => Map[String, Rx[String]],
            drivers: Map[String, (Rx[String], Var[MouseEvent]) => _]
          )(implicit ctx: Ctx.Owner): Unit = {
-    val proxySources = collection.mutable.Map[String, Var[MouseEvent]]("dom" -> Var(null))
+    val proxySources = collection.mutable.Map[String, Var[MouseEvent]]()
     val sinks = mainFn(proxySources)
     drivers foreach {
       case (key, fn) =>
@@ -32,13 +32,14 @@ object ScycleApp extends JSApp {
   }
 
   def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
+    val domSource = sources.getOrElseUpdate("dom", Var[MouseEvent](null))
+
     Map(
       // Logic (functional)
       "dom" -> {
-        val source = sources("dom")
         val i = Var[Int](0)
 
-        source.trigger {
+        domSource.trigger {
           i() = 1
         }
 
@@ -47,7 +48,7 @@ object ScycleApp extends JSApp {
         }, 1000)
 
         Rx {
-          s"Seconds elapsed ${i()} - domSource exists? ${source.now}"
+          s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"
         }
       }
     )
