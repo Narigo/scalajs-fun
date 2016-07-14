@@ -60,4 +60,16 @@ the whole logic and variable initialization inside the main method.
 
 ## Video 06 - Generalizing run() function for more types of sources
 
+Using the `trigger` method, we can actually get rid of the output parameter in the drivers method. This way, we have two
+separate variables, but this seems to be the way that Cycle does it itself.
 
+To truly generalize the `run` method now, it's been pulled out into the `Scycle` object. Using type aliases makes it a
+bit easier to understand which types are used for what. It also shows that the logic method does a bit more right now
+than just taking the drivers output and giving some output to feed into the respective driver.
+
+### Note about implementation of the timer
+
+A small thing which is different to the implementation of the JavaScript is that the interval timer does not get reset
+every time the document is clicked. If we were starting a new interval timer on each click, we would need to introduce a
+variable that can be used to clear the old timer and remembers the new one. So it's possible to do but in order to keep
+the implementation of the core Cycle principle in focus, we will continue with the single timer.

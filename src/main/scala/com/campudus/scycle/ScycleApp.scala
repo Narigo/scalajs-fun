@@ -14,21 +14,9 @@ object ScycleApp extends JSApp {
 
   @JSExport
   def main(): Unit = {
-    run(logic, Map(
+    Scycle.run(logic, Map(
       "dom" -> domDriver _
     ))
-  }
-
-  def run(
-           mainFn: (collection.mutable.Map[String, Var[MouseEvent]]) => Map[String, Rx[String]],
-           drivers: Map[String, (Rx[String], Var[MouseEvent]) => _]
-         )(implicit ctx: Ctx.Owner): Unit = {
-    val proxySources = collection.mutable.Map[String, Var[MouseEvent]]()
-    val sinks = mainFn(proxySources)
-    drivers foreach {
-      case (key, fn) =>
-        fn(sinks(key), proxySources(key))
-    }
   }
 
   def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
@@ -54,13 +42,17 @@ object ScycleApp extends JSApp {
     )
   }
 
-  def domDriver(input: Rx[String], outRx: Var[MouseEvent])(implicit ctx: Ctx.Owner): Unit = Rx {
-    val container = dom.document.getElementById("app")
-    container.textContent = input()
+  def domDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
+    Rx {
+      val container = dom.document.getElementById("app")
+      container.textContent = input()
+    }
 
+    val outRx = Var[MouseEvent](null)
     dom.document.addEventListener("click", { (ev: MouseEvent) =>
       outRx() = ev
     })
+    outRx
   }
 
 }
