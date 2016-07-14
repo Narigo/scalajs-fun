@@ -73,3 +73,7 @@ A small thing which is different to the implementation of the JavaScript is that
 every time the document is clicked. If we were starting a new interval timer on each click, we would need to introduce a
 variable that can be used to clear the old timer and remembers the new one. So it's possible to do but in order to keep
 the implementation of the core Cycle principle in focus, we will continue with the single timer.
+
+## Video 07 - Making our toy DOM Driver more flexible
+
+

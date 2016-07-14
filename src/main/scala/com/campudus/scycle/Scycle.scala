@@ -18,7 +18,10 @@ object Scycle {
       case (key, fn) =>
         val outRx = fn(sinks(key))
         outRx.trigger {
-          proxySources(key)() = outRx.now
+          val x = outRx.now
+          if (x != null) {
+            proxySources(key)() = x
+          }
         }
     }
   }

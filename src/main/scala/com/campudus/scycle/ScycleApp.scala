@@ -23,10 +23,10 @@ object ScycleApp extends JSApp {
   def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
     val domSource = sources.getOrElseUpdate("dom", Var[MouseEvent](null))
 
-    val i = Var[Int](0)
     Map(
       // Logic (functional)
       "dom" -> {
+        val i = Var[Int](0)
 
         domSource.trigger {
           i() = 1
@@ -41,8 +41,14 @@ object ScycleApp extends JSApp {
         }
       },
       "log" -> {
+        val i = Var[Int](0)
+
+        dom.setInterval(() => {
+          i() = i.now + 1
+        }, 1000)
+
         Rx {
-          s"${i()} seconds elapsed since last click"
+          s"${i()} seconds elapsed since page opened"
         }
       }
     )
