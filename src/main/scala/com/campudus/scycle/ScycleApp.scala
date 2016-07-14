@@ -15,12 +15,12 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
-      "dom" -> domDriver _,
-      "log" -> consoleLogDriver _
+      "dom" -> (logicOut => domDriver(logicOut.asInstanceOf[Rx[dom.Element]])),
+      "log" -> (logicOut => consoleLogDriver(logicOut.asInstanceOf[Rx[String]]))
     ))
   }
 
-  def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
+  def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[_]] = {
     val domSource = sources.getOrElseUpdate("dom", Var[MouseEvent](null))
 
     Map(
@@ -37,7 +37,9 @@ object ScycleApp extends JSApp {
         }, 1000)
 
         Rx {
-          s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"
+          val h1 = dom.document.createElement("h1")
+          h1.textContent = s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"
+          h1
         }
       },
       "log" -> {
@@ -62,10 +64,10 @@ object ScycleApp extends JSApp {
     Var(null)
   }
 
-  def domDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
+  def domDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
     Rx {
       val container = dom.document.getElementById("app")
-      container.textContent = input()
+      container.appendChild(input())
     }
 
     val outRx = Var[MouseEvent](null)

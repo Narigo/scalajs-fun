@@ -5,12 +5,12 @@ import rx.{Ctx, Rx, Var}
 
 object Scycle {
 
-  type LogicOutput = Rx[String]
+  type LogicOutput = Rx[_]
   type DriverOutput = Var[MouseEvent]
 
   def run(
            mainFn: (collection.mutable.Map[String, DriverOutput]) => Map[String, LogicOutput],
-           drivers: Map[String, (LogicOutput) => DriverOutput]
+           drivers: Map[String, LogicOutput => DriverOutput]
          )(implicit ctx: Ctx.Owner): Unit = {
     val proxySources = collection.mutable.Map[String, DriverOutput]()
     val sinks = mainFn(proxySources)
