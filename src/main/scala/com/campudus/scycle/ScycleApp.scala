@@ -36,8 +36,8 @@ object ScycleApp extends JSApp {
           i() = i.now + 1
         }, 1000)
 
+        val h1 = dom.document.createElement("h1")
         Rx {
-          val h1 = dom.document.createElement("h1")
           h1.textContent = s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"
           h1
         }
