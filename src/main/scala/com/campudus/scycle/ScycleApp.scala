@@ -15,17 +15,18 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
-      "dom" -> domDriver _
+      "dom" -> domDriver _,
+      "log" -> consoleLogDriver _
     ))
   }
 
   def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[String]] = {
     val domSource = sources.getOrElseUpdate("dom", Var[MouseEvent](null))
 
+    val i = Var[Int](0)
     Map(
       // Logic (functional)
       "dom" -> {
-        val i = Var[Int](0)
 
         domSource.trigger {
           i() = 1
@@ -38,8 +39,21 @@ object ScycleApp extends JSApp {
         Rx {
           s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"
         }
+      },
+      "log" -> {
+        Rx {
+          s"${i()} seconds elapsed since last click"
+        }
       }
     )
+  }
+
+  def consoleLogDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
+    Rx {
+      dom.console.log(input())
+    }
+
+    Var(null)
   }
 
   def domDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
