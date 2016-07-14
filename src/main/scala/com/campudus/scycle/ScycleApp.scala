@@ -1,11 +1,31 @@
 package com.campudus.scycle
 
 import org.scalajs.dom
-import org.scalajs.dom.MouseEvent
+import org.scalajs.dom.Event
 import rx._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
+
+sealed trait Driver
+
+class ConsoleDriver extends Driver
+
+class DomDriver extends Driver {
+  def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
+    println("hello, select events!")
+    val elements = dom.document.getElementsByTagName(tagName)
+    val eventVar = Var[Event](null)
+    for {
+      i <- 0 until elements.length
+    } {
+      elements(i).addEventListener(event, (e: Event) => {
+        eventVar() = e
+      })
+    }
+    eventVar
+  }
+}
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -20,12 +40,13 @@ object ScycleApp extends JSApp {
     ))
   }
 
-  def logic(sources: collection.mutable.Map[String, Var[MouseEvent]])(implicit ctx: Ctx.Owner): Map[String, Rx[_]] = {
-    val domSource = sources.getOrElseUpdate("dom", Var[MouseEvent](null))
-
+  def logic(sources: collection.Map[String, Driver])(implicit ctx: Ctx.Owner): collection.Map[String, Rx[_]] = {
     Map(
       // Logic (functional)
       "dom" -> {
+        println("hello, dom logic!")
+
+        val domSource = sources("dom").asInstanceOf[DomDriver].selectEvents("div", "click")
         val i = Var[Int](0)
 
         domSource.trigger {
@@ -56,27 +77,23 @@ object ScycleApp extends JSApp {
     )
   }
 
-  def consoleLogDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
+  def consoleLogDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Driver = {
     Rx {
       dom.console.log(input())
     }
 
-    Var(null)
+    null
   }
 
-  def domDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Var[MouseEvent] = {
+  def domDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): DomDriver = {
+    println("hello, driver!")
+
     Rx {
       val container = dom.document.getElementById("app")
       container.appendChild(input())
     }
 
-    val outRx = Var[MouseEvent](null)
-    dom.document.addEventListener("click", { (ev: MouseEvent) =>
-      outRx() = ev
-    })
-    outRx
+    new DomDriver
   }
 
 }
-
-

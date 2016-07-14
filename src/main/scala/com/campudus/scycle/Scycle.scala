@@ -9,20 +9,18 @@ object Scycle {
   type DriverOutput = Var[MouseEvent]
 
   def run(
-           mainFn: (collection.mutable.Map[String, DriverOutput]) => Map[String, LogicOutput],
-           drivers: Map[String, LogicOutput => DriverOutput]
+           mainFn: (collection.Map[String, Driver]) => collection.Map[String, LogicOutput],
+           drivers: collection.Map[String, LogicOutput => Driver]
          )(implicit ctx: Ctx.Owner): Unit = {
-    val proxySources = collection.mutable.Map[String, DriverOutput]()
-    val sinks = mainFn(proxySources)
+    val realDrivers = drivers.mapValues(fn => {
+      fn(Rx {
+        null
+      })
+    })
+    val sinks = mainFn(realDrivers)
     drivers foreach {
       case (key, fn) =>
-        val outRx = fn(sinks(key))
-        outRx.trigger {
-          val x = outRx.now
-          if (x != null) {
-            proxySources(key)() = x
-          }
-        }
+        fn(sinks(key))
     }
   }
 
