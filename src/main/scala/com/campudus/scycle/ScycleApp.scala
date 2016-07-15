@@ -11,7 +11,14 @@ sealed trait Driver
 
 class ConsoleDriver extends Driver
 
-class DomDriver extends Driver {
+class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver {
+
+  println("initializing driver...")
+  Rx {
+    val container = dom.document.getElementById("app")
+    container.appendChild(input())
+  }
+
   def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
     println("hello, select events!")
     val elements = dom.document.getElementsByTagName(tagName)
@@ -85,15 +92,10 @@ object ScycleApp extends JSApp {
     null
   }
 
-  def domDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): DomDriver = {
+  def domDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Driver = {
     println("hello, driver!")
 
-    Rx {
-      val container = dom.document.getElementById("app")
-      container.appendChild(input())
-    }
-
-    new DomDriver
+    new DomDriver(input)
   }
 
 }
