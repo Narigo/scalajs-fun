@@ -20,7 +20,6 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
   }
 
   def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
-    println("hello, select events!")
     val elements = dom.document.getElementsByTagName(tagName)
     val eventVar = Var[Event](null)
     for {
@@ -51,8 +50,6 @@ object ScycleApp extends JSApp {
     Map(
       // Logic (functional)
       "dom" -> {
-        println("hello, dom logic!")
-
         val domSource = sources("dom").asInstanceOf[DomDriver].selectEvents("div", "click")
         val i = Var[Int](0)
 
