@@ -14,8 +14,9 @@ class ConsoleDriver extends Driver
 class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver {
 
   println("initializing driver...")
+  val container = dom.document.getElementById("app")
+
   Rx {
-    val container = dom.document.getElementById("app")
     container.appendChild(input())
   }
 
@@ -31,6 +32,13 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
     }
     eventVar
   }
+
+  def h1(text: String): dom.Element = {
+    val h1 = dom.document.createElement("h1")
+    h1.textContent = text
+    h1
+  }
+
 }
 
 @JSExport
@@ -50,7 +58,8 @@ object ScycleApp extends JSApp {
     Map(
       // Logic (functional)
       "dom" -> {
-        val domSource = sources("dom").asInstanceOf[DomDriver].selectEvents("div", "click")
+        val driver = sources("dom").asInstanceOf[DomDriver]
+        val domSource = driver.selectEvents("div", "click")
         val i = Var[Int](0)
 
         domSource.trigger {
@@ -61,10 +70,8 @@ object ScycleApp extends JSApp {
           i() = i.now + 1
         }, 1000)
 
-        val h1 = dom.document.createElement("h1")
         Rx {
-          h1.textContent = s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"
-          h1
+          driver.h1(s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}")
         }
       },
       "log" -> {
