@@ -15,6 +15,7 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
 
   println("initializing driver...")
   val container = dom.document.getElementById("app")
+  val h1 = dom.document.createElement("h1")
 
   Rx {
     container.appendChild(input())
@@ -34,7 +35,6 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
   }
 
   def h1(text: String): dom.Element = {
-    val h1 = dom.document.createElement("h1")
     h1.textContent = text
     h1
   }
