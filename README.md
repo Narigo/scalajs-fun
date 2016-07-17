@@ -76,4 +76,8 @@ the implementation of the core Cycle principle in focus, we will continue with t
 
 ## Video 07 - Making our toy DOM Driver more flexible
 
-
+The latest refactorings are done to abstract the driver and let it do a lot more for us. It receives a specific input 
+(in case of the `DomDriver` it wants a `dom.Element`) and returns functions that can be used to receive events in the 
+main function. Called `selectEvents`, it takes the currently available DOM elements and adds event listeners on them. In
+the current implementation, it cannot add listeners to the added elements yet, as the selectEvents call is done before 
+the elements are added to the DOM.

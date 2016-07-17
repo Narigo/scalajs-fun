@@ -27,6 +27,7 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
     for {
       i <- 0 until elements.length
     } {
+      println(s"Add event listener to ${elements(i).nodeName}")
       elements(i).addEventListener(event, (e: Event) => {
         eventVar() = e
       })
