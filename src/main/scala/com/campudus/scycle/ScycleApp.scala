@@ -22,16 +22,12 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
   }
 
   def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
-    val elements = dom.document.getElementsByTagName(tagName)
     val eventVar = Var[Event](null)
-    for {
-      i <- 0 until elements.length
-    } {
-      println(s"Add event listener to ${elements(i).nodeName}")
-      elements(i).addEventListener(event, (e: Event) => {
+    dom.document.addEventListener(event, (e: Event) => {
+      if (e.srcElement.tagName == tagName.toUpperCase()) {
         eventVar() = e
-      })
-    }
+      }
+    })
     eventVar
   }
 
@@ -60,7 +56,7 @@ object ScycleApp extends JSApp {
       // Logic (functional)
       "dom" -> {
         val driver = sources("dom").asInstanceOf[DomDriver]
-        val domSource = driver.selectEvents("div", "click")
+        val domSource = driver.selectEvents("h1", "click")
         val i = Var[Int](0)
 
         domSource.trigger {

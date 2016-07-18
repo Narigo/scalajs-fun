@@ -81,3 +81,8 @@ The latest refactorings are done to abstract the driver and let it do a lot more
 main function. Called `selectEvents`, it takes the currently available DOM elements and adds event listeners on them. In
 the current implementation, it cannot add listeners to the added elements yet, as the selectEvents call is done before 
 the elements are added to the DOM.
+
+## Video 08 - Fine-grained control over the DOM Source
+
+The new implementation of the DomDriver takes all events that occur on the document and then filters out the ones that
+we created listeners for. This ensures to find newly created DOM elements as well. 
