@@ -15,10 +15,9 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
 
   println("initializing driver...")
   val container = dom.document.getElementById("app")
-  val h1 = dom.document.createElement("h1")
 
   Rx {
-    container.appendChild(input())
+    container.innerHTML = input().outerHTML
   }
 
   def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
@@ -32,6 +31,7 @@ class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver 
   }
 
   def h1(text: String): dom.Element = {
+    val h1 = dom.document.createElement("h1")
     h1.textContent = text
     h1
   }
@@ -46,8 +46,8 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
-      "dom" -> (logicOut => domDriver(logicOut.asInstanceOf[Rx[dom.Element]])),
-      "log" -> (logicOut => consoleLogDriver(logicOut.asInstanceOf[Rx[String]]))
+      "dom" -> (logicOut => makeDomDriver(logicOut.asInstanceOf[Rx[dom.Element]])),
+      "log" -> (logicOut => makeConsoleLogDriver(logicOut.asInstanceOf[Rx[String]]))
     ))
   }
 
@@ -85,7 +85,7 @@ object ScycleApp extends JSApp {
     )
   }
 
-  def consoleLogDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Driver = {
+  def makeConsoleLogDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Driver = {
     Rx {
       dom.console.log(input())
     }
@@ -93,7 +93,7 @@ object ScycleApp extends JSApp {
     null
   }
 
-  def domDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Driver = {
+  def makeDomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Driver = {
     println("hello, driver!")
 
     new DomDriver(input)

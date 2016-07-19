@@ -85,4 +85,4 @@ the elements are added to the DOM.
 ## Video 08 - Fine-grained control over the DOM Source
 
 The new implementation of the DomDriver takes all events that occur on the document and then filters out the ones that
-we created listeners for. This ensures to find newly created DOM elements as well. 
+we created listeners for. This ensures to catch events of newly created DOM elements as well.
