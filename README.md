@@ -86,3 +86,11 @@ the elements are added to the DOM.
 
 The new implementation of the DomDriver takes all events that occur on the document and then filters out the ones that
 we created listeners for. This ensures to catch events of newly created DOM elements as well.
+
+## Video 09 - Hyperscript as our alternative to template languages
+
+In this video, we see a small improvement on creating and handling the DOM elements. It uses Hyperscript, which is 
+basically functions wrapping around the creation of DOM elements. Something similar is implemented with the 
+`Hyperscript` trait and the `HyperScriptElement` classes. The `Text` case is somewhat special, as we need to wrap a text
+node into a span to let it count as an element. Maybe we could return `dom.Node` instead of `dom.Element` to change 
+this.
