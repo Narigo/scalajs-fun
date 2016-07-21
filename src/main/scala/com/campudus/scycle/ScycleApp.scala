@@ -79,7 +79,7 @@ object ScycleApp extends JSApp {
       // Logic (functional)
       "dom" -> {
         val driver = sources("dom").asInstanceOf[DomDriver]
-        val domSource = driver.selectEvents("h1", "click")
+        val domSource = driver.selectEvents("span", "click")
         val i = Var[Int](0)
 
         domSource.trigger {
