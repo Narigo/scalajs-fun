@@ -21,6 +21,7 @@ case class Text(text: String) extends Hyperscript {
 }
 
 class HyperScriptElement(tagName: String, subElements: Seq[Hyperscript]) extends Hyperscript {
+
   override def toElement: dom.Element = {
     val element = dom.document.createElement(tagName)
     subElements.foreach { child =>
@@ -66,6 +67,8 @@ object ScycleApp extends JSApp {
 
   implicit private val ctx = Ctx.Owner.safe()
 
+  implicit def stringToTextNode(s: String): Hyperscript = Text(s)
+
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
@@ -92,8 +95,8 @@ object ScycleApp extends JSApp {
 
         Rx {
           Div(
-            H1(Text(s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}")),
-            Span(Text("Hello there..."))
+            H1(s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"),
+            Span("Hello there...")
           ).toElement
         }
       },

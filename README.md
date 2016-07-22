@@ -92,5 +92,5 @@ we created listeners for. This ensures to catch events of newly created DOM elem
 In this video, we see a small improvement on creating and handling the DOM elements. It uses Hyperscript, which is 
 basically functions wrapping around the creation of DOM elements. Something similar is implemented with the 
 `Hyperscript` trait and the `HyperScriptElement` classes. The `Text` case is somewhat special, as we need to wrap a text
-node into a span to let it count as an element. Maybe we could return `dom.Node` instead of `dom.Element` to change 
-this.
+node into a span to let it count as an element. With an implicit conversion of `String` to `Text` (`stringToTextNode`)
+we can get rid of extra calls to `Text()`.
