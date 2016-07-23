@@ -41,10 +41,10 @@ sealed trait Driver
 
 class ConsoleDriver extends Driver
 
-class DomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver {
+class DomDriver(selector: String, input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver {
 
   println("initializing driver...")
-  val container = dom.document.getElementById("app")
+  val container = dom.document.querySelector(selector)
 
   Rx {
     container.innerHTML = input().outerHTML
@@ -72,7 +72,7 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
-      "dom" -> (logicOut => makeDomDriver(logicOut.asInstanceOf[Rx[dom.Element]])),
+      "dom" -> (logicOut => makeDomDriver("#app", logicOut.asInstanceOf[Rx[dom.Element]])),
       "log" -> (logicOut => makeConsoleLogDriver(logicOut.asInstanceOf[Rx[String]]))
     ))
   }
@@ -122,10 +122,10 @@ object ScycleApp extends JSApp {
     null
   }
 
-  def makeDomDriver(input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Driver = {
+  def makeDomDriver(selector: String, input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Driver = {
     println("hello, driver!")
 
-    new DomDriver(input)
+    new DomDriver(selector, input)
   }
 
 }

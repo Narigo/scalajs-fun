@@ -94,3 +94,9 @@ basically functions wrapping around the creation of DOM elements. Something simi
 `Hyperscript` trait and the `HyperScriptElement` classes. The `Text` case is somewhat special, as we need to wrap a text
 node into a span to let it count as an element. With an implicit conversion of `String` to `Text` (`stringToTextNode`)
 we can get rid of extra calls to `Text()`.
+
+## Video 10 - From toy DOM Driver to real DOM Driver
+
+When creating the DOM Driver, we now pass a selector to it, to select the container element. The container element is 
+still the one we were using before (`#app`), so the result does not change.
+
