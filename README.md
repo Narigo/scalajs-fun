@@ -98,5 +98,7 @@ we can get rid of extra calls to `Text()`.
 ## Video 10 - From toy DOM Driver to real DOM Driver
 
 When creating the DOM Driver, we now pass a selector to it, to select the container element. The container element is 
-still the one we were using before (`#app`), so the result does not change.
+still the one we were using before (`#app`), so the result does not change. The `makeXXXDriver` functions now return a
+function expecting a `LogicOutput` and return a `Driver`. This way, we do not need to pass an explicit `input` and can
+just use / cast from the `LogicOutput` (that is what the `input` variable has been before anyways).
 

@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.Scycle.LogicOutput
 import org.scalajs.dom
 import org.scalajs.dom.Event
 import rx._
@@ -72,8 +73,8 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
-      "dom" -> (logicOut => makeDomDriver("#app", logicOut.asInstanceOf[Rx[dom.Element]])),
-      "log" -> (logicOut => makeConsoleLogDriver(logicOut.asInstanceOf[Rx[String]]))
+      "dom" -> makeDomDriver("#app"),
+      "log" -> makeConsoleLogDriver()
     ))
   }
 
@@ -114,18 +115,22 @@ object ScycleApp extends JSApp {
     )
   }
 
-  def makeConsoleLogDriver(input: Rx[String])(implicit ctx: Ctx.Owner): Driver = {
-    Rx {
-      dom.console.log(input())
-    }
+  def makeConsoleLogDriver()(implicit ctx: Ctx.Owner): LogicOutput => Driver = {
+    logicOut =>
+      val input = logicOut.asInstanceOf[Rx[String]]
 
-    null
+      Rx {
+        dom.console.log(input())
+      }
+
+      null
   }
 
-  def makeDomDriver(selector: String, input: Rx[dom.Element])(implicit ctx: Ctx.Owner): Driver = {
-    println("hello, driver!")
+  def makeDomDriver(selector: String)(implicit ctx: Ctx.Owner): (LogicOutput => Driver) = {
+    logicOut =>
+      println("hello, driver!")
 
-    new DomDriver(selector, input)
+      new DomDriver(selector, logicOut.asInstanceOf[Rx[dom.Element]])
   }
 
 }
