@@ -1,8 +1,8 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.Scycle.LogicOutput
+import com.campudus.scycle.driver.{ConsoleDriver, DomDriver, Driver}
 import org.scalajs.dom
-import org.scalajs.dom.Event
 import rx._
 
 import scala.scalajs.js.JSApp
@@ -37,31 +37,6 @@ case class H1(children: Hyperscript*) extends HyperScriptElement("h1", children)
 case class Span(children: Hyperscript*) extends HyperScriptElement("span", children)
 
 case class Div(children: Hyperscript*) extends HyperScriptElement("div", children)
-
-sealed trait Driver
-
-class ConsoleDriver extends Driver
-
-class DomDriver(selector: String, input: Rx[dom.Element])(implicit ctx: Ctx.Owner) extends Driver {
-
-  println("initializing driver...")
-  val container = dom.document.querySelector(selector)
-
-  Rx {
-    container.innerHTML = input().outerHTML
-  }
-
-  def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
-    val eventVar = Var[Event](null)
-    dom.document.addEventListener(event, (e: Event) => {
-      if (e.srcElement.tagName.toUpperCase() == tagName.toUpperCase()) {
-        eventVar() = e
-      }
-    })
-    eventVar
-  }
-
-}
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -116,14 +91,7 @@ object ScycleApp extends JSApp {
   }
 
   def makeConsoleLogDriver()(implicit ctx: Ctx.Owner): LogicOutput => Driver = {
-    logicOut =>
-      val input = logicOut.asInstanceOf[Rx[String]]
-
-      Rx {
-        dom.console.log(input())
-      }
-
-      null
+    logicOut => new ConsoleDriver(logicOut.asInstanceOf[Rx[String]])
   }
 
   def makeDomDriver(selector: String)(implicit ctx: Ctx.Owner): (LogicOutput => Driver) = {

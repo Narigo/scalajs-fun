@@ -102,3 +102,6 @@ still the one we were using before (`#app`), so the result does not change. The 
 function expecting a `LogicOutput` and return a `Driver`. This way, we do not need to pass an explicit `input` and can
 just use / cast from the `LogicOutput` (that is what the `input` variable has been before anyways).
 
+The drivers were moved into a separate package. During this refactoring, the `ConsoleDriver` received the `input` 
+parameter just like the `DomDriver`.
+

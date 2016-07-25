@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.driver.Driver
 import org.scalajs.dom._
 import rx.{Ctx, Rx, Var}
 
