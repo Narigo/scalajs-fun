@@ -1,42 +1,12 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.Scycle.LogicOutput
-import com.campudus.scycle.driver.{ConsoleDriver, DomDriver, Driver}
-import org.scalajs.dom
+import com.campudus.scycle.dom._
 import rx._
 
+import org.scalajs.dom.{setInterval, Element}
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-
-sealed trait Hyperscript {
-  def toElement: dom.Element
-}
-
-case class Text(text: String) extends Hyperscript {
-  override def toElement: dom.Element = {
-    val span = dom.document.createElement("span")
-    val textNode = dom.document.createTextNode(text)
-    span.appendChild(textNode)
-    span
-  }
-}
-
-class HyperScriptElement(tagName: String, subElements: Seq[Hyperscript]) extends Hyperscript {
-
-  override def toElement: dom.Element = {
-    val element = dom.document.createElement(tagName)
-    subElements.foreach { child =>
-      element.appendChild(child.toElement)
-    }
-    element
-  }
-}
-
-case class H1(children: Hyperscript*) extends HyperScriptElement("h1", children)
-
-case class Span(children: Hyperscript*) extends HyperScriptElement("span", children)
-
-case class Div(children: Hyperscript*) extends HyperScriptElement("div", children)
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -48,8 +18,7 @@ object ScycleApp extends JSApp {
   @JSExport
   def main(): Unit = {
     Scycle.run(logic, Map(
-      "dom" -> makeDomDriver("#app"),
-      "log" -> makeConsoleLogDriver()
+      "dom" -> makeDomDriver("#app")
     ))
   }
 
@@ -65,7 +34,7 @@ object ScycleApp extends JSApp {
           i() = 1
         }
 
-        dom.setInterval(() => {
+        setInterval(() => {
           i() = i.now + 1
         }, 1000)
 
@@ -75,30 +44,15 @@ object ScycleApp extends JSApp {
             Span("Hello there...")
           ).toElement
         }
-      },
-      "log" -> {
-        val i = Var[Int](0)
-
-        dom.setInterval(() => {
-          i() = i.now + 1
-        }, 1000)
-
-        Rx {
-          s"${i()} seconds elapsed since page opened"
-        }
       }
     )
-  }
-
-  def makeConsoleLogDriver()(implicit ctx: Ctx.Owner): LogicOutput => Driver = {
-    logicOut => new ConsoleDriver(logicOut.asInstanceOf[Rx[String]])
   }
 
   def makeDomDriver(selector: String)(implicit ctx: Ctx.Owner): (LogicOutput => Driver) = {
     logicOut =>
       println("hello, driver!")
 
-      new DomDriver(selector, logicOut.asInstanceOf[Rx[dom.Element]])
+      new DomDriver(selector, logicOut.asInstanceOf[Rx[Element]])
   }
 
 }
