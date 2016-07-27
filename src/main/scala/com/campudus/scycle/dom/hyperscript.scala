@@ -46,11 +46,12 @@ case class Label(className: String = null, children: Seq[Hyperscript] = Seq.empt
 
 case class Hr(className: String = null) extends HyperscriptElement("hr", className, Seq.empty)
 
-case class Input(className: String = null, kind: String) extends HyperscriptElement("input", className, Seq.empty) {
+case class Input(className: String = null, kind: String, value: String = "") extends HyperscriptElement("input", className, Seq.empty) {
 
   override def attrs: Map[String, Option[String]] = Map(
     "class" -> Option(className),
-    "type" -> Option(kind)
+    "type" -> Option(kind),
+    "value" -> Option(value)
   )
 
 }

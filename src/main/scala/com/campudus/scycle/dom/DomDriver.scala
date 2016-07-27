@@ -13,10 +13,12 @@ class DomDriver(selector: String, input: Rx[Element])(implicit ctx: Ctx.Owner) e
     container.innerHTML = input().outerHTML
   }
 
-  def selectEvents(tagName: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
+  def selectEvents(selector: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
     val eventVar = Var[Event](null)
     document.addEventListener(event, (e: Event) => {
-      if (e.srcElement.tagName.toUpperCase() == tagName.toUpperCase()) {
+      console.log("got an event", e)
+      if (e.srcElement == document.querySelector(selector)) {
+        console.log("pushing it through!")
         eventVar() = e
       }
     })
