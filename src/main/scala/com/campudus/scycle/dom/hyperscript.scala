@@ -15,20 +15,42 @@ case class Text(text: String) extends Hyperscript {
   }
 }
 
-class HyperScriptElement(tagName: String, subElements: Seq[Hyperscript]) extends Hyperscript {
+class HyperscriptElement(tagName: String, className: String, subElements: Seq[Hyperscript]) extends Hyperscript {
+
+  def attrs: Map[String, Option[String]] = Map("class" -> Option(className))
 
   override def toElement: dom.Element = {
     val element = dom.document.createElement(tagName)
+    for {
+      (key, value) <- attrs
+    } {
+      value.foreach(element.setAttribute(key, _))
+    }
     subElements.foreach { child =>
       element.appendChild(child.toElement)
     }
     element
+
   }
+
 }
 
-case class H1(children: Hyperscript*) extends HyperScriptElement("h1", children)
 
-case class Span(children: Hyperscript*) extends HyperScriptElement("span", children)
+case class H1(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("h1", className, children)
 
-case class Div(children: Hyperscript*) extends HyperScriptElement("div", children)
+case class Span(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("span", className, children)
 
+case class Div(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("div", className, children)
+
+case class Label(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("label", className, children)
+
+case class Hr(className: String = null) extends HyperscriptElement("hr", className, Seq.empty)
+
+case class Input(className: String = null, kind: String) extends HyperscriptElement("input", className, Seq.empty) {
+
+  override def attrs: Map[String, Option[String]] = Map(
+    "class" -> Option(className),
+    "type" -> Option(kind)
+  )
+
+}

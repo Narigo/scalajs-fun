@@ -2,9 +2,9 @@ package com.campudus.scycle
 
 import com.campudus.scycle.Scycle.LogicOutput
 import com.campudus.scycle.dom._
+import org.scalajs.dom.Element
 import rx._
 
-import org.scalajs.dom.{setInterval, Element}
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -28,21 +28,14 @@ object ScycleApp extends JSApp {
       "dom" -> {
         val driver = sources("dom").asInstanceOf[DomDriver]
         val domSource = driver.selectEvents("span", "click")
-        val i = Var[Int](0)
-
-        domSource.trigger {
-          i() = 1
-        }
-
-        setInterval(() => {
-          i() = i.now + 1
-        }, 1000)
 
         Rx {
-          Div(
-            H1(s"Seconds elapsed ${i()} - domSource exists? ${domSource.now}"),
-            Span("Hello there...")
-          ).toElement
+          Div(children = Seq(
+            Label(children = Seq("Name:")),
+            Input(className = "field", kind = "text"),
+            Hr(),
+            H1(children = Seq("Hello !"))
+          )).toElement
         }
       }
     )

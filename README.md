@@ -105,3 +105,9 @@ just use / cast from the `LogicOutput` (that is what the `input` variable has be
 The drivers were moved into a separate package. During this refactoring, the `ConsoleDriver` received the `input` 
 parameter just like the `DomDriver`.
 
+> Latest refactor: Move `Hyperscript` elements into `dom` package. Remove `ConsoleDriver` to focus on single `dom` 
+driver and start with next lesson.
+
+## Video 11 - Hello World in Cycle.js
+
+First, we create a few more helpers for the `Hyperscript`. A `label`, `input` and `hr` element helps to build the GUI.
