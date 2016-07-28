@@ -5,9 +5,9 @@ import com.campudus.scycle.dom._
 import org.scalajs.dom.{Element, console, html}
 import rx._
 
-import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
+import scala.util.Random
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -38,7 +38,8 @@ object ScycleApp extends JSApp {
             Label(children = Seq("Name:")),
             Input(className = "field", kind = "text", value = name),
             Hr(),
-            H1(children = Seq(s"Hello $name!"))
+            H1(children = Seq(s"Hello $name!")),
+            Span(children = Seq(s"Test: ${Random.nextInt()}"))
           )).toElement
         }
       }

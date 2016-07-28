@@ -11,6 +11,7 @@ class DomDriver(selector: String, input: Rx[Element])(implicit ctx: Ctx.Owner) e
 
   Rx {
     container.innerHTML = input().outerHTML
+//    container.parentNode.replaceChild(input(), container)
   }
 
   def selectEvents(selector: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
