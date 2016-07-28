@@ -31,14 +31,15 @@ object ScycleApp extends JSApp {
         val domSource = driver.selectEvents(".field", "input")
 
         Rx {
-          val name: String = Option(domSource()).map(_.srcElement.asInstanceOf[html.Input].value).getOrElse("")
-          console.log("domSource", domSource(), "name=", name)
+          val name = Var(Option(domSource()).map(_.srcElement.asInstanceOf[html.Input].value).getOrElse(""))
+          val string = s"Hello ${name()}!"
+          console.log("domSource", domSource(), "name=", name())
 
           Div(children = Seq(
             Label(children = Seq("Name:")),
-            Input(className = "field", kind = "text", value = name),
+            Input(className = "field", kind = "text", value = name()),
             Hr(),
-            H1(children = Seq(s"Hello $name!")),
+            H1(children = Seq(string)),
             Span(children = Seq(s"Test: ${Random.nextInt()}"))
           )).toElement
         }

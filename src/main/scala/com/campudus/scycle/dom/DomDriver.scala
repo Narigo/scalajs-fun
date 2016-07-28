@@ -10,8 +10,8 @@ class DomDriver(selector: String, input: Rx[Element])(implicit ctx: Ctx.Owner) e
   val container = document.querySelector(selector)
 
   Rx {
-    container.innerHTML = input().outerHTML
-//    container.parentNode.replaceChild(input(), container)
+//    container.innerHTML = input().outerHTML
+    container.parentNode.replaceChild(input(), container)
   }
 
   def selectEvents(selector: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
