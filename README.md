@@ -112,11 +112,7 @@ driver and start with next lesson.
 
 First, we create a few more helpers for the `Hyperscript`. A `label`, `input` and `hr` element helps to build the GUI.
 Doing a complete replacement of `container.innerHTML` with the `outerHTML` of `input()`, the GUI updates with a quirk: 
-The input field looses focus whenever the view updates. Trying to replace the container with the current input through
-`container.parentNode.replaceChild(input(), container)` does not help: It doesn't even trigger an update of the GUI, 
-even though the console output tells us that the inner Strings should change.
+The input field looses focus whenever the view updates.
 
-Thinking out loud, it seems to me that the underlying problem of this is that from the DOM perspective, nothing changes:
-The `container` element gets replaced with whatever `input()` is. The reference of this might be the same as `container`
-in every case. Not sure why this is the case yet.
-
+We could use a virtual dom implementation to just replace the HTML that changes. But if we'd do so, the focus problem 
+will probably stay.
