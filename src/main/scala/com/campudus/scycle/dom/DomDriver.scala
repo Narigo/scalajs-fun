@@ -7,11 +7,15 @@ import rx.{Ctx, Rx, Var}
 class DomDriver(selector: String, input: Rx[Element])(implicit ctx: Ctx.Owner) extends Driver {
 
   println("initializing driver...")
-  val container = document.querySelector(selector)
 
   Rx {
-//    container.innerHTML = input().outerHTML
-    container.parentNode.replaceChild(input(), container)
+    console.log("selecting again", document.querySelector("#app"))
+    val container = document.querySelector(selector)
+    val oldChild = container.firstChild
+    val newChild = input()
+    console.log("replacing", oldChild, "in", container, "with", newChild)
+
+    container.replaceChild(newChild, oldChild)
   }
 
   def selectEvents(selector: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
