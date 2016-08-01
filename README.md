@@ -114,5 +114,5 @@ First, we create a few more helpers for the `Hyperscript`. A `label`, `input` an
 Doing a complete replacement of `container.innerHTML` with the `outerHTML` of `input()`, the GUI updates with a quirk: 
 The input field looses focus whenever the view updates.
 
-We could use a virtual dom implementation to just replace the HTML that changes. But if we'd do so, the focus problem 
-will probably stay.
+When using a virtual dom implementation that would not replace the whole `input` DOM element, we could mitigate this
+problem. But that means we need to implement a virtual dom before continuing.  

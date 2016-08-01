@@ -2,6 +2,7 @@ package com.campudus.scycle.dom
 
 import com.campudus.scycle.Driver
 import org.scalajs.dom._
+import org.w3c.dom.Attr
 import rx.{Ctx, Rx, Var}
 
 class DomDriver(selector: String, input: Rx[Element])(implicit ctx: Ctx.Owner) extends Driver {
@@ -13,9 +14,14 @@ class DomDriver(selector: String, input: Rx[Element])(implicit ctx: Ctx.Owner) e
     val container = document.querySelector(selector)
     val oldChild = container.firstChild
     val newChild = input()
+
     console.log("replacing", oldChild, "in", container, "with", newChild)
 
-    container.replaceChild(newChild, oldChild)
+    if (oldChild.hasChildNodes()) {
+      oldChild.replaceChild(newChild.childNodes(3), oldChild.childNodes(3))
+    } else {
+      container.replaceChild(newChild, oldChild)
+    }
   }
 
   def selectEvents(selector: String, event: String)(implicit ctx: Ctx.Owner): Rx[Event] = {
