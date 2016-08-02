@@ -1,8 +1,12 @@
 package com.campudus.scycle.vdom
 
-/**
-  * @author <a href="mailto:jb@campudus.com">Joern Bernhardt</a>
-  */
+import com.campudus.scycle.dom.Hyperscript
+
 object VirtualDom {
+
+  def diff(a: Hyperscript, b : Hyperscript): Option[Hyperscript] = {
+    if (a != b) Some(b)
+    else None
+  }
 
 }
