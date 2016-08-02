@@ -116,3 +116,10 @@ The input field looses focus whenever the view updates.
 
 When using a virtual dom implementation that would not replace the whole `input` DOM element, we could mitigate this
 problem. But that means we need to implement a virtual dom before continuing.  
+
+### Starting a virtual dom implementation
+
+Finally something we can test! Let's start by adding a scalatest dependency. A small test to check that the test setup 
+works is a nice trick to be sure that you're not wasting time debugging your tests when in reality the build setup is 
+not correct.
+
