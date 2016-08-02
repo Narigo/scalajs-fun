@@ -15,7 +15,7 @@ case class Text(text: String) extends Hyperscript {
   }
 }
 
-class HyperscriptElement(tagName: String, className: String, subElements: Seq[Hyperscript]) extends Hyperscript {
+class HyperscriptElement(tagName: String, className: String, val subElements: Seq[Hyperscript]) extends Hyperscript {
 
   def attrs: Map[String, Option[String]] = Map("class" -> Option(className))
 
@@ -34,7 +34,6 @@ class HyperscriptElement(tagName: String, className: String, subElements: Seq[Hy
   }
 
 }
-
 
 case class H1(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("h1", className, children)
 
