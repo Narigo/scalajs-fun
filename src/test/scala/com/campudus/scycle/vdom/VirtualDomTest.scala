@@ -1,7 +1,7 @@
 package com.campudus.scycle.vdom
 
 import com.campudus.scycle.dom.{Div, H1, Span, Text}
-import com.campudus.scycle.vdom.VirtualDom.Replacement
+import com.campudus.scycle.vdom.VirtualDom.{Insertion, Replacement}
 import org.scalatest.FunSpec
 
 class VirtualDomTest extends FunSpec {
@@ -123,6 +123,20 @@ class VirtualDomTest extends FunSpec {
       }
     }
 
+    describe("doing insertions") {
+      it("adds new elements") {
+        val before = Div(children = Seq(
+          Text("a")
+        ))
+        val after = Div(children = Seq(
+          Text("a"),
+          Text("b")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(List(1), Text("b"))
+        ))
+      }
+    }
   }
 
 }
