@@ -9,7 +9,9 @@ object VirtualDom {
       (a, b) match {
         case (aElem: HyperscriptElement, bElem: HyperscriptElement) =>
           if (aElem.attrs.equals(bElem.attrs)) {
-            List(Replacement(List(0), bElem.subElements.head))
+            aElem.subElements.zipWithIndex.map({
+              case (elem, idx) => Replacement(List(idx), bElem.subElements(idx))
+            }).toList
           } else {
             println(aElem.attrs)
             println(bElem.attrs)

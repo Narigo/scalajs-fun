@@ -6,7 +6,6 @@ import org.scalatest.FlatSpec
 
 class VirtualDomTest extends FlatSpec {
 
-
   "The virtual dom diffing algorithm" should "detect the same element" in {
     val myH1 = H1("hello")
 
@@ -34,4 +33,19 @@ class VirtualDomTest extends FlatSpec {
     assert(VirtualDom.diff(firstDiv, secondDiv) === List(Replacement(List(0), Text("bye"))))
   }
 
+  it should "be able to replace multiple child nodes" in {
+    val before = Div(children = Seq(
+      Text("firstA"),
+      Text("firstB")
+    ))
+    val after = Div(children = Seq(
+      Text("secondA"),
+      Text("secondB")
+    ))
+
+    assert(VirtualDom.diff(before, after) === List(
+      Replacement(List(0), Text("secondA")),
+      Replacement(List(1), Text("secondB"))
+    ))
+  }
 }
