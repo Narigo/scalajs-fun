@@ -93,4 +93,30 @@ class VirtualDomTest extends FlatSpec {
       Replacement(List(2), Text("secondC"))
     ))
   }
+
+  it should "replace nodes with whole trees" in {
+    val before = Div(children = Seq(
+      Text("firstA"),
+      Text("firstB"),
+      Text("firstC")
+    ))
+    val after = Div(children = Seq(
+      Text("firstA"),
+      Div(children = Seq(
+        Text("secondChildB1"),
+        Text("secondChildB2"),
+        Div(children = Seq(Text("secondChildB3a")))
+      )),
+      Text("firstC")
+    ))
+
+    assert(VirtualDom.diff(before, after) === List(
+      Replacement(List(1), Div(children = Seq(
+        Text("secondChildB1"),
+        Text("secondChildB2"),
+        Div(children = Seq(Text("secondChildB3a")))
+      )))
+    ))
+  }
+
 }
