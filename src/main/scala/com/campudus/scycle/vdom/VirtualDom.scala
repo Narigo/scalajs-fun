@@ -2,22 +2,23 @@ package com.campudus.scycle.vdom
 
 import com.campudus.scycle.dom.{Hyperscript, HyperscriptElement}
 
+import scala.collection.mutable.ListBuffer
+
 object VirtualDom {
 
-  def diff(a: Hyperscript, b: Hyperscript): List[Replacement] = {
+  def diff(a: Hyperscript, b: Hyperscript, currentPath: ListBuffer[Int] = ListBuffer()): List[Replacement] = {
     if (a != b) {
       (a, b) match {
         case (aElem: HyperscriptElement, bElem: HyperscriptElement) =>
           if (aElem.attrs.equals(bElem.attrs)) {
-            aElem.subElements.zipWithIndex.map({
-              case (elem, idx) => Replacement(List(idx), bElem.subElements(idx))
+            aElem.subElements.zipWithIndex.flatMap({
+              case (elem, idx) =>
+                diff(elem, bElem.subElements(idx), currentPath :+ idx)
             }).toList
           } else {
-            println(aElem.attrs)
-            println(bElem.attrs)
-            List(Replacement(List(), bElem))
+            List(Replacement(currentPath.toList, bElem))
           }
-        case _ => List(Replacement(Nil, b))
+        case _ => List(Replacement(currentPath.toList, b))
       }
     } else {
       Nil
