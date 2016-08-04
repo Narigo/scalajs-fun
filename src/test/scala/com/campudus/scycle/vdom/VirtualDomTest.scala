@@ -2,121 +2,127 @@ package com.campudus.scycle.vdom
 
 import com.campudus.scycle.dom.{Div, H1, Span, Text}
 import com.campudus.scycle.vdom.VirtualDom.Replacement
-import org.scalatest.FlatSpec
+import org.scalatest.FunSpec
 
-class VirtualDomTest extends FlatSpec {
+class VirtualDomTest extends FunSpec {
 
-  "The virtual dom diffing algorithm" should "detect the same element" in {
-    val myH1 = H1("hello")
+  describe("The virtual dom diffing algorithm") {
 
-    assert(VirtualDom.diff(myH1, myH1) === Nil)
-  }
+    describe("doing replacements") {
+      it("detects the same element") {
+        val myH1 = H1("hello")
 
-  it should "replace two different elements" in {
-    val myH1 = H1("hello")
-    val mySpan = Span("bye")
+        assert(VirtualDom.diff(myH1, myH1) === Nil)
+      }
 
-    assert(VirtualDom.diff(myH1, mySpan) === List(Replacement(Nil, mySpan)))
-  }
+      it("replaces two different elements") {
+        val myH1 = H1("hello")
+        val mySpan = Span("bye")
 
-  it should "replace same element with different attributes" in {
-    val myH1a = H1("hello")
-    val myH1b = H1("bye")
+        assert(VirtualDom.diff(myH1, mySpan) === List(Replacement(Nil, mySpan)))
+      }
 
-    assert(VirtualDom.diff(myH1a, myH1b) === List(Replacement(Nil, myH1b)))
-  }
+      it("replaces same element with different attributes") {
+        val myH1a = H1("hello")
+        val myH1b = H1("bye")
 
-  it should "only replace a changed text if the tags above are the same" in {
-    val firstDiv = Div(children = Seq(Text("hello")))
-    val secondDiv = Div(children = Seq(Text("bye")))
+        assert(VirtualDom.diff(myH1a, myH1b) === List(Replacement(Nil, myH1b)))
+      }
 
-    assert(VirtualDom.diff(firstDiv, secondDiv) === List(Replacement(List(0), Text("bye"))))
-  }
+      it("only replaces a changed text if the tags above are the same") {
+        val firstDiv = Div(children = Seq(Text("hello")))
+        val secondDiv = Div(children = Seq(Text("bye")))
 
-  it should "be able to replace multiple child nodes" in {
-    val before = Div(children = Seq(
-      Text("firstA"),
-      Text("firstB")
-    ))
-    val after = Div(children = Seq(
-      Text("secondA"),
-      Text("secondB")
-    ))
+        assert(VirtualDom.diff(firstDiv, secondDiv) === List(Replacement(List(0), Text("bye"))))
+      }
 
-    assert(VirtualDom.diff(before, after) === List(
-      Replacement(List(0), Text("secondA")),
-      Replacement(List(1), Text("secondB"))
-    ))
-  }
+      it("can replace multiple child nodes") {
+        val before = Div(children = Seq(
+          Text("firstA"),
+          Text("firstB")
+        ))
+        val after = Div(children = Seq(
+          Text("secondA"),
+          Text("secondB")
+        ))
 
-  it should "replace only changed child nodes" in {
-    val before = Div(children = Seq(
-      Text("firstA"),
-      Text("firstB"),
-      Text("firstC")
-    ))
-    val after = Div(children = Seq(
-      Text("secondA"),
-      Text("firstB"),
-      Text("secondC")
-    ))
+        assert(VirtualDom.diff(before, after) === List(
+          Replacement(List(0), Text("secondA")),
+          Replacement(List(1), Text("secondB"))
+        ))
+      }
 
-    assert(VirtualDom.diff(before, after) === List(
-      Replacement(List(0), Text("secondA")),
-      Replacement(List(2), Text("secondC"))
-    ))
-  }
+      it("replaces only changed child nodes") {
+        val before = Div(children = Seq(
+          Text("firstA"),
+          Text("firstB"),
+          Text("firstC")
+        ))
+        val after = Div(children = Seq(
+          Text("secondA"),
+          Text("firstB"),
+          Text("secondC")
+        ))
 
-  it should "replaces child nodes recursively if necessary" in {
-    val before = Div(children = Seq(
-      Text("firstA"),
-      Div(children = Seq(
-        Text("firstChildB1"),
-        Text("firstChildB2"),
-        Text("firstChildB3")
-      )),
-      Text("firstC")
-    ))
-    val after = Div(children = Seq(
-      Text("firstA"),
-      Div(children = Seq(
-        Text("secondChildB1"),
-        Text("firstChildB2"),
-        Text("secondChildB3")
-      )),
-      Text("secondC")
-    ))
+        assert(VirtualDom.diff(before, after) === List(
+          Replacement(List(0), Text("secondA")),
+          Replacement(List(2), Text("secondC"))
+        ))
+      }
 
-    assert(VirtualDom.diff(before, after) === List(
-      Replacement(List(1, 0), Text("secondChildB1")),
-      Replacement(List(1, 2), Text("secondChildB3")),
-      Replacement(List(2), Text("secondC"))
-    ))
-  }
+      it("replaces child nodes recursively if necessary") {
+        val before = Div(children = Seq(
+          Text("firstA"),
+          Div(children = Seq(
+            Text("firstChildB1"),
+            Text("firstChildB2"),
+            Text("firstChildB3")
+          )),
+          Text("firstC")
+        ))
+        val after = Div(children = Seq(
+          Text("firstA"),
+          Div(children = Seq(
+            Text("secondChildB1"),
+            Text("firstChildB2"),
+            Text("secondChildB3")
+          )),
+          Text("secondC")
+        ))
 
-  it should "replace nodes with whole trees" in {
-    val before = Div(children = Seq(
-      Text("firstA"),
-      Text("firstB"),
-      Text("firstC")
-    ))
-    val after = Div(children = Seq(
-      Text("firstA"),
-      Div(children = Seq(
-        Text("secondChildB1"),
-        Text("secondChildB2"),
-        Div(children = Seq(Text("secondChildB3a")))
-      )),
-      Text("firstC")
-    ))
+        assert(VirtualDom.diff(before, after) === List(
+          Replacement(List(1, 0), Text("secondChildB1")),
+          Replacement(List(1, 2), Text("secondChildB3")),
+          Replacement(List(2), Text("secondC"))
+        ))
+      }
 
-    assert(VirtualDom.diff(before, after) === List(
-      Replacement(List(1), Div(children = Seq(
-        Text("secondChildB1"),
-        Text("secondChildB2"),
-        Div(children = Seq(Text("secondChildB3a")))
-      )))
-    ))
+      it("replaces changed nodes with whole trees") {
+        val before = Div(children = Seq(
+          Text("firstA"),
+          Text("firstB"),
+          Text("firstC")
+        ))
+        val after = Div(children = Seq(
+          Text("firstA"),
+          Div(children = Seq(
+            Text("secondChildB1"),
+            Text("secondChildB2"),
+            Div(children = Seq(Text("secondChildB3a")))
+          )),
+          Text("firstC")
+        ))
+
+        assert(VirtualDom.diff(before, after) === List(
+          Replacement(List(1), Div(children = Seq(
+            Text("secondChildB1"),
+            Text("secondChildB2"),
+            Div(children = Seq(Text("secondChildB3a")))
+          )))
+        ))
+      }
+    }
+
   }
 
 }
