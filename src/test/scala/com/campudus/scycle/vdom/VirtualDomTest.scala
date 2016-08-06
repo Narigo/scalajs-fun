@@ -124,6 +124,7 @@ class VirtualDomTest extends FunSpec {
     }
 
     describe("doing insertions") {
+
       it("adds new elements") {
         val before = Div(children = Seq(
           Text("a")
@@ -136,6 +137,20 @@ class VirtualDomTest extends FunSpec {
           Insertion(List(1), Text("b"))
         ))
       }
+
+      it("can add elements before others") {
+        val before = Div(children = Seq(
+          Text("a")
+        ))
+        val after = Div(children = Seq(
+          Text("b"),
+          Text("a")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(List(0), Text("b"))
+        ))
+      }
+
     }
   }
 

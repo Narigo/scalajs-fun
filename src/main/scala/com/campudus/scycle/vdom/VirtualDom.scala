@@ -6,28 +6,32 @@ import scala.collection.mutable.ListBuffer
 
 object VirtualDom {
 
-  def diff(a: Hyperscript, b: Hyperscript, currentPath: ListBuffer[Int] = ListBuffer()): List[Diff] = {
+  def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
+    naiveDiff(a, b, ListBuffer()).toList
+  }
+
+  def naiveDiff(a: Hyperscript, b: Hyperscript, currentPath: ListBuffer[Int] = ListBuffer()): ListBuffer[Diff] = {
     if (a != b) {
       (a, b) match {
         case (aElem: HyperscriptElement, bElem: HyperscriptElement) =>
           if (aElem.attrs.equals(bElem.attrs)) {
             val first = aElem.subElements.zipWithIndex.flatMap({
               case (elem, idx) =>
-                diff(elem, bElem.subElements(idx), currentPath :+ idx)
-            }).toList
-            val added = if (aElem.subElements.length < bElem.subElements.length) {
+                naiveDiff(elem, bElem.subElements(idx), currentPath :+ idx)
+            })
+            val added: Seq[Insertion] = if (aElem.subElements.length < bElem.subElements.length) {
               bElem.subElements.zipWithIndex.dropWhile(_._2 < aElem.subElements.length).map({
                 case (newNode, idx) => Insertion((currentPath :+ idx).toList, newNode)
-              }).toList
+              })
             } else Nil
-            first ::: added
+            first ++: ListBuffer(added: _*)
           } else {
-            List(Replacement(currentPath.toList, bElem))
+            ListBuffer(Replacement(currentPath.toList, bElem))
           }
-        case _ => List(Replacement(currentPath.toList, b))
+        case _ => ListBuffer(Replacement(currentPath.toList, b))
       }
     } else {
-      Nil
+      ListBuffer()
     }
   }
 
