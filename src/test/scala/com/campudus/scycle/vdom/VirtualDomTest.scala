@@ -1,7 +1,7 @@
 package com.campudus.scycle.vdom
 
 import com.campudus.scycle.dom.{Div, H1, Span, Text}
-import com.campudus.scycle.vdom.VirtualDom.{Insertion, Replacement}
+import com.campudus.scycle.vdom.VirtualDom.{Insertion, Path, Replacement}
 import org.scalatest.FunSpec
 
 class VirtualDomTest extends FunSpec {
@@ -19,21 +19,21 @@ class VirtualDomTest extends FunSpec {
         val myH1 = H1("hello")
         val mySpan = Span("bye")
 
-        assert(VirtualDom.diff(myH1, mySpan) === List(Replacement(Nil, mySpan)))
+        assert(VirtualDom.diff(myH1, mySpan) === List(Replacement(Path(), mySpan)))
       }
 
       it("replaces same element with different attributes") {
         val myH1a = H1("hello")
         val myH1b = H1("bye")
 
-        assert(VirtualDom.diff(myH1a, myH1b) === List(Replacement(Nil, myH1b)))
+        assert(VirtualDom.diff(myH1a, myH1b) === List(Replacement(Path(), myH1b)))
       }
 
       it("only replaces a changed text if the tags above are the same") {
         val firstDiv = Div(children = Seq(Text("hello")))
         val secondDiv = Div(children = Seq(Text("bye")))
 
-        assert(VirtualDom.diff(firstDiv, secondDiv) === List(Replacement(List(0), Text("bye"))))
+        assert(VirtualDom.diff(firstDiv, secondDiv) === List(Replacement(Path(0), Text("bye"))))
       }
 
       it("can replace multiple child nodes") {
@@ -47,8 +47,8 @@ class VirtualDomTest extends FunSpec {
         ))
 
         assert(VirtualDom.diff(before, after) === List(
-          Replacement(List(0), Text("secondA")),
-          Replacement(List(1), Text("secondB"))
+          Replacement(Path(0), Text("secondA")),
+          Replacement(Path(1), Text("secondB"))
         ))
       }
 
@@ -65,8 +65,8 @@ class VirtualDomTest extends FunSpec {
         ))
 
         assert(VirtualDom.diff(before, after) === List(
-          Replacement(List(0), Text("secondA")),
-          Replacement(List(2), Text("secondC"))
+          Replacement(Path(0), Text("secondA")),
+          Replacement(Path(2), Text("secondC"))
         ))
       }
 
@@ -91,9 +91,9 @@ class VirtualDomTest extends FunSpec {
         ))
 
         assert(VirtualDom.diff(before, after) === List(
-          Replacement(List(1, 0), Text("secondChildB1")),
-          Replacement(List(1, 2), Text("secondChildB3")),
-          Replacement(List(2), Text("secondC"))
+          Replacement(Path(1, 0), Text("secondChildB1")),
+          Replacement(Path(1, 2), Text("secondChildB3")),
+          Replacement(Path(2), Text("secondC"))
         ))
       }
 
@@ -114,7 +114,7 @@ class VirtualDomTest extends FunSpec {
         ))
 
         assert(VirtualDom.diff(before, after) === List(
-          Replacement(List(1), Div(children = Seq(
+          Replacement(Path(1), Div(children = Seq(
             Text("secondChildB1"),
             Text("secondChildB2"),
             Div(children = Seq(Text("secondChildB3a")))
@@ -134,7 +134,7 @@ class VirtualDomTest extends FunSpec {
           Text("b")
         ))
         assert(VirtualDom.diff(before, after) === List(
-          Insertion(List(1), Text("b"))
+          Insertion(Path(1), Text("b"))
         ))
       }
 
@@ -147,7 +147,7 @@ class VirtualDomTest extends FunSpec {
           Text("a")
         ))
         assert(VirtualDom.diff(before, after) === List(
-          Insertion(List(0), Text("b"))
+          Insertion(Path(0), Text("b"))
         ))
       }
 
