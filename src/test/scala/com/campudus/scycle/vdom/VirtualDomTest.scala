@@ -70,6 +70,23 @@ class VirtualDomTest extends FunSpec {
         ))
       }
 
+      it("can switch two elements by replacing them") {
+        val before = Div(children = Seq(
+          Text("a"),
+          Text("b"),
+          Text("c")
+        ))
+        val after = Div(children = Seq(
+          Text("a"),
+          Text("c"),
+          Text("b")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Replacement(Path(1), Text("c")),
+          Replacement(Path(2), Text("b"))
+        ))
+      }
+
       it("replaces child nodes recursively if necessary") {
         val before = Div(children = Seq(
           Text("firstA"),
@@ -138,6 +155,21 @@ class VirtualDomTest extends FunSpec {
         ))
       }
 
+      it("adds multiple new elements") {
+        val before = Div(children = Seq(
+          Text("a")
+        ))
+        val after = Div(children = Seq(
+          Text("a"),
+          Text("b"),
+          Div(children = Seq(Text("c")))
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(Path(1), Text("b")),
+          Insertion(Path(2), Div(children = Seq(Text("c"))))
+        ))
+      }
+
       it("can add elements before others") {
         val before = Div(children = Seq(
           Text("a")
@@ -148,6 +180,68 @@ class VirtualDomTest extends FunSpec {
         ))
         assert(VirtualDom.diff(before, after) === List(
           Insertion(Path(0), Text("b"))
+        ))
+      }
+
+      it("can add elements before others, not only at beginning") {
+        val before = Div(children = Seq(
+          Text("a"),
+          Text("b")
+        ))
+        val after = Div(children = Seq(
+          Text("a"),
+          Text("c"),
+          Text("b")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(Path(1), Text("c"))
+        ))
+      }
+
+      it("can add multiple elements before others") {
+        val before = Div(children = Seq(
+          Text("a"),
+          Text("b")
+        ))
+        val after = Div(children = Seq(
+          Text("c"),
+          Text("a"),
+          Text("b"),
+          Text("d")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(Path(0), Text("c")),
+          Insertion(Path(3), Text("d"))
+        ))
+      }
+
+      it("can add subtrees") {
+        val before = Div(children = Seq(
+          Text("a"),
+          Text("b")
+        ))
+        val after = Div(children = Seq(
+          Text("a"),
+          Text("b"),
+          Div(children = Seq(Text("c")))
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(Path(2), Div(children = Seq(Text("c"))))
+        ))
+      }
+
+      it("can add subtrees before others") {
+        val before = Div(children = Seq(
+          Text("a"),
+          Text("b")
+        ))
+        val after = Div(children = Seq(
+          Text("a"),
+          Div(children = Seq(Text("c"))),
+          Text("b")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Insertion(Path(1), Div(children = Seq(Text("c"))))
         ))
       }
 
