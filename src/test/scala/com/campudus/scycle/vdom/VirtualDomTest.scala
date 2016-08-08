@@ -198,7 +198,7 @@ class VirtualDomTest extends FunSpec {
         ))
       }
 
-      it("can add multiple elements before others") {
+      it("can add multiple elements with one before others") {
         val before = Div(children = Seq(
           Text("a"),
           Text("b")

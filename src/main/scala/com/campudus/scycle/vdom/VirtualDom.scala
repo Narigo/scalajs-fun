@@ -9,19 +9,23 @@ object VirtualDom {
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
     val replacementsAndInserts = naiveDiff(a, b, ListBuffer())
     optimizeReplacementsAndInsertions(a, b, replacementsAndInserts)
+    //    replacementsAndInserts.toList
   }
 
   def optimizeReplacementsAndInsertions(a: Hyperscript,
                                         b: Hyperscript,
                                         replacementsAndInserts: ListBuffer[Diff]): List[Diff] = {
     if (replacementsAndInserts.length > 1) {
-      val first = replacementsAndInserts.headOption
-      val second = replacementsAndInserts.tail.headOption
-      (first, second) match {
-        case (Some(Replacement(pathRep, elemRep)), Some(Insertion(pathIns, elemIns))) =>
-          replacementsAndInserts.remove(0, 2)
-          replacementsAndInserts.prepend(Insertion(pathRep, elemRep))
-        case _ =>
+      val first = replacementsAndInserts.head
+      first match {
+        case Replacement(pathRep, elemRep) =>
+          replacementsAndInserts.zipWithIndex.find(_._1.isInstanceOf[Insertion]) match {
+            case Some((_, firstInsertIdx)) =>
+              replacementsAndInserts.remove(0, firstInsertIdx + 1)
+              replacementsAndInserts.prepend(Insertion(pathRep, elemRep))
+            case None => first :: optimizeReplacementsAndInsertions(a, b, replacementsAndInserts.tail)
+          }
+        case _ => first :: optimizeReplacementsAndInsertions(a, b, replacementsAndInserts.tail)
       }
     }
     replacementsAndInserts.toList
