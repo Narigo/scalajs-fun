@@ -3,6 +3,7 @@ package com.campudus.scycle.vdom
 import com.campudus.scycle.dom.{Hyperscript, HyperscriptElement}
 
 import scala.collection.mutable.ListBuffer
+import scala.util.Try
 
 object VirtualDom {
 
@@ -29,6 +30,15 @@ object VirtualDom {
       }
     }
     replacementsAndInserts.toList
+  }
+
+  def getElem(a: Hyperscript, path: Path): Hyperscript = a match {
+    case a: HyperscriptElement =>
+      if (path.nonEmpty) {
+        val next = Try(a.subElements(path.head)).getOrElse(throw new NoSuchElementException)
+        getElem(next, path.tail)
+      } else a
+    case _ => a
   }
 
   def naiveDiff(a: Hyperscript, b: Hyperscript, currentPath: ListBuffer[Int] = ListBuffer()): ListBuffer[Diff] = {
