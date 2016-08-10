@@ -16,20 +16,32 @@ object VirtualDom {
   def optimizeReplacementsAndInsertions(a: Hyperscript,
                                         b: Hyperscript,
                                         replacementsAndInserts: ListBuffer[Diff]): List[Diff] = {
-    if (replacementsAndInserts.length > 1) {
+    if (replacementsAndInserts.length > 1 && firstReplacementsCanBeInsertions(a, replacementsAndInserts)) {
       val first = replacementsAndInserts.head
       first match {
         case Replacement(pathRep, elemRep) =>
           replacementsAndInserts.zipWithIndex.find(_._1.isInstanceOf[Insertion]) match {
-            case Some((_, firstInsertIdx)) =>
+            case Some((Insertion(pathIns, elemIns), firstInsertIdx)) =>
               replacementsAndInserts.remove(0, firstInsertIdx + 1)
               replacementsAndInserts.prepend(Insertion(pathRep, elemRep))
-            case None => first :: optimizeReplacementsAndInsertions(a, b, replacementsAndInserts.tail)
+            case _ => first :: optimizeReplacementsAndInsertions(a, b, replacementsAndInserts.tail)
           }
         case _ => first :: optimizeReplacementsAndInsertions(a, b, replacementsAndInserts.tail)
       }
     }
     replacementsAndInserts.toList
+  }
+
+  def firstReplacementsCanBeInsertions[T <: Diff](a: Hyperscript, list: ListBuffer[T]): Boolean = {
+    if (list.exists(_.isInstanceOf[Insertion])) {
+      val aElem = a.asInstanceOf[HyperscriptElement]
+      val lastElements = aElem.subElements.reverse.zip(list.reverse).takeWhile({
+        case (aChild, Diff(_, node)) => aChild == node
+      })
+      lastElements.nonEmpty || firstReplacementsCanBeInsertions(a, list.dropRight(1))
+    } else {
+      false
+    }
   }
 
   def getElem(a: Hyperscript, path: Path): Hyperscript = a match {
@@ -68,11 +80,22 @@ object VirtualDom {
 
   type Path = ListBuffer[Int]
 
-  sealed trait Diff
+  sealed trait Diff {
+    val path: Path
+    val node: Hyperscript
+  }
 
-  case class Replacement(selectChildren: Path, newNode: Hyperscript) extends Diff
+  case class Replacement(path: Path, node: Hyperscript) extends Diff
 
-  case class Insertion(selectInsertionNode: Path, newNode: Hyperscript) extends Diff
+  case class Insertion(path: Path, node: Hyperscript) extends Diff
+
+  object Diff {
+    def unapply[T <: Diff](e: T): Option[(Path, Hyperscript)] = e match {
+      case Replacement(p, n) => Some(p, n)
+      case Insertion(p, n) => Some(p, n)
+      case _ => None
+    }
+  }
 
   object Path {
     def apply(indizes: Int*): Path = ListBuffer(indizes: _*)

@@ -245,6 +245,22 @@ class VirtualDomTest extends FunSpec {
         ))
       }
 
+      it("does not incorrectly optimize") {
+        val before = Div(children = Seq(
+          Text("a"),
+          Text("b")
+        ))
+        val after = Div(children = Seq(
+          Text("b"),
+          Text("a"),
+          Text("c")
+        ))
+        assert(VirtualDom.diff(before, after) === List(
+          Replacement(Path(0), Text("b")),
+          Replacement(Path(1), Text("a")),
+          Insertion(Path(2), Text("c"))
+        ))
+      }
     }
   }
 
