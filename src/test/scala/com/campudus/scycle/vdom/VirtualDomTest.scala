@@ -276,25 +276,12 @@ class VirtualDomTest extends FunSpec {
     }
   }
 
-  describe("replacements") {
-    it("will reuse the element and just replace its attributes") {
+  describe("scalajs test setup") {
+    it("can tell if two divs are the same") {
       val container = dom.document.createElement("div")
-      val realDiv = dom.document.createElement("div")
-      realDiv.setAttribute("class", "first")
-      container.appendChild(realDiv)
-      dom.console.log(realDiv.outerHTML)
-      dom.console.log(container.firstChild.isEqualNode(realDiv))
-      assert(container.firstElementChild === realDiv)
-
-      val firstDiv = VirtualDom(realDiv)
-      val secondDiv = Div("second")
-      val diff = VirtualDom.diff(firstDiv, secondDiv)
-      VirtualDom.update(container, diff)
-
-      val resultDiv = container.firstElementChild
-      dom.console.log(realDiv.outerHTML)
-
-      assert(resultDiv == realDiv)
+      dom.console.log("container", container)
+      assert(container.isSameNode(container))
     }
   }
+
 }
