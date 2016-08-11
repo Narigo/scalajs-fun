@@ -16,4 +16,6 @@ libraryDependencies ++= Seq(
 
 bootSnippet := "tutorial.webapp.TutorialApp().main();"
 
+jsDependencies += RuntimeDOM
+
 updateBrowsers <<= updateBrowsers.triggeredBy(fastOptJS in Compile)

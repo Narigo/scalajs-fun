@@ -123,3 +123,7 @@ Finally something we can test! Let's start by adding a scalatest dependency. A s
 works is a nice trick to be sure that you're not wasting time debugging your tests when in reality the build setup is 
 not correct.
 
+After building a simple virtual dom diffing algorithm, it turns out that adding "simple" optimizations may take some 
+time to get them right. There may still be some bugs lurking in the current algorithm but we'll try to refocus on the
+real implementation of CycleJS again.
+

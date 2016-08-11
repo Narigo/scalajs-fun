@@ -1,11 +1,29 @@
 package com.campudus.scycle.vdom
 
-import com.campudus.scycle.dom.{Hyperscript, HyperscriptElement}
+import com.campudus.scycle.dom.{Div, Hyperscript, HyperscriptElement}
+import org.scalajs.dom
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 object VirtualDom {
+
+  def apply(element: dom.Element): Hyperscript = element.tagName.toLowerCase match {
+    case "div" => Div(element.getAttribute("class"))
+  }
+
+  def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
+    case Replacement(path, node) =>
+      val toReplace = path.foldLeft(container) {
+        (container, childIdx) => container.childNodes(childIdx)
+      }
+      toReplace match {
+        case elem: dom.Element =>
+          elem.setAttribute("class", node.toElement.getAttribute("class"))
+        case n: dom.Node => ???
+      }
+    case _ => ???
+  })
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
     val replacementsAndInserts = naiveDiff(a, b, ListBuffer())

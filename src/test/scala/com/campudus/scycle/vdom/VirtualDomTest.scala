@@ -2,6 +2,7 @@ package com.campudus.scycle.vdom
 
 import com.campudus.scycle.dom.{Div, H1, Span, Text}
 import com.campudus.scycle.vdom.VirtualDom.{Insertion, Path, Replacement}
+import org.scalajs.dom
 import org.scalatest.FunSpec
 
 class VirtualDomTest extends FunSpec {
@@ -264,4 +265,36 @@ class VirtualDomTest extends FunSpec {
     }
   }
 
+  describe("virtual dom") {
+    it("can map real div elements to virtual dom div elements") {
+      val realDiv = dom.document.createElement("div")
+      realDiv.setAttribute("class", "hello")
+      val virtualDiv = Div("hello")
+      val result = VirtualDom(realDiv)
+
+      assert(result === virtualDiv)
+    }
+  }
+
+  describe("replacements") {
+    it("will reuse the element and just replace its attributes") {
+      val container = dom.document.createElement("div")
+      val realDiv = dom.document.createElement("div")
+      realDiv.setAttribute("class", "first")
+      container.appendChild(realDiv)
+      dom.console.log(realDiv.outerHTML)
+      dom.console.log(container.firstChild.isEqualNode(realDiv))
+      assert(container.firstElementChild === realDiv)
+
+      val firstDiv = VirtualDom(realDiv)
+      val secondDiv = Div("second")
+      val diff = VirtualDom.diff(firstDiv, secondDiv)
+      VirtualDom.update(container, diff)
+
+      val resultDiv = container.firstElementChild
+      dom.console.log(realDiv.outerHTML)
+
+      assert(resultDiv == realDiv)
+    }
+  }
 }

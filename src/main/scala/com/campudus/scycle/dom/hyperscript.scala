@@ -15,9 +15,9 @@ case class Text(text: String) extends Hyperscript {
   }
 }
 
-class HyperscriptElement(tagName: String, className: String, val subElements: Seq[Hyperscript]) extends Hyperscript {
+class HyperscriptElement(tagName: String, val subElements: Seq[Hyperscript]) extends Hyperscript {
 
-  def attrs: Map[String, Option[String]] = Map("class" -> Option(className))
+  def attrs: Map[String, Option[String]] = Map.empty
 
   override def toElement: dom.Element = {
     val element = dom.document.createElement(tagName)
@@ -35,22 +35,29 @@ class HyperscriptElement(tagName: String, className: String, val subElements: Se
 
 }
 
-case class H1(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("h1", className, children)
+trait ClassNameAttr extends HyperscriptElement {
+  val className: String
 
-case class Span(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("span", className, children)
+  abstract override def attrs: Map[String, Option[String]] = super.attrs + ("class" -> Option(className))
 
-case class Div(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("div", className, children)
+}
 
-case class Label(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("label", className, children)
+case class H1(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("h1", children) with ClassNameAttr
 
-case class Hr(className: String = null) extends HyperscriptElement("hr", className, Seq.empty)
+case class Span(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("span", children) with ClassNameAttr
 
-case class Input(className: String = null, kind: String, value: String = "") extends HyperscriptElement("input", className, Seq.empty) {
+case class Div(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("div", children) with ClassNameAttr
 
-  override def attrs: Map[String, Option[String]] = Map(
-    "class" -> Option(className),
-    "type" -> Option(kind),
-    "value" -> Option(value)
-  )
+case class Label(className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("label", children) with ClassNameAttr
+
+case class Hr(className: String = null) extends HyperscriptElement("hr", Seq.empty) with ClassNameAttr
+
+case class Input(className: String = null, kind: String, value: String = "") extends HyperscriptElement("input", Seq.empty) with ClassNameAttr {
+
+  override def attrs: Map[String, Option[String]] =
+    super.attrs.+(
+      "type" -> Option(kind),
+      "value" -> Option(value)
+    )
 
 }
