@@ -7,6 +7,21 @@ import org.scalatest.FunSpec
 
 class VirtualDomTest extends FunSpec {
 
+  describe("scalajs test setup") {
+    it("can tell if two divs are the same") {
+      val container = dom.document.createElement("div")
+      val div = dom.document.createElement("div")
+      container.appendChild(div)
+      dom.console.log("container", container)
+      dom.console.log("container.firstChild", container.firstChild)
+      assert(container == container)
+      assert(div == container.firstChild)
+      assert(div == container.firstChild.asInstanceOf[dom.Element])
+
+      dom.console.log("container.firstElementChild", container.firstElementChild)
+    }
+  }
+
   describe("The virtual dom diffing algorithm") {
 
     describe("doing replacements") {
@@ -276,12 +291,17 @@ class VirtualDomTest extends FunSpec {
     }
   }
 
-  describe("scalajs test setup") {
-    it("can tell if two divs are the same") {
-      val container = dom.document.createElement("div")
-      dom.console.log("container", container)
-      assert(container.isSameNode(container))
+  describe("replacements") {
+
+    it("empty replacement won't change elements") {
+      val div = dom.document.createElement("div")
+      val sub = dom.document.createElement("div")
+      div.appendChild(sub)
+      assert(sub == div.firstChild)
+      VirtualDom.update(div, List())
+      assert(sub == div.firstChild)
     }
+
   }
 
 }
