@@ -15,14 +15,20 @@ object VirtualDom {
   def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
     case Replacement(path, node) =>
       val toReplace = path.foldLeft(container) {
-        (container, childIdx) => container.childNodes(childIdx)
+        (subNode, childIdx) => subNode.childNodes(childIdx)
       }
+      dom.console.log("replacing something", toReplace)
       toReplace match {
-        case elem: dom.Element =>
-          elem.setAttribute("class", node.toElement.getAttribute("class"))
-        case n: dom.Node => ???
+        case currentElement: dom.Element =>
+          dom.console.log("setting class!", node.toElement.getAttribute("class"))
+          currentElement.setAttribute("class", node.toElement.getAttribute("class"))
+        case n: dom.Node =>
+          dom.console.log("replacing child!")
+          n.parentNode.replaceChild(node.toElement, n)
       }
-    case _ => ???
+    case _ =>
+      dom.console.log("update failing?!")
+      ???
   })
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {

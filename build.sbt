@@ -9,7 +9,7 @@ name := "Scala.js Fun"
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "org.scala-js" %%% "scalajs-dom" % "0.8.0",
+  "org.scala-js" %%% "scalajs-dom" % "0.9.1",
   "com.lihaoyi" %%% "scalarx" % "0.3.1",
   "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
 )

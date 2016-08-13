@@ -123,6 +123,11 @@ Finally something we can test! Let's start by adding a scalatest dependency. A s
 works is a nice trick to be sure that you're not wasting time debugging your tests when in reality the build setup is 
 not correct.
 
+To be sure that the code can be tested correctly, we need to test within a browser instead of testing in Rhino 
+environment. This can be done by either installing PhantomJS (`npm i -g phantomjs`) and disabling Rhino in sbt (by
+`set scalaJSUseRhino in Global := false` in the sbt REPL) or testing with a browser directly through the new HTML Test 
+Runner feature in ScalaJS (use `testHtmlFastOpt` and open the path to the file presented in the output in the browser).
+
 After building a simple virtual dom diffing algorithm, it turns out that adding "simple" optimizations may take some 
 time to get them right. There may still be some bugs lurking in the current algorithm but we'll try to refocus on the
 real implementation of CycleJS again.

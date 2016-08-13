@@ -302,6 +302,22 @@ class VirtualDomTest extends FunSpec {
       assert(sub == div.firstChild)
     }
 
+    it("will reuse the element and just replace its attributes") {
+      val container = dom.document.createElement("div")
+      val realDiv = dom.document.createElement("div")
+      realDiv.setAttribute("class", "first")
+      container.appendChild(realDiv)
+
+      val firstDiv = VirtualDom(realDiv)
+      val secondDiv = Div(className = "second")
+      val diff = VirtualDom.diff(firstDiv, secondDiv)
+      VirtualDom.update(container, diff)
+
+      val resultDiv = container.firstChild
+
+      assert(resultDiv == realDiv)
+    }
+
   }
 
 }
