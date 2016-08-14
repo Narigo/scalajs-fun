@@ -289,6 +289,21 @@ class VirtualDomTest extends FunSpec {
 
       assert(result === virtualDiv)
     }
+
+    it("can map real div elements with child elements to virtual dom div elements") {
+      val containerDiv = dom.document.createElement("div")
+      val childDiv = dom.document.createElement("div")
+      childDiv.setAttribute("class", "child")
+      containerDiv.setAttribute("class", "container")
+      containerDiv.appendChild(childDiv)
+
+      val virtualDiv = Div("container", Seq(Div("child")))
+      val result = VirtualDom(containerDiv)
+
+      println(s"vdiv  =$virtualDiv")
+      println(s"result=$result")
+      assert(result === virtualDiv)
+    }
   }
 
   describe("replacements") {
@@ -316,6 +331,28 @@ class VirtualDomTest extends FunSpec {
       val resultDiv = container.firstChild
 
       assert(resultDiv == realDiv)
+    }
+
+    it("can insert new elements and not change existing ones") {
+      val container = dom.document.createElement("div")
+      val realDivA = dom.document.createElement("div")
+      realDivA.setAttribute("class", "first")
+      container.appendChild(realDivA)
+
+      val containerBefore = VirtualDom(container)
+      val containerAfter = Div(children = Seq(
+        Div(className = "first"),
+        Div(className = "second")
+      ))
+      val diff = VirtualDom.diff(containerBefore, containerAfter)
+
+      VirtualDom.update(container, diff)
+
+      val resultFirstDiv = container.firstChild
+      val resultSecondDiv = container.childNodes(1).asInstanceOf[dom.Element]
+
+      assert(resultFirstDiv == realDivA)
+      assert(resultSecondDiv.getAttribute("class") === "second")
     }
 
   }

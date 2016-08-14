@@ -9,7 +9,12 @@ import scala.util.Try
 object VirtualDom {
 
   def apply(element: dom.Element): Hyperscript = element.tagName.toLowerCase match {
-    case "div" => Div(element.getAttribute("class"))
+    case "div" =>
+      val children = element.childNodes
+      val list = for {
+        i <- 0 until children.length
+      } yield children(i).asInstanceOf[dom.Element]
+      Div(element.getAttribute("class"), list.map(apply))
   }
 
   def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
@@ -26,9 +31,19 @@ object VirtualDom {
           dom.console.log("replacing child!")
           n.parentNode.replaceChild(node.toElement, n)
       }
-    case _ =>
-      dom.console.log("update failing?!")
-      ???
+    case Insertion(path, node) =>
+      val lastPath = path.last
+      val parent = path.dropRight(1).foldLeft(container) {
+        (subNode, childIdx) => subNode.childNodes(childIdx)
+      }
+      if (lastPath < parent.childNodes.length) {
+        val elem = parent.childNodes(lastPath)
+        dom.console.log("inserting before elem", elem)
+        parent.insertBefore(node.toElement, elem)
+      } else {
+        dom.console.log("inserting after all")
+        parent.appendChild(node.toElement)
+      }
   })
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
