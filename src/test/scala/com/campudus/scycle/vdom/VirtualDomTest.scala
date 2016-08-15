@@ -1,6 +1,6 @@
 package com.campudus.scycle.vdom
 
-import com.campudus.scycle.dom.{Div, H1, Span, Text}
+import com.campudus.scycle.dom._
 import com.campudus.scycle.vdom.VirtualDom.{Insertion, Path, Replacement}
 import org.scalajs.dom
 import org.scalatest.FunSpec
@@ -12,13 +12,9 @@ class VirtualDomTest extends FunSpec {
       val container = dom.document.createElement("div")
       val div = dom.document.createElement("div")
       container.appendChild(div)
-      dom.console.log("container", container)
-      dom.console.log("container.firstChild", container.firstChild)
       assert(container == container)
       assert(div == container.firstChild)
       assert(div == container.firstChild.asInstanceOf[dom.Element])
-
-      dom.console.log("container.firstElementChild", container.firstElementChild)
     }
   }
 
@@ -300,8 +296,6 @@ class VirtualDomTest extends FunSpec {
       val virtualDiv = Div("container", Seq(Div("child")))
       val result = VirtualDom(containerDiv)
 
-      println(s"vdiv  =$virtualDiv")
-      println(s"result=$result")
       assert(result === virtualDiv)
     }
   }
@@ -355,6 +349,25 @@ class VirtualDomTest extends FunSpec {
       assert(resultSecondDiv.getAttribute("class") === "second")
     }
 
+    it("can replace insert values") {
+      val container = dom.document.createElement("div")
+      val firstInput = dom.document.createElement("input")
+      firstInput.setAttribute("value", "hello")
+      container.appendChild(firstInput)
+
+      val containerBefore = VirtualDom(container)
+      val containerAfter = Div(children = Seq(
+        Input(value = "bye")
+      ))
+      val diff = VirtualDom.diff(containerBefore, containerAfter)
+
+      VirtualDom.update(container, diff)
+
+      val resultA = container.firstElementChild
+
+      assert(resultA == firstInput)
+      assert(resultA.getAttribute("value") === "bye")
+    }
   }
 
 }

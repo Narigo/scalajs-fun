@@ -1,6 +1,6 @@
 package com.campudus.scycle.vdom
 
-import com.campudus.scycle.dom.{Div, Hyperscript, HyperscriptElement}
+import com.campudus.scycle.dom.{Div, Hyperscript, HyperscriptElement, Input}
 import org.scalajs.dom
 
 import scala.collection.mutable.ListBuffer
@@ -15,6 +15,12 @@ object VirtualDom {
         i <- 0 until children.length
       } yield children(i).asInstanceOf[dom.Element]
       Div(element.getAttribute("class"), list.map(apply))
+    case "input" =>
+      Input(
+        className = element.getAttribute("class"),
+        kind = element.getAttribute("type"),
+        value = element.getAttribute("value")
+      )
   }
 
   def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
@@ -22,13 +28,15 @@ object VirtualDom {
       val toReplace = path.foldLeft(container) {
         (subNode, childIdx) => subNode.childNodes(childIdx)
       }
-      dom.console.log("replacing something", toReplace)
       toReplace match {
         case currentElement: dom.Element =>
-          dom.console.log("setting class!", node.toElement.getAttribute("class"))
-          currentElement.setAttribute("class", node.toElement.getAttribute("class"))
+          val nodeElement = node.toElement
+          val newAttributes = for {
+            i <- 0 until nodeElement.attributes.length
+          } yield nodeElement.attributes(i)
+
+          newAttributes.filter(_.specified).foreach(attr => currentElement.setAttribute(attr.name, attr.value))
         case n: dom.Node =>
-          dom.console.log("replacing child!")
           n.parentNode.replaceChild(node.toElement, n)
       }
     case Insertion(path, node) =>
@@ -38,10 +46,8 @@ object VirtualDom {
       }
       if (lastPath < parent.childNodes.length) {
         val elem = parent.childNodes(lastPath)
-        dom.console.log("inserting before elem", elem)
         parent.insertBefore(node.toElement, elem)
       } else {
-        dom.console.log("inserting after all")
         parent.appendChild(node.toElement)
       }
   })
