@@ -1,5 +1,6 @@
 package com.campudus.scycle.vdom
 
+import com.campudus.scycle
 import com.campudus.scycle.dom._
 import com.campudus.scycle.vdom.VirtualDom.{Insertion, Path, Replacement}
 import org.scalajs.dom
@@ -349,7 +350,7 @@ class VirtualDomTest extends FunSpec {
       assert(resultSecondDiv.getAttribute("class") === "second")
     }
 
-    it("can replace insert values") {
+    it("can replace input values") {
       val container = dom.document.createElement("div")
       val firstInput = dom.document.createElement("input")
       firstInput.setAttribute("value", "hello")
@@ -368,6 +369,34 @@ class VirtualDomTest extends FunSpec {
       assert(resultA == firstInput)
       assert(resultA.getAttribute("value") === "bye")
     }
+
+    it("can replace any hyperscript element") {
+      val container = dom.document.createElement("div")
+      val h1 = dom.document.createElement("h1")
+      val span = dom.document.createElement("span")
+      h1.setAttribute("class", "testh1")
+      span.setAttribute("class", "testspan")
+      container.appendChild(h1)
+      container.appendChild(span)
+
+      val containerBefore = VirtualDom(container)
+      val containerAfter = Div(children = Seq(
+        H1(className = "testafterh1"),
+        Span(className = "testafterspan")
+      ))
+      val diff = VirtualDom.diff(containerBefore, containerAfter)
+
+      VirtualDom.update(container, diff)
+
+      val resultA = container.firstElementChild
+      val resultB = container.childNodes(1).asInstanceOf[dom.Element]
+
+      assert(resultA == h1)
+      assert(resultA.getAttribute("class") === "testafterh1")
+      assert(resultB == span)
+      assert(resultB.getAttribute("class") === "testafterspan")
+    }
+
   }
 
 }

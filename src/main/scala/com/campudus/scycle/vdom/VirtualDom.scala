@@ -8,19 +8,8 @@ import scala.util.Try
 
 object VirtualDom {
 
-  def apply(element: dom.Element): Hyperscript = element.tagName.toLowerCase match {
-    case "div" =>
-      val children = element.childNodes
-      val list = for {
-        i <- 0 until children.length
-      } yield children(i).asInstanceOf[dom.Element]
-      Div(element.getAttribute("class"), list.map(apply))
-    case "input" =>
-      Input(
-        className = element.getAttribute("class"),
-        kind = element.getAttribute("type"),
-        value = element.getAttribute("value")
-      )
+  def apply(element: dom.Element): Hyperscript = element match {
+    case HyperscriptElement(element) => element
   }
 
   def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
