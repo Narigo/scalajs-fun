@@ -21,6 +21,10 @@ class VirtualDomTest extends FunSpec {
 
   describe("The virtual dom diffing algorithm") {
 
+    it("can apply null values") {
+      assert(VirtualDom(null) === null)
+    }
+
     describe("doing replacements") {
       it("detects the same element") {
         val myH1 = H1("hello")
