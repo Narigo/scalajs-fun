@@ -1,6 +1,6 @@
 package com.campudus.scycle.vdom
 
-import com.campudus.scycle.dom.{Div, Hyperscript, HyperscriptElement, Input}
+import com.campudus.scycle.dom.{Hyperscript, HyperscriptElement}
 import org.scalajs.dom
 
 import scala.collection.mutable.ListBuffer
@@ -9,14 +9,21 @@ import scala.util.Try
 object VirtualDom {
 
   def apply(element: dom.Element): Hyperscript = element match {
+    case null => null
     case HyperscriptElement(element) => element
   }
 
   def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
+    case Replacement(ListBuffer(), null) =>
+      do {
+        container.removeChild(container.firstChild)
+      } while(container.hasChildNodes())
     case Replacement(path, node) =>
+      dom.console.log("find toReplace")
       val toReplace = path.foldLeft(container) {
         (subNode, childIdx) => subNode.childNodes(childIdx)
       }
+      dom.console.log("found a toReplace:", toReplace)
       toReplace match {
         case currentElement: dom.Element =>
           val nodeElement = node.toElement
@@ -29,22 +36,31 @@ object VirtualDom {
           n.parentNode.replaceChild(node.toElement, n)
       }
     case Insertion(path, node) =>
-      val lastPath = path.last
-      val parent = path.dropRight(1).foldLeft(container) {
-        (subNode, childIdx) => subNode.childNodes(childIdx)
-      }
-      if (lastPath < parent.childNodes.length) {
-        val elem = parent.childNodes(lastPath)
-        parent.insertBefore(node.toElement, elem)
+      if (path.nonEmpty) {
+        val lastPath = path.last
+        val parent = path.dropRight(1).foldLeft(container) {
+          (subNode, childIdx) => subNode.childNodes(childIdx)
+        }
+        if (lastPath < parent.childNodes.length) {
+          val elem = parent.childNodes(lastPath)
+          parent.insertBefore(node.toElement, elem)
+        } else {
+          parent.appendChild(node.toElement)
+        }
       } else {
-        parent.appendChild(node.toElement)
+        container.appendChild(node.toElement)
       }
   })
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
-    val replacementsAndInserts = naiveDiff(a, b, ListBuffer())
-    optimizeReplacementsAndInsertions(a, b, replacementsAndInserts)
-    //    replacementsAndInserts.toList
+    if (a == null) {
+      List(Insertion(Path(), b))
+    } else if (b == null) {
+      List(Replacement(Path(), null))
+    } else {
+      val replacementsAndInserts = naiveDiff(a, b, ListBuffer())
+      optimizeReplacementsAndInsertions(a, b, replacementsAndInserts)
+    }
   }
 
   def optimizeReplacementsAndInsertions(a: Hyperscript,

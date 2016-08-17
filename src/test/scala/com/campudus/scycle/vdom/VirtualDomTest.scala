@@ -155,6 +155,12 @@ class VirtualDomTest extends FunSpec {
 
     describe("doing insertions") {
 
+      it("can handle null elements") {
+        val diffs = VirtualDom.diff(null, Div())
+        assert(diffs.length === 1)
+        assert(diffs.head.isInstanceOf[Insertion])
+      }
+
       it("adds new elements") {
         val before = Div(children = Seq(
           Text("a")
@@ -302,6 +308,30 @@ class VirtualDomTest extends FunSpec {
   }
 
   describe("replacements") {
+
+    it("insertions in root are possible") {
+      val container = dom.document.createElement("div")
+      val test = Div(className = "test")
+      val diffs = VirtualDom.diff(null, test)
+      assert(container.children.length === 0)
+      VirtualDom.update(container, diffs)
+      assert(container.children.length > 0)
+    }
+
+    it("remove in root is possible") {
+      val container = dom.document.createElement("div")
+      val test = dom.document.createElement("div")
+      test.setAttribute("class", "test")
+      container.appendChild(test)
+      dom.console.log("before diff")
+      val diffs = VirtualDom.diff(VirtualDom(container), null)
+      dom.console.log("after diff")
+      assert(container.children.length > 0)
+      dom.console.log("before update")
+      VirtualDom.update(container, diffs)
+      dom.console.log("after update")
+      assert(container.children.length === 0)
+    }
 
     it("empty replacement won't change elements") {
       val div = dom.document.createElement("div")
