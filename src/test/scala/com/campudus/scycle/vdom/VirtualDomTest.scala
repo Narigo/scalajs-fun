@@ -1,6 +1,5 @@
 package com.campudus.scycle.vdom
 
-import com.campudus.scycle
 import com.campudus.scycle.dom._
 import com.campudus.scycle.vdom.VirtualDom.{Insertion, Path, Replacement}
 import org.scalajs.dom
@@ -291,7 +290,7 @@ class VirtualDomTest extends FunSpec {
     it("can map real div elements to virtual dom div elements") {
       val realDiv = dom.document.createElement("div")
       realDiv.setAttribute("class", "hello")
-      val virtualDiv = Div("hello")
+      val virtualDiv = Div(className = "hello")
       val result = VirtualDom(realDiv)
 
       assert(result === virtualDiv)
@@ -304,11 +303,29 @@ class VirtualDomTest extends FunSpec {
       containerDiv.setAttribute("class", "container")
       containerDiv.appendChild(childDiv)
 
-      val virtualDiv = Div("container", Seq(Div("child")))
+      val virtualDiv = Div(className = "container", children = Seq(Div(className = "child")))
       val result = VirtualDom(containerDiv)
 
       assert(result === virtualDiv)
     }
+  }
+
+  describe("removals") {
+
+    it("can remove child elements") {
+      val containerDiv = dom.document.createElement("div")
+      val childDiv = dom.document.createElement("div")
+      childDiv.setAttribute("class", "child")
+      containerDiv.setAttribute("class", "container")
+      containerDiv.appendChild(childDiv)
+
+      val virtualDiv = Div(className = "container", children = Seq())
+      val diff = VirtualDom.diff(VirtualDom(containerDiv), virtualDiv)
+      VirtualDom.update(containerDiv, diff)
+
+      assert(containerDiv.childNodes.length === 0)
+    }
+
   }
 
   describe("replacements") {
@@ -327,13 +344,9 @@ class VirtualDomTest extends FunSpec {
       val test = dom.document.createElement("div")
       test.setAttribute("class", "test")
       container.appendChild(test)
-      dom.console.log("before diff")
       val diffs = VirtualDom.diff(VirtualDom(container), null)
-      dom.console.log("after diff")
       assert(container.children.length > 0)
-      dom.console.log("before update")
       VirtualDom.update(container, diffs)
-      dom.console.log("after update")
       assert(container.children.length === 0)
     }
 
@@ -429,6 +442,52 @@ class VirtualDomTest extends FunSpec {
       assert(resultA.getAttribute("class") === "testafterh1")
       assert(resultB == span)
       assert(resultB.getAttribute("class") === "testafterspan")
+    }
+
+    it("can replace Text nodes") {
+      val div = dom.document.createElement("div")
+      div.appendChild(dom.document.createTextNode("before"))
+      assert(div.textContent === "before")
+      val before = VirtualDom(div)
+      assert(before == Div(children = Seq(Text("before"))))
+      val after = Div(children = Seq(Text("after")))
+      val diffs = VirtualDom.diff(before, after)
+      VirtualDom.update(div, diffs)
+      assert(div.textContent === "after")
+    }
+
+    it("can replace nested elements with not so nested elements") {
+      val div = dom.document.createElement("div")
+      div.setAttribute("id", "div")
+      val span = dom.document.createElement("span")
+      span.setAttribute("id", "span")
+      val deep = dom.document.createElement("span")
+      deep.setAttribute("id", "deep")
+      span.appendChild(deep)
+      div.appendChild(span)
+      val before = VirtualDom(div)
+      assert(before == Div(id = "div", children = Seq(Span(id = "span", children = Seq(Span(id = "deep"))))))
+      val after = Div(id = "div", children = Seq(Span(id = "shallow")))
+      val diffs = VirtualDom.diff(before, after)
+      VirtualDom.update(div, diffs)
+      assert(div.firstElementChild.getAttribute("id") === "shallow")
+      assert(div.childNodes.length === 1)
+      assert(div.firstElementChild.childNodes.length === 0)
+    }
+
+    it("can replace elements with text nodes") {
+      val div = dom.document.createElement("div")
+      val span = dom.document.createElement("span")
+      span.appendChild(dom.document.createTextNode("before"))
+      div.appendChild(span)
+      assert(div.textContent === "before")
+      val before = VirtualDom(div)
+      assert(before == Div(children = Seq(Span(children = Seq(Text("before"))))))
+      val after = Div(children = Seq(Text("after")))
+      val diffs = VirtualDom.diff(before, after)
+      assert(diffs == List(Replacement(Path(0), Text("after"))))
+      VirtualDom.update(div, diffs)
+      assert(div.textContent === "after")
     }
 
   }

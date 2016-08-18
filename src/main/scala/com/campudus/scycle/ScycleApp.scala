@@ -35,13 +35,13 @@ object ScycleApp extends JSApp {
           val string = s"Hello $name!"
           console.log("domSource", domSource(), "name=", name)
 
-          Div(children = Seq(
-            Label(children = Seq("Name:")),
+          Div(id = "app", children = Seq(
+            Label(children = Seq(Text("Name:"))),
             Input(className = "field", kind = "text", value = name),
             Hr(),
-            H1(children = Seq(string)),
-            Span(children = Seq(s"Test: ${Random.nextInt()}"))
-          )).toElement
+            H1(children = Seq(Text(string))),
+            Span(children = Seq(Text(s"Test: ${Random.nextInt()}")))
+          )).toNode
         }
       }
     )

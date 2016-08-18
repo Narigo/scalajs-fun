@@ -10,30 +10,40 @@ object VirtualDom {
 
   def apply(element: dom.Element): Hyperscript = element match {
     case null => null
-    case HyperscriptElement(element) => element
+    case HyperscriptElement(elem) => elem
   }
 
   def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
     case Replacement(ListBuffer(), null) =>
       do {
         container.removeChild(container.firstChild)
-      } while(container.hasChildNodes())
+      } while (container.hasChildNodes())
+    case Replacement(ListBuffer(), node) =>
+      val parent = container.parentNode
+      if (parent != null) {
+        container.parentNode.replaceChild(node.toNode, container)
+      } else {
+        node.toNode
+      }
     case Replacement(path, node) =>
-      dom.console.log("find toReplace")
       val toReplace = path.foldLeft(container) {
         (subNode, childIdx) => subNode.childNodes(childIdx)
       }
-      dom.console.log("found a toReplace:", toReplace)
       toReplace match {
-        case currentElement: dom.Element =>
-          val nodeElement = node.toElement
+        case currentElement: dom.Element if node.isInstanceOf[HyperscriptElement] =>
+          val nodeElement = node.toNode
           val newAttributes = for {
             i <- 0 until nodeElement.attributes.length
           } yield nodeElement.attributes(i)
 
           newAttributes.filter(_.specified).foreach(attr => currentElement.setAttribute(attr.name, attr.value))
+          val applied = apply(currentElement)
+          val diffs = diff(applied, node)
+          update(currentElement, diffs)
+        case currentElement: dom.Element =>
+          currentElement.parentNode.replaceChild(node.toNode, currentElement)
         case n: dom.Node =>
-          n.parentNode.replaceChild(node.toElement, n)
+          n.parentNode.replaceChild(node.toNode, n)
       }
     case Insertion(path, node) =>
       if (path.nonEmpty) {
@@ -43,13 +53,18 @@ object VirtualDom {
         }
         if (lastPath < parent.childNodes.length) {
           val elem = parent.childNodes(lastPath)
-          parent.insertBefore(node.toElement, elem)
+          parent.insertBefore(node.toNode, elem)
         } else {
-          parent.appendChild(node.toElement)
+          parent.appendChild(node.toNode)
         }
       } else {
-        container.appendChild(node.toElement)
+        container.appendChild(node.toNode)
       }
+    case Remove(path, oldNode) =>
+      val toRemove = path.foldLeft(container) {
+        (subNode, childIdx) => subNode.childNodes(childIdx)
+      }
+      toRemove.parentNode.removeChild(toRemove)
   })
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
@@ -108,7 +123,8 @@ object VirtualDom {
       (a, b) match {
         case (aElem: HyperscriptElement, bElem: HyperscriptElement) =>
           if (aElem.attrs.equals(bElem.attrs)) {
-            val first = aElem.subElements.zipWithIndex.flatMap({
+            val aChildrenPlusIdx = aElem.subElements.zipWithIndex
+            val first = aChildrenPlusIdx.takeWhile(_._2 < bElem.subElements.length).flatMap({
               case (elem, idx) =>
                 naiveDiff(elem, bElem.subElements(idx), currentPath :+ idx)
             })
@@ -117,7 +133,10 @@ object VirtualDom {
                 case (newNode, idx) => Insertion(currentPath :+ idx, newNode)
               })
             } else Nil
-            first ++: ListBuffer(added: _*)
+            val removed: Seq[Remove] = aChildrenPlusIdx.dropWhile(_._2 < bElem.subElements.length).map({
+              case (nodeToRemove, idx) => Remove(currentPath :+ idx, nodeToRemove)
+            })
+            first ++: ListBuffer(added: _*) ++: ListBuffer(removed: _*)
           } else {
             ListBuffer(Replacement(currentPath, bElem))
           }
@@ -139,10 +158,13 @@ object VirtualDom {
 
   case class Insertion(path: Path, node: Hyperscript) extends Diff
 
+  case class Remove(path: Path, node: Hyperscript) extends Diff
+
   object Diff {
     def unapply[T <: Diff](e: T): Option[(Path, Hyperscript)] = e match {
       case Replacement(p, n) => Some(p, n)
       case Insertion(p, n) => Some(p, n)
+      case Remove(p, n) => Some(p, n)
       case _ => None
     }
   }
