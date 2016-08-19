@@ -35,13 +35,13 @@ object ScycleApp extends JSApp {
           val string = s"Hello $name!"
           console.log("domSource", domSource(), "name=", name)
 
-          Div(id = "app", children = Seq(
+          Div(children = Seq(
             Label(children = Seq(Text("Name:"))),
             Input(className = "field", kind = "text", value = name),
             Hr(),
             H1(children = Seq(Text(string))),
             Span(children = Seq(Text(s"Test: ${Random.nextInt()}")))
-          )).toNode
+          ))
         }
       }
     )
@@ -51,7 +51,7 @@ object ScycleApp extends JSApp {
     logicOut =>
       println("hello, driver!")
 
-      new DomDriver(selector, logicOut.asInstanceOf[Rx[Element]])
+      new DomDriver(selector, logicOut.asInstanceOf[Rx[Hyperscript]])
   }
 
 }

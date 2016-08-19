@@ -12,7 +12,7 @@ object Scycle {
            mainFn: (collection.Map[String, Driver]) => collection.Map[String, LogicOutput],
            drivers: collection.Map[String, LogicOutput => Driver]
          )(implicit ctx: Ctx.Owner): Unit = {
-    val realDrivers = drivers.mapValues(fn => fn(Rx {}))
+    val realDrivers = drivers.mapValues(fn => fn(Rx {null}))
     val sinks = mainFn(realDrivers)
     drivers.foreach {
       case (key, fn) => fn(sinks(key))

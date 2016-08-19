@@ -117,6 +117,8 @@ The input field looses focus whenever the view updates.
 When using a virtual dom implementation that would not replace the whole `input` DOM element, we could mitigate this
 problem. But that means we need to implement a virtual dom before continuing.  
 
+---
+
 ### Starting a virtual dom implementation
 
 Finally something we can test! Let's start by adding a scalatest dependency. A small test to check that the test setup 
@@ -132,3 +134,9 @@ After building a simple virtual dom diffing algorithm, it turns out that adding 
 time to get them right. There may still be some bugs lurking in the current algorithm but we'll try to refocus on the
 real implementation of CycleJS again.
 
+---
+
+Being done with the virtual dom implementation for now, we can update our DOM driver to use it. It made sense to let the
+main function return a virtual dom representation as well instead of mapping from and to real HTML elements. This way, 
+the driver only needs the virtual dom representation and the user code (our `ScycleApp` `logic` function) does not need
+to deal with the real DOM itself.
