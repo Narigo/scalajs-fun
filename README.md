@@ -140,3 +140,9 @@ Being done with the virtual dom implementation for now, we can update our DOM dr
 main function return a virtual dom representation as well instead of mapping from and to real HTML elements. This way, 
 the driver only needs the virtual dom representation and the user code (our `ScycleApp` `logic` function) does not need
 to deal with the real DOM itself.
+
+## Video 12 - An interactive counter in Cycle.js
+
+Before beginning the implementation of the next video, we are going to need a few more HTML elements: `button` and `p`. 
+We are going to implement them just like all other of our `Hyperscript` elements for now.
+

@@ -35,28 +35,28 @@ object HyperscriptElement {
 
   def unapply(node: dom.Node): Option[_ <: Hyperscript] = node match {
     case element: dom.Element =>
-      val simple = (element.tagName.toLowerCase match {
+      (element.tagName.toLowerCase match {
         case "div" => Some(Div.apply _)
         case "h1" => Some(H1.apply _)
         case "span" => Some(Span.apply _)
         case "label" => Some(Label.apply _)
+        case "button" => Some(Button.apply _)
+        case "p" => Some(P.apply _)
         case _ => None
-      }).map { applyFn =>
+      }).map({ applyFn =>
         val parent: Seq[Hyperscript] => HyperscriptElement = applyFn(element.getAttribute("id"), element.getAttribute("class"), _)
         val children = for {
           i <- 0 until element.childNodes.length
           children <- unapply(element.childNodes(i)).toSeq
         } yield children
         parent(children)
-      }
-      if (simple.isDefined) simple
-      else {
+      }).orElse({
         element.tagName.toLowerCase match {
           case "input" => Some(Input(element.getAttribute("class"), element.getAttribute("type"), element.getAttribute("value")))
           case "hr" => Some(Hr(element.getAttribute("class")))
           case _ => None
         }
-      }
+      })
     case _ => Some(Text(node.textContent))
   }
 
@@ -99,6 +99,10 @@ case class H1(id: String = null, className: String = null, children: Seq[Hypersc
 case class Span(id: String = null, className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("span", children) with IdAttr with ClassNameAttr
 
 case class Div(id: String = null, className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("div", children) with IdAttr with ClassNameAttr
+
+case class P(id: String = null, className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("p", children) with IdAttr with ClassNameAttr
+
+case class Button(id: String = null, className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("button", children) with IdAttr with ClassNameAttr
 
 case class Label(id: String = null, className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("label", children) with IdAttr with ClassNameAttr
 

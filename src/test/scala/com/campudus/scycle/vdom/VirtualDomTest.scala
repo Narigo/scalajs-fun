@@ -24,6 +24,22 @@ class VirtualDomTest extends FunSpec {
       assert(VirtualDom(null) === null)
     }
 
+    it("can apply all kinds of elements") {
+      def check[T <: Hyperscript](tagName: String, kind: Class[T]): Unit = {
+        val element = dom.document.createElement(tagName)
+        assert(kind.isInstance(VirtualDom(element)))
+      }
+
+      check("div", classOf[Div])
+      check("h1", classOf[H1])
+      check("span", classOf[Span])
+      check("hr", classOf[Hr])
+      check("input", classOf[Input])
+      check("label", classOf[Label])
+      check("button", classOf[Button])
+      check("p", classOf[P])
+    }
+
     describe("doing replacements") {
       it("detects the same element") {
         val myH1 = H1("hello")
