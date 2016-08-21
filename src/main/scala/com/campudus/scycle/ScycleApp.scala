@@ -28,19 +28,14 @@ object ScycleApp extends JSApp {
       // Logic (functional)
       "dom" -> {
         val driver = sources("dom").asInstanceOf[DomDriver]
-        val domSource = driver.selectEvents(".field", "input")
 
         Rx {
-          val name = Option(domSource()).map(_.srcElement.asInstanceOf[html.Input].value).getOrElse("")
-          val string = s"Hello $name!"
-          console.log("domSource", domSource(), "name=", name)
-
           Div(children = Seq(
-            Label(children = Seq(Text("Name:"))),
-            Input(className = "field", kind = "text", value = name),
-            Hr(),
-            H1(children = Seq(Text(string))),
-            Span(children = Seq(Text(s"Test: ${Random.nextInt()}")))
+            Button(className = "decrement", children = Seq(Text("Decrement"))),
+            Button(className = "increment", children = Seq(Text("Increment"))),
+             P(children = Seq(
+              Label(children = Seq(Text("0")))
+            ))
           ))
         }
       }
