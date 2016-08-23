@@ -29,7 +29,7 @@ object ScycleApp extends JSApp {
         val decrement = driver.selectEvents(".decrement", "click")
         val increment = driver.selectEvents(".increment", "click")
 
-        val result = Var(0)
+        val result = Var(10)
 
         Rx {
           decrement.triggerLater(result() = result() - 1)

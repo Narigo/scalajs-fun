@@ -146,3 +146,7 @@ to deal with the real DOM itself.
 Before beginning the implementation of the next video, we are going to need a few more HTML elements: `button` and `p`. 
 We are going to implement them just like all other of our `Hyperscript` elements for now.
 
+After all the work with virtual dom was done, setting up the GUI is pretty straight forward. The two buttons, a 
+paragraph and text label. In the video, we see how to merge and scan `Rx.Observable` streams. With the `ScalaRx` 
+implementation we can use the `triggerLater` methods to update the `result`, which basically is our counter state.  
+
