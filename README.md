@@ -150,3 +150,6 @@ After all the work with virtual dom was done, setting up the GUI is pretty strai
 paragraph and text label. In the video, we see how to merge and scan `Rx.Observable` streams. With the `ScalaRx` 
 implementation we can use the `triggerLater` methods to update the `result`, which basically is our counter state.  
 
+## Video 13 - Using the HTTP Driver
+
+

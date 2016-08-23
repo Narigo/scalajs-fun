@@ -1,6 +1,5 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.Scycle.LogicOutput
 import com.campudus.scycle.dom._
 import rx._
 
@@ -21,20 +20,20 @@ object ScycleApp extends JSApp {
     ))
   }
 
-  def logic(sources: collection.Map[String, Driver])(implicit ctx: Ctx.Owner): collection.Map[String, Rx[_]] = {
-    Map(
-      // Logic (functional)
-      "dom" -> {
-        val driver = sources("dom").asInstanceOf[DomDriver]
-        val decrement = driver.selectEvents(".decrement", "click")
-        val increment = driver.selectEvents(".increment", "click")
+  def logic(sources: collection.Map[String, Driver])(implicit ctx: Ctx.Owner): Rx[collection.Map[String, _]] = {
+    val driver = sources("dom").asInstanceOf[DomDriver]
+    val decrement = driver.selectEvents(".decrement", "click")
+    val increment = driver.selectEvents(".increment", "click")
 
-        val result = Var(10)
+    val result = Var(10)
 
-        Rx {
-          decrement.triggerLater(result() = result() - 1)
-          increment.triggerLater(result() = result() + 1)
+    Rx {
+      decrement.triggerLater(result() = result() - 1)
+      increment.triggerLater(result() = result() + 1)
 
+      Map(
+        // Logic (functional)
+        "dom" -> {
           Div(children = Seq(
             Button(className = "decrement", children = Seq(Text("Decrement"))),
             Button(className = "increment", children = Seq(Text("Increment"))),
@@ -43,11 +42,11 @@ object ScycleApp extends JSApp {
             ))
           ))
         }
-      }
-    )
+      )
+    }
   }
 
-  def makeDomDriver(selector: String)(implicit ctx: Ctx.Owner): (LogicOutput => Driver) = {
+  def makeDomDriver(selector: String)(implicit ctx: Ctx.Owner): (Rx[_] => Driver) = {
     logicOut =>
       println("hello, driver!")
 
