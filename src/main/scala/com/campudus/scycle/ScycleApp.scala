@@ -21,24 +21,16 @@ object ScycleApp extends JSApp {
   }
 
   def logic(sources: collection.Map[String, Driver])(implicit ctx: Ctx.Owner): Rx[collection.Map[String, _]] = {
-    val driver = sources("dom").asInstanceOf[DomDriver]
-    val decrement = driver.selectEvents(".decrement", "click")
-    val increment = driver.selectEvents(".increment", "click")
-
-    val result = Var(10)
-
     Rx {
-      decrement.triggerLater(result() = result() - 1)
-      increment.triggerLater(result() = result() + 1)
-
       Map(
         // Logic (functional)
         "dom" -> {
           Div(children = Seq(
-            Button(className = "decrement", children = Seq(Text("Decrement"))),
-            Button(className = "increment", children = Seq(Text("Increment"))),
-            P(children = Seq(
-              Label(children = Seq(Text("" + result())))
+            Button(className = ".getFirst", children = Seq(Text("Get first user"))),
+            Div(className = ".user-details", children = Seq(
+              H1(className = ".user-name", children = Seq(Text("(name)"))),
+              Div(className = ".user-email", children = Seq(Text("(email)"))),
+              Div(className = ".user-website", children = Seq(Text("(website)")))
             ))
           ))
         }
