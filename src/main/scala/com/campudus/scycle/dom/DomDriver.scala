@@ -7,10 +7,10 @@ import rx.{Ctx, Rx, Var}
 
 class DomDriver(selector: String, input: Rx[Hyperscript])(implicit ctx: Ctx.Owner) extends Driver {
 
-  println("initializing driver...")
+  println("initializing dom driver...")
 
   Rx {
-    console.log("selecting again", document.querySelector("#app"))
+    console.log("selecting again", document.querySelector(selector))
     val container = document.querySelector(selector)
     val newChild = input()
 
