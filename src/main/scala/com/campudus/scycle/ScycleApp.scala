@@ -43,7 +43,7 @@ object ScycleApp extends JSApp {
             Div(className = "user-details", children = Seq(
               H1(className = "user-name", children = Seq(Text("(name)"))),
               Div(className = "user-email", children = Seq(Text("(email)"))),
-              Div(className = "user-website", children = Seq(Text("(website)")))
+              A(className = "user-website", href = "https://example.com", children = Seq(Text("(website)")))
             ))
           ))
         },

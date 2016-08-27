@@ -54,6 +54,7 @@ object HyperscriptElement {
         element.tagName.toLowerCase match {
           case "input" => Some(Input(element.getAttribute("class"), element.getAttribute("type"), element.getAttribute("value")))
           case "hr" => Some(Hr(element.getAttribute("class")))
+          case "a" => Some(A(element.getAttribute("id"), element.getAttribute("class"), element.getAttribute("href")))
           case _ => None
         }
       })
@@ -93,6 +94,14 @@ trait ClassNameAttr extends HyperscriptElement {
 
   abstract override def attrs: Map[String, Option[String]] = super.attrs + ("class" -> Option(className))
 }
+
+trait HrefAttr extends HyperscriptElement {
+  val href: String
+
+  abstract override def attrs: Map[String, Option[String]] = super.attrs + ("href" -> Option(href))
+}
+
+case class A(id: String = null, className: String = null, href: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("a", children) with IdAttr with ClassNameAttr with HrefAttr
 
 case class H1(id: String = null, className: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("h1", children) with IdAttr with ClassNameAttr
 
