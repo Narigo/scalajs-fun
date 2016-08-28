@@ -21,25 +21,27 @@ object ScycleApp extends JSApp {
   }
 
   def logic(sources: collection.Map[String, Driver])(implicit ctx: Ctx.Owner): Rx[collection.Map[String, _]] = {
+    val domDriver = sources("dom").asInstanceOf[DomDriver]
+    val buttonClicks1 = domDriver.selectEvents(".get-first", "click")
+    val buttonClicks2 = domDriver.selectEvents(".abort-load", "click")
+
+    val request = Rx {
+      if (buttonClicks1() != null) {
+        println("set request!")
+        Some(Get("http://jsonplaceholder.typicode.com/users/1"))
+      } else {
+        println("no request to set!")
+        None
+      }
+    }
+
     Rx {
-      val domDriver = sources("dom").asInstanceOf[DomDriver]
-      val buttonClicks = domDriver.selectEvents(".get-first", "click")
-
-      val request = Rx {
-        val clickEvent = buttonClicks()
-        println("button clicked -> Request!")
-        Get("http://jsonplaceholder.typicode.com/users/1")
-      }
-
-      buttonClicks.triggerLater {
-        println("button clicked")
-      }
-
       Map(
         // Logic (functional)
         "dom" -> {
           Div(children = Seq(
-            Button(className = "get-first", children = Seq(Text("Get first user"))),
+            Button(className = "get-first", children = Seq(Text(if (request().isEmpty) "Get first user" else "Getting first user"))),
+            Button(className = "abort-load", children = Seq(Text(if (request().isEmpty) "Do nothing..." else "Stop loading"))),
             Div(className = "user-details", children = Seq(
               H1(className = "user-name", children = Seq(Text("(name)"))),
               Div(className = "user-email", children = Seq(Text("(email)"))),
@@ -63,7 +65,7 @@ object ScycleApp extends JSApp {
     logicOut =>
       println("hello, HTTP driver!")
 
-      new HttpDriver(logicOut.asInstanceOf[Rx[Request]])(ctx)
+      new HttpDriver(logicOut.asInstanceOf[Rx[Option[Request]]])(ctx)
   }
 
 }

@@ -12,24 +12,7 @@ case class Text(text: String) extends Hyperscript {
   }
 }
 
-object Hyperscript {
-
-  def domToHyperscript(element: dom.Element): HyperscriptElement = {
-    val applyFn = element.tagName.toLowerCase match {
-      case "div" => Div.apply _
-      case "h1" => H1.apply _
-      case "span" => Span.apply _
-      case "label" => Label.apply _
-    }
-
-    val mappedChildren = for {
-      i <- 0 until element.children.length
-    } yield domToHyperscript(element.children(i))
-
-    applyFn(element.getAttribute("id"), element.getAttribute("class"), mappedChildren)
-  }
-
-}
+object Hyperscript
 
 object HyperscriptElement {
 

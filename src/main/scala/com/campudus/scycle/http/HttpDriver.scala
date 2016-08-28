@@ -3,7 +3,7 @@ package com.campudus.scycle.http
 import com.campudus.scycle.Driver
 import rx.{Ctx, Rx, Var}
 
-class HttpDriver(input: Rx[Request])(implicit ctx: Ctx.Owner) extends Driver {
+class HttpDriver(input: Rx[Option[Request]])(implicit ctx: Ctx.Owner) extends Driver {
 
   println("initializing http driver...")
 

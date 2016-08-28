@@ -28,6 +28,8 @@ class DomDriver(selector: String, input: Rx[Hyperscript])(implicit ctx: Ctx.Owne
       if (e.srcElement == document.querySelector(selector)) {
         console.log("pushing it through!")
         eventVar() = e
+      } else {
+        eventVar() = null
       }
     })
     eventVar
