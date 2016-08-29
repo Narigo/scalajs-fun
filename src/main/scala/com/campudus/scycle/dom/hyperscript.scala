@@ -28,9 +28,7 @@ object HyperscriptElement {
         case "p" => Some(P.curried(element.getAttribute("id"))(element.getAttribute("class")))
         case "a" => Some(A.curried(element.getAttribute("id"))(element.getAttribute("class"))(element.getAttribute("href")))
         case _ => None
-      }).map({ applyFn =>
-        val parent: Seq[Hyperscript] => HyperscriptElement =
-          applyFn(_)
+      }).map({ parent =>
         val children = for {
           i <- 0 until element.childNodes.length
           children <- unapply(element.childNodes(i)).toSeq
