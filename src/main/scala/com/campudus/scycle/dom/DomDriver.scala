@@ -18,6 +18,9 @@ class DomDriver(selector: String, input: Rx[Hyperscript])(implicit ctx: Ctx.Owne
     val after = Div(id = "app", children = Seq(newChild))
     val diffs = VirtualDom.diff(before, after)
 
+    console.log(s"before=$before")
+    console.log(s"after =$after")
+    console.log(s"got some diffs $diffs")
     VirtualDom.update(container, diffs)
   }
 

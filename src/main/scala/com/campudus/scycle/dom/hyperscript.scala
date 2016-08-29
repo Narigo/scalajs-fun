@@ -18,16 +18,19 @@ object HyperscriptElement {
 
   def unapply(node: dom.Node): Option[_ <: Hyperscript] = node match {
     case element: dom.Element =>
+      type Children = Seq[Hyperscript] => HyperscriptElement
       (element.tagName.toLowerCase match {
-        case "div" => Some(Div.apply _)
-        case "h1" => Some(H1.apply _)
-        case "span" => Some(Span.apply _)
-        case "label" => Some(Label.apply _)
-        case "button" => Some(Button.apply _)
-        case "p" => Some(P.apply _)
+        case "div" => Some(Div.curried(element.getAttribute("id"))(element.getAttribute("class")))
+        case "h1" => Some(H1.curried(element.getAttribute("id"))(element.getAttribute("class")))
+        case "span" => Some(Span.curried(element.getAttribute("id"))(element.getAttribute("class")))
+        case "label" => Some(Label.curried(element.getAttribute("id"))(element.getAttribute("class")))
+        case "button" => Some(Button.curried(element.getAttribute("id"))(element.getAttribute("class")))
+        case "p" => Some(P.curried(element.getAttribute("id"))(element.getAttribute("class")))
+        case "a" => Some(A.curried(element.getAttribute("id"))(element.getAttribute("class"))(element.getAttribute("href")))
         case _ => None
       }).map({ applyFn =>
-        val parent: Seq[Hyperscript] => HyperscriptElement = applyFn(element.getAttribute("id"), element.getAttribute("class"), _)
+        val parent: Seq[Hyperscript] => HyperscriptElement =
+          applyFn(_)
         val children = for {
           i <- 0 until element.childNodes.length
           children <- unapply(element.childNodes(i)).toSeq
@@ -37,7 +40,6 @@ object HyperscriptElement {
         element.tagName.toLowerCase match {
           case "input" => Some(Input(element.getAttribute("class"), element.getAttribute("type"), element.getAttribute("value")))
           case "hr" => Some(Hr(element.getAttribute("class")))
-          case "a" => Some(A(element.getAttribute("id"), element.getAttribute("class"), element.getAttribute("href")))
           case _ => None
         }
       })

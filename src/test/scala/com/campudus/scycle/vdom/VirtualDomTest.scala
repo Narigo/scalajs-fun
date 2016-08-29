@@ -38,6 +38,33 @@ class VirtualDomTest extends FunSpec {
       check("label", classOf[Label])
       check("button", classOf[Button])
       check("p", classOf[P])
+      check("a", classOf[A])
+    }
+
+    it("does not yield changes if nothing changes") {
+
+      val first = Div(children = Seq(
+        Button(className = "get-first", children = Seq(Text("something a 1"))),
+        Button(className = "get-second", children = Seq(Text("something b 1"))),
+        Div(className = "user-details", children = Seq(
+          H1(className = "user-name", children = Seq(Text("(name)"))),
+          Div(className = "user-email", children = Seq(Text("(email)"))),
+          A(className = "user-website", href = "https://example.com", children = Seq(Text("(website)")))
+        ))
+      ))
+      val second = Div(children = Seq(
+        Button(className = "get-first", children = Seq(Text("something a 2"))),
+        Button(className = "get-second", children = Seq(Text("something b 2"))),
+        Div(className = "user-details", children = Seq(
+          H1(className = "user-name", children = Seq(Text("(name)"))),
+          Div(className = "user-email", children = Seq(Text("(email)"))),
+          A(className = "user-website", href = "https://example.com", children = Seq(Text("(website)")))
+        ))
+      ))
+
+      val diffs = VirtualDom.diff(first, second)
+      assert(diffs.length === 2)
+      assert(diffs.forall(diff => diff.isInstanceOf[Replacement]))
     }
 
     describe("doing replacements") {
