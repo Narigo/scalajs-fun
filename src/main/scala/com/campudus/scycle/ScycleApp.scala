@@ -26,12 +26,8 @@ object ScycleApp extends JSApp {
     val buttonClicks1 = domDriver.selectEvents(".get-first", "click")
     val buttonClicks2 = domDriver.selectEvents(".abort-load", "click")
     println("getting response")
-    val response = httpDriver.response()
+    val response = httpDriver.getResponse()
     println(s"got response as Rx[String]")
-
-    response.trigger {
-      println("there was a new response in the logic")
-    }
 
     val request = Rx {
       println("evaluating request")
@@ -44,32 +40,27 @@ object ScycleApp extends JSApp {
       }
     }
 
-    val user = Rx {
-      println("evaluating user")
-      val userResponse = response()
+    Rx {
+      println("re-evaluating map. Something changed!")
+      val userResponse = response.apply()
       println(s"the user response is $userResponse")
-      val userToReturn = if (userResponse != null) {
-        val user = userResponse.split(" ")
-        User(user(0), user(1), user(2))
+      val user = if (userResponse != null) {
+        val u = userResponse.split(" ")
+        User(u(0), u(1), u(2))
       } else {
         User("(name)", "(email)", "(website)")
       }
-      println(s"user to return = $userToReturn")
-      userToReturn
-    }
-    println("got a user")
+      println(s"user to return = $user")
 
-    Rx {
       Map(
-        // Logic (functional)
         "dom" -> {
           Div(children = Seq(
             Button(className = "get-first", children = Seq(Text(if (request() == null) "Get first user" else "Getting first user"))),
             Button(className = "abort-load", children = Seq(Text(if (request() == null) "Do nothing..." else "Stop loading"))),
             Div(className = "user-details", children = Seq(
-              H1(className = "user-name", children = Seq(Text(user().name))),
-              Div(className = "user-email", children = Seq(Text(user().email))),
-              A(className = "user-website", href = user().website, children = Seq(Text(user().website)))
+              H1(className = "user-name", children = Seq(Text(user.name))),
+              Div(className = "user-email", children = Seq(Text(user.email))),
+              A(className = "user-website", href = user.website, children = Seq(Text(user.website)))
             ))
           ))
         },

@@ -155,5 +155,6 @@ re-evaluate the `Map` with the calculations outside of the values we return for 
 
 ## Video 13 - Using the HTTP Driver
 
-We start by making a new GUI for the desired result.
+We start by making a new GUI for the desired result. The second step is to hook up the `Rx` variables of an `HttpDriver`
+to the app.
 
