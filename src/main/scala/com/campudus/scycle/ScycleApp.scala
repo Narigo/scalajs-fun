@@ -6,6 +6,7 @@ import rx._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
+import scala.util.Random
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -25,32 +26,29 @@ object ScycleApp extends JSApp {
     val httpDriver = sources("http").asInstanceOf[HttpDriver]
     val buttonClicks1 = domDriver.selectEvents(".get-first", "click")
     val buttonClicks2 = domDriver.selectEvents(".abort-load", "click")
-    println("getting response")
     val response = httpDriver.getResponse()
-    println(s"got response as Rx[String]")
+    var testEv: org.scalajs.dom.Event = null
 
     val request = Rx {
       println("evaluating request")
-      if (buttonClicks1() != null) {
-        println("set request!")
-        Get("http://jsonplaceholder.typicode.com/users/1")
+      val clickEv = buttonClicks1()
+      testEv = clickEv
+      if (clickEv != null) {
+        Get(s"http://jsonplaceholder.typicode.com/users/${Random.nextInt()}")
       } else {
-        println("no request to set!")
         null
       }
     }
 
     Rx {
-      println("re-evaluating map. Something changed!")
-      val userResponse = response.apply()
-      println(s"the user response is $userResponse")
+      println("evaluating map. Something changed!")
+      val userResponse = response()
       val user = if (userResponse != null) {
         val u = userResponse.split(" ")
         User(u(0), u(1), u(2))
       } else {
         User("(name)", "(email)", "(website)")
       }
-      println(s"user to return = $user")
 
       Map(
         "dom" -> {
