@@ -8,20 +8,19 @@ class HttpDriver(input: Rx[Request])(implicit ctx: Ctx.Owner) extends Driver {
   println("initializing http driver...")
   val request = Rx {
     println("evaluate val request in HttpDriver")
-    Option(input())
+    val req = input()
+    if (req == null) {
+      ""
+    } else {
+      req.url
+    }
   }
 
   val response = Rx {
     println("evaluate val response in HttpDriver")
     val receivedRequest = request()
     println(s"evaluate val response in HttpDriver 2 $receivedRequest")
-    val num = receivedRequest.map(req => {
-      println("test")
-//      println(s"test2 ${req.url.lastIndexOf('/')}")
-//
-//      req.url.split('/').toList
-      List("test")
-    }).getOrElse(List("null"))
+    val num = receivedRequest
     println("evaluate val response in HttpDriver 2b")
     val number = num.last
     println("evaluate val response in HttpDriver 3")

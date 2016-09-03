@@ -158,3 +158,7 @@ re-evaluate the `Map` with the calculations outside of the values we return for 
 We start by making a new GUI for the desired result. The second step is to hook up the `Rx` variables of an `HttpDriver`
 to the app.
 
+> After struggling a lot trying to get the value of an `Option`, it looks like ScalaJS or rx.Scala do not like using 
+`Option.map` or `Option.get`. The underlying problem seems to be that `Rx[Something]` does not like having null values
+assigned to it. We need to investigate this behavior further to see what we can do. Maybe having a `Non-Request` class
+would help.
