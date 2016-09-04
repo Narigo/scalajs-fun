@@ -1,7 +1,7 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.dom._
-import com.campudus.scycle.http.{Get, HttpDriver, Request}
+import com.campudus.scycle.http.{Get, HttpDriver, NonRequest, Request}
 import rx._
 
 import scala.scalajs.js.JSApp
@@ -26,29 +26,35 @@ object ScycleApp extends JSApp {
     val httpDriver = sources("http").asInstanceOf[HttpDriver]
     val buttonClicks1 = domDriver.selectEvents(".get-first", "click")
     val buttonClicks2 = domDriver.selectEvents(".abort-load", "click")
-    val response = httpDriver.getResponse()
     var testEv: org.scalajs.dom.Event = null
 
     val request = Rx {
-      println("evaluating request")
+      println("evaluating request in app")
       val clickEv = buttonClicks1()
       testEv = clickEv
       if (clickEv != null) {
         Get(s"http://jsonplaceholder.typicode.com/users/${Random.nextInt()}")
       } else {
-        null
+        NonRequest
       }
     }
 
-    Rx {
-      println("evaluating map. Something changed!")
+    println(s"current request ${request.now}")
+    val response = httpDriver.getResponse()
+
+    val user = Rx {
+      println("evaluating user in app")
       val userResponse = response()
-      val user = if (userResponse != null) {
+      if (userResponse != null) {
         val u = userResponse.split(" ")
         User(u(0), u(1), u(2))
       } else {
         User("(name)", "(email)", "(website)")
       }
+    }
+
+    Rx {
+      println("evaluating map. Something changed!")
 
       Map(
         "dom" -> {
@@ -56,13 +62,19 @@ object ScycleApp extends JSApp {
             Button(className = "get-first", children = Seq(Text(if (request() == null) "Get first user" else "Getting first user"))),
             Button(className = "abort-load", children = Seq(Text(if (request() == null) "Do nothing..." else "Stop loading"))),
             Div(className = "user-details", children = Seq(
-              H1(className = "user-name", children = Seq(Text(user.name))),
-              Div(className = "user-email", children = Seq(Text(user.email))),
-              A(className = "user-website", href = user.website, children = Seq(Text(user.website)))
+              H1(className = "user-name", children = Seq(Text("(name)"))),
+              Div(className = "user-email", children = Seq(Text("(email)"))),
+              A(className = "user-website", href = "(website)", children = Seq(Text("(website)")))
+              //              H1(className = "user-name", children = Seq(Text(user().name))),
+              //              Div(className = "user-email", children = Seq(Text(user().email))),
+              //              A(className = "user-website", href = user().website, children = Seq(Text(user().website)))
             ))
           ))
         },
-        "http" -> request()
+        "http" -> {
+          println(s"current request in app ${request.now}")
+          request()
+        }
       )
     }
   }
@@ -76,7 +88,7 @@ object ScycleApp extends JSApp {
 
   def makeHttpDriver()(implicit ctx: Ctx.Owner): (Rx[_] => Driver) = {
     logicOut =>
-      println("hello, HTTP driver!")
+      println(s"hello, HTTP driver! Got $logicOut")
 
       new HttpDriver(logicOut.asInstanceOf[Rx[Request]])(ctx)
   }

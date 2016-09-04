@@ -10,13 +10,18 @@ class DomDriver(selector: String, input: Rx[Hyperscript])(implicit ctx: Ctx.Owne
   println("initializing dom driver...")
 
   Rx {
+    println("evaluating dom driver update of input")
     val container = document.querySelector(selector)
     val newChild = input()
 
+    println(s"evaluating dom driver update of input - before $newChild")
     val before = VirtualDom(container)
+    println("evaluating dom driver update of input - after")
     val after = Div(id = "app", children = Seq(newChild))
+    println("evaluating dom driver update of input - diffs")
     val diffs = VirtualDom.diff(before, after)
 
+    println(s"evaluating dom driver update of input - update $diffs")
     VirtualDom.update(container, diffs)
   }
 
