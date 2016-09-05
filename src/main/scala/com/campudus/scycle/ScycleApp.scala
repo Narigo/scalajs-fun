@@ -40,10 +40,11 @@ object ScycleApp extends JSApp {
     }
 
     println(s"current request ${request.now}")
-    val response = httpDriver.getResponse()
+    val response = httpDriver.getResponse
 
     val user = Rx {
       println("evaluating user in app")
+      println(s"response is now ${response.now}")
       val userResponse = response()
       if (userResponse != null) {
         val u = userResponse.split(" ")
@@ -90,7 +91,22 @@ object ScycleApp extends JSApp {
     logicOut =>
       println(s"hello, HTTP driver! Got $logicOut")
 
-      new HttpDriver(logicOut.asInstanceOf[Rx[Request]])(ctx)
+      val input = Rx {
+        println("evaluating input in makeHttpDriver")
+        val in = logicOut()
+        println("received an in")
+        println(s"in = $in")
+        val value = if (in == null) {
+          NonRequest
+        } else {
+          in.asInstanceOf[Request]
+        }
+        println(s"value set done")
+        value
+      }
+
+      println(s"creating httpdriver with ${input.now}")
+      new HttpDriver(input)
   }
 
 }

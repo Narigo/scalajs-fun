@@ -5,9 +5,15 @@ import rx.{Ctx, Rx}
 
 class HttpDriver(input: Rx[Request])(implicit ctx: Ctx.Owner) extends Driver {
 
-  def getResponse(): Rx[String] = Rx {
+  Rx {
+    println("test?")
+    println(s"input = ${input()}")
+  }
+
+  val getResponse: Rx[String] = Rx {
     val request = input()
     if (request == null) {
+      println(s"null request received")
       "(empty)"
     } else {
       val response = request.url
