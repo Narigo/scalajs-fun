@@ -159,6 +159,13 @@ We start by making a new GUI for the desired result. The second step is to hook 
 to the app.
 
 > After struggling a lot trying to get the value of an `Option`, it looks like ScalaJS or rx.Scala do not like using 
-`Option.map` or `Option.get`. The underlying problem seems to be that `Rx[Something]` does not like having null values
-assigned to it. We need to investigate this behavior further to see what we can do. Maybe having a `Non-Request` class
-would help.
+> `Option.map` or `Option.get`. The underlying problem seems to be that `Rx[Something]` does not like having null values
+> assigned to it. We need to investigate this behavior further to see what we can do. Maybe having a `Non-Request` class
+> would help.
+> 
+> Turns out that `NonRequest` doesn't really help. It's also not very clear to me why using `response()` in `ScycleApp`
+> does not fire. A lot of debugging code exists in this commit now, but I don't think I'll come around to fix this. As 
+> it doesn't really look like the `scala.rx` library gets much love, I will push this on a branch and restart this 
+> project with another library: https://github.com/LukaJCB/rxscala-js
+>
+> Using the rxscala-js library, the code will be much closer to the videos anyways. Let's see how far we get using that.

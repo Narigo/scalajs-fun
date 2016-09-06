@@ -9,13 +9,14 @@ object Scycle {
 
   def run(
            mainFn: (collection.Map[String, Driver]) => Rx[collection.Map[String, _]],
-           drivers: collection.Map[String, Rx[_] => Driver]
+           drivers: collection.Map[String, Ctx.Owner => Rx[_] => Driver]
          )(implicit ctx: Ctx.Owner): Unit = {
 
-    val realDrivers = drivers.mapValues(fn => fn(Rx {null}))
+    println(s"owner in Scycle.run = $ctx")
+    val realDrivers = drivers.mapValues(fn => fn(ctx)(Rx {null}))
     val sinks = mainFn(realDrivers)
     drivers.foreach {
-      case (key, fn) => fn(Rx {
+      case (key, fn) => fn(ctx)(Rx {
         val map = sinks()
         map(key)
       })
