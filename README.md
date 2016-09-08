@@ -169,3 +169,17 @@ to the app.
 > project with another library: https://github.com/LukaJCB/rxscala-js
 >
 > Using the rxscala-js library, the code will be much closer to the videos anyways. Let's see how far we get using that.
+
+## Restarting with rxscala-js
+
+After trying out rxscala for the first few videos, we're going to restart implementing [Cycle.js](http://cycle.js.org/) 
+with [rxscala-js](https://github.com/LukaJCB/rxscala-js). As it is based on Observables, we can implement it more easily
+following the videos.
+
+To begin, we have to rewrite the main logic around observables. We can keep the `VirtualDom` implementation for now and 
+see how far we get with the new library. First, we need to depend on the new library by changing the dependencies in our
+`build.sbt` file using `"com.github.lukajcb" %%% "rxscala-js" % "0.4.0"`.
+
+### Implementing the main function again
+
+
