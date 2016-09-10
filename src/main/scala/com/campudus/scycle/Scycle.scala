@@ -1,30 +1,28 @@
 package com.campudus.scycle
 
+import org.scalajs.dom.Event
 import rxscalajs._
 
 object Scycle {
 
   def run(
-           mainFn: (Map[String, Driver]) => Map[String, Observable[_]],
-           drivers: Map[String, Observable[_] => Driver]
+           mainFn: (Map[String, Observable[_]]) => Map[String, Observable[_]],
+           drivers: Map[String, Observable[_] => Observable[_]]
          ): Unit = {
 
     println("run method")
 
-    val initialDrivers = drivers.mapValues(fn => {
-      println(s"init driver with fn $fn")
-      val initialObs = Observable.just(null)
-      fn(initialObs)
-    })
     println(s"init sinks")
-    val sinks = mainFn(initialDrivers)
+    val proxyDomSource = Subject[Event]()
+    val sinks = mainFn(Map("dom" -> proxyDomSource))
     println(s"some sinks there")
 
-    drivers.foreach {
-      case (key, fn) => {
-        println(s"init driver with sinks")
-        fn(sinks(key))
-      }
+    val domSource = drivers("dom")(sinks("dom")).asInstanceOf[Observable[Event]]
+    domSource.subscribe((click: Event) => proxyDomSource.next(click))
+
+    drivers.keys.foreach { key =>
+      println(s"init driver with sinks")
+      drivers(key)(sinks(key))
     }
 
   }

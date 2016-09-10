@@ -16,6 +16,9 @@ libraryDependencies ++= Seq(
 
 bootSnippet := "tutorial.webapp.TutorialApp().main();"
 
-jsDependencies += RuntimeDOM
+jsDependencies ++= Seq(
+  "org.webjars.npm" % "rxjs" % "5.0.0-beta.11" / "Rx.umd.min.js" commonJSName "Rx",
+  RuntimeDOM
+)
 
 updateBrowsers <<= updateBrowsers.triggeredBy(fastOptJS in Compile)

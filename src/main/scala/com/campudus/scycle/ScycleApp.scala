@@ -1,8 +1,6 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.dom._
-import com.campudus.scycle.http.{HttpDriver, NonRequest, Request}
-import rxscalajs.Observable
+import rxscalajs._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -14,22 +12,13 @@ object ScycleApp extends JSApp {
   def main(): Unit = {
     println("main export")
 
-    Scycle.run(logic, Map(
-      "dom" -> ((obs: Observable[_]) => DomDriver(obs.asInstanceOf[Observable[Hyperscript]])),
-      "http" -> ((obs: Observable[_]) => HttpDriver(obs.asInstanceOf[Observable[Request]]))
-    ))
-  }
+    val o = Observable
+      .interval(200)
+      .take(5)
+    o.subscribe(n => println(s"n=$n"))
 
-  def logic(drivers: Map[String, Driver]): Map[String, Observable[_]] = {
-    println("in logic")
-    val domDriver = drivers("dom").asInstanceOf[DomDriver]
-//    val clicks$ = domDriver.selectEvents("#app", "click")
+    println(s"having the o $o")
 
-    println("test?")
-    Map(
-      "dom" -> Observable.just("hello") ,//clicks$.map(e => println("clicked!")),
-      "http" -> Observable.just(NonRequest)
-    )
   }
 
 }
