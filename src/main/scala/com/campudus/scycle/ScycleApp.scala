@@ -17,8 +17,7 @@ object ScycleApp extends JSApp {
       .take(5)
     o.subscribe(n => println(s"n=$n"))
 
-    println(s"having the o $o")
-
+    println(s"having the o: $o")
   }
 
 }
