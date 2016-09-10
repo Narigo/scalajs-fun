@@ -11,11 +11,20 @@ object Scycle {
 
     println("run method")
 
-    val initialDrivers = drivers.mapValues(fn => fn(Observable.just(null)))
+    val initialDrivers = drivers.mapValues(fn => {
+      println(s"init driver with fn $fn")
+      val initialObs = Observable.just(null)
+      fn(initialObs)
+    })
+    println(s"init sinks")
     val sinks = mainFn(initialDrivers)
+    println(s"some sinks there")
 
     drivers.foreach {
-      case (key, fn) => fn(sinks(key))
+      case (key, fn) => {
+        println(s"init driver with sinks")
+        fn(sinks(key))
+      }
     }
 
   }

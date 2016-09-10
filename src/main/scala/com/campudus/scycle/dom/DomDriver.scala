@@ -1,7 +1,6 @@
 package com.campudus.scycle.dom
 
 import com.campudus.scycle.Driver
-import com.campudus.scycle.vdom.VirtualDom
 import org.scalajs.dom._
 import rxscalajs._
 

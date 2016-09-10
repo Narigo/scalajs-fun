@@ -21,11 +21,13 @@ object ScycleApp extends JSApp {
   }
 
   def logic(drivers: Map[String, Driver]): Map[String, Observable[_]] = {
+    println("in logic")
     val domDriver = drivers("dom").asInstanceOf[DomDriver]
-    val clicks$ = domDriver.selectEvents("#app", "click")
+//    val clicks$ = domDriver.selectEvents("#app", "click")
 
+    println("test?")
     Map(
-      "dom" -> clicks$.map(e => println("clicked!")),
+      "dom" -> Observable.just("hello") ,//clicks$.map(e => println("clicked!")),
       "http" -> Observable.just(NonRequest)
     )
   }
