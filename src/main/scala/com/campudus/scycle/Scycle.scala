@@ -18,12 +18,15 @@ object Scycle {
     println(s"some sinks there")
 
     val domSource = drivers("dom")(sinks("dom")).asInstanceOf[Observable[Event]]
-    domSource.subscribe((click: Event) => proxyDomSource.next(click))
+    domSource.subscribe((click: Event) => {
+      println("domSource event happened, providing it through proxy")
+      proxyDomSource.next(click)
+    })
 
-    drivers.keys.foreach { key =>
-      println(s"init driver with sinks")
-      drivers(key)(sinks(key))
-    }
+//    drivers.keys.foreach { key =>
+//      println(s"init driver with sinks")
+//      drivers(key)(sinks(key))
+//    }
 
   }
 

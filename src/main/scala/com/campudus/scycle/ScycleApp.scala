@@ -1,5 +1,8 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.dom.{Div, DomDriver, Hyperscript, Text}
+import com.campudus.scycle.http.{HttpDriver, Request}
+import org.scalajs.dom.Event
 import rxscalajs._
 
 import scala.scalajs.js.JSApp
@@ -12,13 +15,21 @@ object ScycleApp extends JSApp {
   def main(): Unit = {
     println("main export")
 
-    val o = Observable
-      .interval(200)
-      .take(5)
-    o.subscribe(n => println(s"n=$n"))
-
-    println(s"having the o $o")
-
+    Scycle.run(logic, drivers)
   }
 
+  val drivers: Map[String, Observable[_] => Observable[_]] = Map(
+    "dom" -> (obs => DomDriver.apply(obs.asInstanceOf[Observable[Hyperscript]]))
+  )
+
+  def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {
+    println("called logic")
+    val clicks$ = drivers("dom").asInstanceOf[Observable[Event]]
+    Map(
+      "dom" -> clicks$.map { ev =>
+        println("clicked on dom in logic!")
+        Div(children = Seq(Text("hello")))
+      }
+    )
+  }
 }
