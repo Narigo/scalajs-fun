@@ -1,7 +1,6 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.dom.{Div, DomDriver, Hyperscript, Text}
-import com.campudus.scycle.http.{HttpDriver, Request}
 import org.scalajs.dom.Event
 import rxscalajs._
 
@@ -26,10 +25,11 @@ object ScycleApp extends JSApp {
     println("called logic")
     val clicks$ = drivers("dom").asInstanceOf[Observable[Event]]
     Map(
-      "dom" -> clicks$.map { ev =>
-        println("clicked on dom in logic!")
-        Div(children = Seq(Text("hello")))
-      }
+      "dom" -> clicks$
+        .map(ev => {
+          println("clicked on dom in logic!")
+          Div(id = "app", children = Seq(Text(s"hello ${Math.random()}")))
+        })
     )
   }
 }

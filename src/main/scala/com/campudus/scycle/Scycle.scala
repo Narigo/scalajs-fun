@@ -23,6 +23,9 @@ object Scycle {
       proxyDomSource.next(click)
     })
 
+    proxyDomSource.subscribe(ev => {
+      println("proxy got some data")
+    })
 //    drivers.keys.foreach { key =>
 //      println(s"init driver with sinks")
 //      drivers(key)(sinks(key))
