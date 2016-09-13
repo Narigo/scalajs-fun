@@ -1,6 +1,5 @@
 package com.campudus.scycle
 
-import org.scalajs.dom.Event
 import rxscalajs._
 
 object Scycle {
@@ -13,24 +12,20 @@ object Scycle {
     println("run method")
 
     println(s"init sinks")
-    val proxyDomSource = Subject[Event]()
-    val sinks = mainFn(Map("dom" -> proxyDomSource))
-    println(s"some sinks there")
-
-    val domSource = drivers("dom")(sinks("dom")).asInstanceOf[Observable[Event]]
-    domSource.subscribe((click: Event) => {
-      println("domSource event happened, providing it through proxy")
-      proxyDomSource.next(click)
+    val proxies = drivers.keys.foldLeft(Map[String, Subject[_]]())({ (ps, key) =>
+      ps + (key -> Subject[_]())
     })
 
-    proxyDomSource.subscribe(ev => {
-      println("proxy got some data")
-    })
-//    drivers.keys.foreach { key =>
-//      println(s"init driver with sinks")
-//      drivers(key)(sinks(key))
-//    }
-
+    val sinks = mainFn(proxies)
+    drivers.keys.foreach { key =>
+      proxyHelper(drivers(key)(sinks(key)), key, proxies)
+    }
   }
 
+  def proxyHelper[T](source: Observable[T], key: String, proxies: Map[String, Subject[_]]): Unit = {
+    val proxy = proxies(key).asInstanceOf[Subject[T]]
+    source.subscribe({ ev =>
+      proxy.next(ev)
+    })
+  }
 }
