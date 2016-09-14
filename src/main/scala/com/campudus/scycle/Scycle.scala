@@ -12,20 +12,22 @@ object Scycle {
     println("run method")
 
     println(s"init sinks")
-    val proxies = drivers.keys.foldLeft(Map[String, Subject[_]]())({ (ps, key) =>
-      ps + (key -> Subject[_]())
+    val proxies = drivers.foldLeft(Map[String, Subject[_]]())({
+      case (proxyMap, (key, driverFn)) => proxyMap + createProxy(key, driverFn)
     })
 
     val sinks = mainFn(proxies)
-    drivers.keys.foreach { key =>
-      proxyHelper(drivers(key)(sinks(key)), key, proxies)
+    drivers.foreach {
+      case (key, driverFn) => wireProxyToSink(drivers(key)(sinks(key)), key, proxies)
     }
   }
 
-  def proxyHelper[T](source: Observable[T], key: String, proxies: Map[String, Subject[_]]): Unit = {
+  def wireProxyToSink[T](source: Observable[T], key: String, proxies: Map[String, Subject[_]]): Unit = {
     val proxy = proxies(key).asInstanceOf[Subject[T]]
     source.subscribe({ ev =>
       proxy.next(ev)
     })
   }
+
+  def createProxy[T](key: String, driverFn: Observable[T] => Observable[_]): (String, Subject[T]) = key -> Subject[T]()
 }
