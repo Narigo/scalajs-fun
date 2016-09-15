@@ -183,6 +183,9 @@ To begin, we have to rewrite the main logic around observables. We can keep the 
 see how far we get with the new library. First, we need to depend on the new library by changing the dependencies in our
 `build.sbt` file using `"com.github.lukajcb" %%% "rxscala-js" % "0.4.0"`.
 
+Another thing we need to do is add the `js-deps` script to our `index-dev.html`, as `rxscala-js` has a "real" JavaScript
+dependency. If we don't do that, we get errors in the browser later, even though everything compiles.
+
 ### Implementing the main function again
 
 
