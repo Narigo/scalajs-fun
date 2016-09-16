@@ -188,4 +188,11 @@ dependency. If we don't do that, we get errors in the browser later, even though
 
 ### Implementing the main function again
 
+As a first step in the rewrite, we implement the core functions again, namely `Scycle.run`. The first working iteration
+is a simple `Observable[_] => Observable[_]`. This looks similar to what we had before, but to get there, we need to use
+sub functions to let the compiler be able inferring the correct types. The functions `wireProxyToSink` and `createProxy`
+do that.
+
+This is not really the ideal scenario, especially since we still need to cast in the main (`logic`) function in our 
+`ScycleApp` to get the correct `Observable`.
 
