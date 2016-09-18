@@ -2,11 +2,14 @@ package com.campudus.scycle.http
 
 import rxscalajs._
 
-import scala.util.Random
-
 object HttpDriver {
-  def apply(input: Observable[Request]): Observable[_] = input.map({ r =>
+  def apply(input: Observable[Request]): Observable[TextResponse] = input.flatMap({ r =>
     println("request in httpdriver")
-    s"Request $r -> ${Random.nextInt}"
+    Observable
+      .ajax(r.url)
+      .map(p => {
+        val d = p._1
+        TextResponse(r.url, "a b c")
+      })
   })
 }
