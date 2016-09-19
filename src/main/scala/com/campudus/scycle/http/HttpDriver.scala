@@ -8,8 +8,8 @@ object HttpDriver {
     Observable
       .ajax(r.url)
       .map(p => {
-        val d = p._1
-        TextResponse(r.url, "a b c")
+        val user = p.response
+        TextResponse(r.url, s"${user.username} ${user.email} ${user.website}")
       })
   })
 }
