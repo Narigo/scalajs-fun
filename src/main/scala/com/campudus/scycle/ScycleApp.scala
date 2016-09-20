@@ -31,10 +31,7 @@ object ScycleApp extends JSApp {
 
     Map(
       "dom" -> clicks$
-        .zip(requests$.map({ response =>
-          val strings = response.asInstanceOf[TextResponse].body.split(" ")
-          User(strings(0), strings(1), strings(2))
-        }))
+        .zip(requests$.map(r => r.asInstanceOf[UserResponse].user))
         .map({ project =>
           val user = project._2
           Div(id = "app", children = Seq(
@@ -54,5 +51,3 @@ object ScycleApp extends JSApp {
     )
   }
 }
-
-case class User(name: String, email: String, website: String)
