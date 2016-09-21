@@ -32,21 +32,24 @@ object ScycleApp extends JSApp {
     Map(
       "dom" -> clicks$
         .zip(requests$.map(r => r.asInstanceOf[UserResponse].user))
+        .startWith((null, null))
         .map({ project =>
           val user = project._2
           Div(id = "app", children = Seq(
-            Button(className = "get-first", children = Seq(Text(if (user == null) "Get first user" else "Getting first user"))),
-            Button(className = "abort-load", children = Seq(Text(if (user == null) "Do nothing..." else "Stop loading"))),
-            Div(className = "user-details", children = Seq(
-              H1(className = "user-name", children = Seq(Text(s"${user.name}"))),
-              Div(className = "user-email", children = Seq(Text(s"${user.email}"))),
-              A(className = "user-website", href = s"${user.website}", children = Seq(Text(s"${user.website}")))
-            ))
-          ))
+            Button(className = "get-first", children = Seq(Text("Get first user")))
+          ) ++ (if (user != null) {
+            Seq(
+              Div(className = "user-details", children = Seq(
+                H1(className = "user-name", children = Seq(Text(s"${user.name}"))),
+                Div(className = "user-email", children = Seq(Text(s"${user.email}"))),
+                A(className = "user-website", href = s"${user.website}", children = Seq(Text(s"${user.website}")))
+              ))
+            )
+          } else Seq()))
         }),
       "http" -> clicks$
         .map(ev => {
-          Get(s"http://jsonplaceholder.typicode.com/users/${Math.abs(Random.nextInt()) % 10}")
+          Get(s"http://jsonplaceholder.typicode.com/users/1")
         })
     )
   }
