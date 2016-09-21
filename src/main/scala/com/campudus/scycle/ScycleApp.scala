@@ -20,8 +20,8 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: Map[String, Observable[_] => Observable[_]] = Map(
-    "dom" -> (obs => DomDriver.apply(obs.asInstanceOf[Observable[Hyperscript]])),
-    "http" -> (obs => HttpDriver.apply(obs.asInstanceOf[Observable[Request]]))
+    "dom" -> DomDriver,
+    "http" -> HttpDriver
   )
 
   def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {

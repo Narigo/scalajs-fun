@@ -4,8 +4,11 @@ import com.campudus.scycle.vdom.VirtualDom
 import org.scalajs.dom._
 import rxscalajs._
 
-object DomDriver {
-  def apply(input: Observable[Hyperscript]): Observable[Event] = {
+object DomDriver extends (Observable[_] => Observable[Event]) {
+
+  def apply(input: Observable[_]): Observable[Event] = work(input.asInstanceOf[Observable[Hyperscript]])
+
+  private def work(input: Observable[Hyperscript]): Observable[Event] = {
     println("apply domdriver")
 
     input.subscribe({ hs =>

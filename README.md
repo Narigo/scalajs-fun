@@ -196,3 +196,5 @@ do that.
 This is not really the ideal scenario, especially since we still need to cast in the main (`logic`) function in our 
 `ScycleApp` to get the correct `Observable`.
 
+The first step to do less type casting is to make the `apply` method of the Driver cast itself to the correct types 
+instead of having the user cast it.
