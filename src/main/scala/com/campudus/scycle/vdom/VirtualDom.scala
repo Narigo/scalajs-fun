@@ -78,9 +78,11 @@ object VirtualDom {
     }
   }
 
-  def optimizeReplacementsAndInsertions(a: Hyperscript,
-                                        b: Hyperscript,
-                                        replacementsAndInserts: ListBuffer[Diff]): List[Diff] = {
+  def optimizeReplacementsAndInsertions(
+                                         a: Hyperscript,
+                                         b: Hyperscript,
+                                         replacementsAndInserts: ListBuffer[Diff]
+                                       ): List[Diff] = {
     if (replacementsAndInserts.length > 1 && firstReplacementsCanBeInsertions(a, replacementsAndInserts)) {
       val first = replacementsAndInserts.head
       first match {
@@ -150,8 +152,10 @@ object VirtualDom {
   type Path = ListBuffer[Int]
 
   sealed trait Diff {
+
     val path: Path
     val node: Hyperscript
+
   }
 
   case class Replacement(path: Path, node: Hyperscript) extends Diff
@@ -161,16 +165,20 @@ object VirtualDom {
   case class Remove(path: Path, node: Hyperscript) extends Diff
 
   object Diff {
+
     def unapply[T <: Diff](e: T): Option[(Path, Hyperscript)] = e match {
       case Replacement(p, n) => Some(p, n)
       case Insertion(p, n) => Some(p, n)
       case Remove(p, n) => Some(p, n)
       case _ => None
     }
+
   }
 
   object Path {
+
     def apply(indizes: Int*): Path = ListBuffer(indizes: _*)
+
   }
 
 }

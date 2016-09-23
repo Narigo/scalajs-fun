@@ -8,6 +8,7 @@ object HttpDriver extends (Observable[_] => Observable[UserResponse]) {
 
   private def work(input: Observable[Request]): Observable[UserResponse] = input.flatMap({ r =>
     println("request in httpdriver")
+
     Observable
       .ajax(r.url)
       .map(p => {

@@ -3,13 +3,15 @@ package com.campudus.scycle.dom
 import org.scalajs.dom
 
 sealed trait Hyperscript {
+
   def toNode: dom.Node
+
 }
 
 case class Text(text: String) extends Hyperscript {
-  override def toNode: dom.Node = {
-    dom.document.createTextNode(text)
-  }
+
+  override def toNode: dom.Node = dom.document.createTextNode(text)
+
 }
 
 object Hyperscript
@@ -67,21 +69,27 @@ abstract class HyperscriptElement(val tagName: String, val subElements: Seq[Hype
 }
 
 trait IdAttr extends HyperscriptElement {
+
   val id: String
 
   abstract override def attrs: Map[String, Option[String]] = super.attrs + ("id" -> Option(id))
+
 }
 
 trait ClassNameAttr extends HyperscriptElement {
+
   val className: String
 
   abstract override def attrs: Map[String, Option[String]] = super.attrs + ("class" -> Option(className))
+
 }
 
 trait HrefAttr extends HyperscriptElement {
+
   val href: String
 
   abstract override def attrs: Map[String, Option[String]] = super.attrs + ("href" -> Option(href))
+
 }
 
 case class A(id: String = null, className: String = null, href: String = null, children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("a", children) with IdAttr with ClassNameAttr with HrefAttr

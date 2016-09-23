@@ -5,7 +5,7 @@ import rxscalajs._
 object Scycle {
 
   def run(
-           mainFn: (Map[String, Observable[_]]) => Map[String, Observable[_]],
+           mainFn: Map[String, Observable[_]] => Map[String, Observable[_]],
            drivers: Map[String, Observable[_] => Observable[_]]
          ): Unit = {
 
@@ -30,4 +30,5 @@ object Scycle {
   }
 
   def createProxy[T](key: String, driverFn: Observable[T] => Observable[_]): (String, Subject[T]) = key -> Subject[T]()
+
 }

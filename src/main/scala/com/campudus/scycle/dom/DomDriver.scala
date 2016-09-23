@@ -19,4 +19,5 @@ object DomDriver extends (Observable[_] => Observable[Event]) {
 
     Observable.fromEvent(document.querySelector("#app"), "click")
   }
+
 }
