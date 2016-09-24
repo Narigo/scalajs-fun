@@ -198,3 +198,10 @@ This is not really the ideal scenario, especially since we still need to cast in
 
 The first step to do less type casting is to make the `apply` method of the Driver cast itself to the correct types 
 instead of having the user cast it.
+
+## Video 14 - Body Mass Index calculator built in Cycle.js
+
+During this video, we can see how to build a small application in Cycle.js that calculates a BMI. With a few range 
+sliders (input fields of type range), we should get a calculated value. The first thing we do is to build structure of 
+the resulting DOM tree.
+

@@ -7,7 +7,6 @@ import rxscalajs._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-import scala.util.Random
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -20,37 +19,26 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: Map[String, Observable[_] => Observable[_]] = Map(
-    "dom" -> DomDriver,
-    "http" -> HttpDriver
+    "dom" -> DomDriver
   )
 
   def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {
     println("called logic")
-    val clicks$ = drivers("dom").asInstanceOf[Observable[Event]]
-    val requests$ = drivers("http").asInstanceOf[Observable[Response]]
 
     Map(
-      "dom" -> clicks$
-        .zip(requests$.map(r => r.asInstanceOf[UserResponse].user))
-        .startWith((null, null))
-        .map({ project =>
-          val user = project._2
-          Div(id = "app", children = Seq(
-            Button(className = "get-first", children = Seq(Text("Get first user")))
-          ) ++ (if (user != null) {
-            Seq(
-              Div(className = "user-details", children = Seq(
-                H1(className = "user-name", children = Seq(Text(s"${user.name}"))),
-                Div(className = "user-email", children = Seq(Text(s"${user.email}"))),
-                A(className = "user-website", href = s"${user.website}", children = Seq(Text(s"${user.website}")))
-              ))
-            )
-          } else Seq()))
-        }),
-      "http" -> clicks$
-        .map(ev => {
-          Get(s"http://jsonplaceholder.typicode.com/users/1")
-        })
+      "dom" -> Observable.just(
+        Div(id = "app", children = Seq(
+          Div(children = Seq(
+            Label(children = Seq(Text("Weight: 00 kg"))),
+            Input(className = "weight", kind = "range", value = "")
+          )),
+          Div(children = Seq(
+            Label(children = Seq(Text("Height: 00 kg"))),
+            Input(className = "height", kind = "range", value = "")
+          )),
+          H1(children = Seq(Text("BMI is 0")))
+        ))
+      )
     )
   }
 }
