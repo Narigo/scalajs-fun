@@ -1,10 +1,9 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.dom._
-import com.campudus.scycle.http._
-import org.scalajs.dom.Event
 import rxscalajs._
 
+import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -24,13 +23,21 @@ object ScycleApp extends JSApp {
 
   def logic(drivers: (Map[String, Driver])): Map[String, Observable[_]] = {
     println("called logic")
+    val changeWeight$ = drivers("dom").asInstanceOf[DomDriver]
+      .selectEvent("#app", "input")
+      .map(ev => {
+        val value = ev.srcElement.asInstanceOf[js.Dynamic].value
+        org.scalajs.dom.console.log("got an input event", value)
+        value.toString
+      })
+      .startWith("0")
 
     Map(
-      "dom" -> Observable.just(
+      "dom" -> changeWeight$.map(weight =>
         Div(id = "app", children = Seq(
           Div(children = Seq(
-            Label(children = Seq(Text("Weight: 00 kg"))),
-            Input(className = "weight", kind = "range", value = "")
+            Label(children = Seq(Text(s"Weight: $weight kg"))),
+            Input(className = "weight", kind = "range", value = weight)
           )),
           Div(children = Seq(
             Label(children = Seq(Text("Height: 00 kg"))),
