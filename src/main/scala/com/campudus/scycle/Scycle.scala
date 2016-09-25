@@ -5,8 +5,8 @@ import rxscalajs._
 object Scycle {
 
   def run(
-           mainFn: Map[String, Observable[_]] => Map[String, Observable[_]],
-           drivers: Map[String, Observable[_] => Observable[_]]
+           mainFn: Map[String, Driver] => Map[String, Observable[_]],
+           drivers: Map[String, Observable[_] => Driver]
          ): Unit = {
 
     println("run method")
@@ -16,9 +16,12 @@ object Scycle {
       case (proxyMap, (key, driverFn)) => proxyMap + createProxy(key, driverFn)
     })
 
-    val sinks = mainFn(proxies)
+    val sinks = mainFn(proxies.foldLeft(Map[String, Driver]()) {
+      case (acc, (key, proxy)) => acc + (key -> drivers(key)(proxy))
+    })
+
     drivers.foreach {
-      case (key, driverFn) => wireProxyToSink(drivers(key)(sinks(key)), key, proxies)
+      case (key, driverFn) => drivers(key)(sinks(key))
     }
   }
 
@@ -29,6 +32,6 @@ object Scycle {
     })
   }
 
-  def createProxy[T](key: String, driverFn: Observable[T] => Observable[_]): (String, Subject[T]) = key -> Subject[T]()
+  def createProxy[T](key: String, driverFn: Observable[T] => Driver): (String, Subject[T]) = key -> Subject[T]()
 
 }

@@ -1,23 +1,27 @@
 package com.campudus.scycle.dom
 
+import com.campudus.scycle.Driver
 import com.campudus.scycle.vdom.VirtualDom
 import org.scalajs.dom._
 import rxscalajs._
 
-object DomDriver extends (Observable[_] => Observable[Event]) {
+class DomDriver(input: Observable[Hyperscript]) extends Driver {
 
-  def apply(input: Observable[_]): Observable[Event] = work(input.asInstanceOf[Observable[Hyperscript]])
+  println(s"apply domdriver")
 
-  private def work(input: Observable[Hyperscript]): Observable[Event] = {
-    println("apply domdriver")
+  input.subscribe({ hs =>
+    val container = document.querySelector("#app")
+    val diff = VirtualDom.diff(VirtualDom(container), hs)
+    VirtualDom.update(container, diff)
+  })
 
-    input.subscribe({ hs =>
-      val container = document.querySelector("#app")
-      val diff = VirtualDom.diff(VirtualDom(container), hs)
-      VirtualDom.update(container, diff)
-    })
+  def selectEvent(what: String, name: String): Observable[Event] =
+    Observable.fromEvent(document.querySelector(what), name)
 
-    Observable.fromEvent(document.querySelector("#app"), "click")
-  }
+}
+
+object DomDriver extends Driver {
+
+  def apply(input: Observable[_]): DomDriver = new DomDriver(input.asInstanceOf[Observable[Hyperscript]])
 
 }

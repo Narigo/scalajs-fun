@@ -18,11 +18,11 @@ object ScycleApp extends JSApp {
     Scycle.run(logic, drivers)
   }
 
-  val drivers: Map[String, Observable[_] => Observable[_]] = Map(
-    "dom" -> DomDriver
+  val drivers: Map[String, Observable[_] => Driver] = Map(
+    "dom" -> DomDriver.apply _
   )
 
-  def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {
+  def logic(drivers: (Map[String, Driver])): Map[String, Observable[_]] = {
     println("called logic")
 
     Map(
