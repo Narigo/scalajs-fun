@@ -23,8 +23,17 @@ object ScycleApp extends JSApp {
 
   def logic(drivers: (Map[String, Driver])): Map[String, Observable[_]] = {
     println("called logic")
-    val changeWeight$ = drivers("dom").asInstanceOf[DomDriver]
-      .selectEvent("#app", "input")
+    val domDriver = drivers("dom").asInstanceOf[DomDriver]
+    val changeWeight$ = domDriver
+      .selectEvent(".weight", "input")
+      .map(ev => {
+        val value = ev.srcElement.asInstanceOf[js.Dynamic].value
+        org.scalajs.dom.console.log("got an input event", value)
+        value.toString
+      })
+      .startWith("0")
+    val changeHeight$ = domDriver
+      .selectEvent(".height", "input")
       .map(ev => {
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
         org.scalajs.dom.console.log("got an input event", value)
@@ -33,19 +42,20 @@ object ScycleApp extends JSApp {
       .startWith("0")
 
     Map(
-      "dom" -> changeWeight$.map(weight =>
-        Div(id = "app", children = Seq(
-          Div(children = Seq(
-            Label(children = Seq(Text(s"Weight: $weight kg"))),
-            Input(className = "weight", kind = "range", value = weight)
-          )),
-          Div(children = Seq(
-            Label(children = Seq(Text("Height: 00 kg"))),
-            Input(className = "height", kind = "range", value = "")
-          )),
-          H1(children = Seq(Text("BMI is 0")))
-        ))
-      )
+      "dom" -> changeWeight$.zip(changeHeight$).map({
+        case (weight, height) =>
+          Div(id = "app", children = Seq(
+            Div(children = Seq(
+              Label(children = Seq(Text(s"Weight: $weight kg"))),
+              Input(className = "weight", kind = "range", value = weight)
+            )),
+            Div(children = Seq(
+              Label(children = Seq(Text(s"Height: $height cm"))),
+              Input(className = "height", kind = "range", value = height)
+            )),
+            H1(children = Seq(Text("BMI is 0")))
+          ))
+      }: ((String, String)) => Hyperscript)
     )
   }
 }

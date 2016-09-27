@@ -15,8 +15,11 @@ class DomDriver(input: Observable[Hyperscript]) extends Driver {
     VirtualDom.update(container, diff)
   })
 
-  def selectEvent(what: String, name: String): Observable[Event] =
-    Observable.fromEvent(document.querySelector(what), name)
+  def selectEvent(what: String, name: String): Observable[Event] = {
+    Observable
+      .fromEvent(document.querySelector("#app"), name)
+      .filter(ev => ev.srcElement == document.querySelector(what))
+  }
 
 }
 

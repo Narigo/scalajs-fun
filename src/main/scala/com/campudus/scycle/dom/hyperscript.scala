@@ -38,7 +38,7 @@ object HyperscriptElement {
         parent(children)
       }).orElse({
         element.tagName.toLowerCase match {
-          case "input" => Some(Input(element.getAttribute("class"), element.getAttribute("type"), element.getAttribute("value")))
+          case "input" => Some(Input(element.getAttribute("id"), element.getAttribute("class"), element.getAttribute("type"), element.getAttribute("value")))
           case "hr" => Some(Hr(element.getAttribute("class")))
           case _ => None
         }
@@ -108,7 +108,7 @@ case class Label(id: String = null, className: String = null, children: Seq[Hype
 
 case class Hr(className: String = null, final val children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("hr", children) with ClassNameAttr
 
-case class Input(className: String = null, kind: String = null, value: String = "", final val children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("input", children) with ClassNameAttr {
+case class Input(id: String = null, className: String = null, kind: String = null, value: String = "", final val children: Seq[Hyperscript] = Seq.empty) extends HyperscriptElement("input", children) with IdAttr with ClassNameAttr {
 
   override def attrs: Map[String, Option[String]] =
     super.attrs.+(
