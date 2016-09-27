@@ -18,7 +18,7 @@ class DomDriver(input: Observable[Hyperscript]) extends Driver {
   def selectEvent(what: String, name: String): Observable[Event] = {
     Observable
       .fromEvent(document.querySelector("#app"), name)
-      .filter(ev => ev.srcElement == document.querySelector(what))
+      .filter(ev => ev.srcElement.isSameNode(document.querySelector(what)))
   }
 
 }

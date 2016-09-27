@@ -28,7 +28,7 @@ object ScycleApp extends JSApp {
       .selectEvent(".weight", "input")
       .map(ev => {
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-        org.scalajs.dom.console.log("got an input event", value)
+        org.scalajs.dom.console.log("got an weight input event", value)
         value.toString
       })
       .startWith("0")
@@ -36,14 +36,19 @@ object ScycleApp extends JSApp {
       .selectEvent(".height", "input")
       .map(ev => {
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-        org.scalajs.dom.console.log("got an input event", value)
+        org.scalajs.dom.console.log("got an height input event", value)
         value.toString
       })
       .startWith("0")
 
+    val state$ = Observable.combineLatest(List(changeWeight$, changeHeight$))({
+      case weight :: height :: Nil => (weight, height, "0")
+    }).startWith(("0", "0", "0"))
+
     Map(
-      "dom" -> changeWeight$.zip(changeHeight$).map({
-        case (weight, height) =>
+      "dom" -> state$.map({
+        case (weight, height, bmi) =>
+          println(s"weight=$weight, height=$height")
           Div(id = "app", children = Seq(
             Div(children = Seq(
               Label(children = Seq(Text(s"Weight: $weight kg"))),
@@ -53,9 +58,9 @@ object ScycleApp extends JSApp {
               Label(children = Seq(Text(s"Height: $height cm"))),
               Input(className = "height", kind = "range", value = height)
             )),
-            H1(children = Seq(Text("BMI is 0")))
+            H1(children = Seq(Text(s"BMI is $bmi")))
           ))
-      }: ((String, String)) => Hyperscript)
+      }: ((String, String, String)) => Hyperscript)
     )
   }
 }
