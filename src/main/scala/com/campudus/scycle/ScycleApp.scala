@@ -25,31 +25,35 @@ object ScycleApp extends JSApp {
     println("called logic")
     val domDriver = drivers("dom").asInstanceOf[DomDriver]
     val changeWeight$ = domDriver
-      .selectEvent(".weight", "click")
+      .selectEvent(".weight", "input")
       .map(ev => {
+        org.scalajs.dom.console.log("got a weight input event")
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-        org.scalajs.dom.console.log("got an weight input event", value)
+        org.scalajs.dom.console.log("got a weight input event", value)
         value.toString
       })
       .startWith("0")
     val changeHeight$ = domDriver
-      .selectEvent(".height", "click")
+      .selectEvent(".height", "input")
       .map(ev => {
+        org.scalajs.dom.console.log("hello in .height map")
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-        org.scalajs.dom.console.log("got an height input event", value)
+        org.scalajs.dom.console.log("got a height input event", value)
         value.toString
       })
       .startWith("0")
 
-    val state$ = Observable.combineLatest(List(changeWeight$, changeHeight$))({
-      case weight :: height :: Nil => (weight, height, "0")
-    }).startWith(("0", "0", "0"))
+    val state$ = changeWeight$.zip(changeHeight$).map({
+      case (weight, height) =>
+        org.scalajs.dom.console.log("hello in combineLatest")
+        (weight, height, "0")
+    }: ((String, String)) => (String, String, String)).startWith(("0", "0", "0"))
 
     Map(
       "dom" -> state$.map({
         case (weight, height, bmi) =>
           println(s"weight=$weight, height=$height")
-          Div(id = "app", children = Seq(
+          Div(children = Seq(
             Div(children = Seq(
               Label(children = Seq(Text(s"Weight: $weight kg"))),
               Input(className = "weight", kind = "range", value = weight)

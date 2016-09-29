@@ -10,27 +10,26 @@ class DomDriver(input: Observable[Hyperscript]) extends Driver {
   println(s"apply domdriver")
 
   input.subscribe({ hs =>
-    val container = document.querySelector("#app")
+    val container = document.querySelector("#app").firstElementChild
     val diff = VirtualDom.diff(VirtualDom(container), hs)
     VirtualDom.update(container, diff)
   })
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
-    console.log("searching for", what, eventName)
-    Observable
-      .fromEvent(document.querySelector("#app"), eventName)
-      .map({ ev =>
-        console.log("got an event", ev)
-        ev
-      })
+    val elem = document.querySelector("#app")
+    console.log("searching for", what, eventName, elem)
+    val obs = Observable
+      .fromEvent(elem, eventName)
       .filter({ ev =>
         val src = ev.srcElement
         val target = document.querySelector(what)
-        console.log("target=", target)
-        console.log("src=", src)
-        console.log("target == src =", src == target)
-        src == target
+        console.log("hello", what, eventName, src.isSameNode(target))
+        src.isSameNode(target)
       })
+
+    Observable.create({ observer =>
+      obs.subscribe(observer)
+    })
   }
 
 }
