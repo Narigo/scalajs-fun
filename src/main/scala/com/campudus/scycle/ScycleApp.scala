@@ -25,7 +25,7 @@ object ScycleApp extends JSApp {
     println("called logic")
     val domDriver = drivers("dom").asInstanceOf[DomDriver]
     val changeWeight$ = domDriver
-      .selectEvent(".weight", "input")
+      .selectEvent(".weight", "click")
       .map(ev => {
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
         org.scalajs.dom.console.log("got an weight input event", value)
@@ -33,7 +33,7 @@ object ScycleApp extends JSApp {
       })
       .startWith("0")
     val changeHeight$ = domDriver
-      .selectEvent(".height", "input")
+      .selectEvent(".height", "click")
       .map(ev => {
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
         org.scalajs.dom.console.log("got an height input event", value)
