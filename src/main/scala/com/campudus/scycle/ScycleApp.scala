@@ -30,24 +30,28 @@ object ScycleApp extends JSApp {
         org.scalajs.dom.console.log("got a weight input event")
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
         org.scalajs.dom.console.log("got a weight input event", value)
-        value.toString
+        value.asInstanceOf[Double]
       })
-      .startWith("0")
+      .startWith(0.0)
     val changeHeight$ = domDriver
       .selectEvent(".height", "input")
       .map(ev => {
         org.scalajs.dom.console.log("hello in .height map")
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
         org.scalajs.dom.console.log("got a height input event", value)
-        value.toString
+        value.asInstanceOf[Double]
       })
-      .startWith("0")
+      .startWith(1.0)
 
-    val state$ = changeWeight$.zip(changeHeight$).map({
+    val state$ = changeWeight$.combineLatest(changeHeight$).map({
       case (weight, height) =>
         org.scalajs.dom.console.log("hello in combineLatest")
-        (weight, height, "0")
-    }: ((String, String)) => (String, String, String)).startWith(("0", "0", "0"))
+        val heightMeters = height * 0.01
+        val bmi = Math.round(weight / (heightMeters * heightMeters))
+        org.scalajs.dom.console.log("bmi is", bmi)
+        (weight, height, bmi)
+    }: ((Double, Double)) => (Double, Double, Double))
+      .startWith((0.0, 1.0, 0.0))
 
     Map(
       "dom" -> state$.map({
@@ -56,15 +60,15 @@ object ScycleApp extends JSApp {
           Div(children = Seq(
             Div(children = Seq(
               Label(children = Seq(Text(s"Weight: $weight kg"))),
-              Input(className = "weight", kind = "range", value = weight)
+              Input(className = "weight", kind = "range", value = s"$weight")
             )),
             Div(children = Seq(
               Label(children = Seq(Text(s"Height: $height cm"))),
-              Input(className = "height", kind = "range", value = height)
+              Input(className = "height", kind = "range", value = s"$height")
             )),
             H1(children = Seq(Text(s"BMI is $bmi")))
           ))
-      }: ((String, String, String)) => Hyperscript)
+      }: ((Double, Double, Double)) => Hyperscript)
     )
   }
 }
