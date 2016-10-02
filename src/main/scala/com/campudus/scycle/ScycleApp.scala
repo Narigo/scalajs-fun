@@ -57,7 +57,7 @@ object ScycleApp extends JSApp {
       "dom" -> state$.map({
         case (weight, height, bmi) =>
           println(s"weight=$weight, height=$height")
-          Div(children = Seq(
+          Div(id = "app", children = Seq(
             Div(children = Seq(
               Label(children = Seq(Text(s"Weight: $weight kg"))),
               Input(className = "weight", kind = "range", value = s"$weight")
@@ -71,4 +71,5 @@ object ScycleApp extends JSApp {
       }: ((Double, Double, Double)) => Hyperscript)
     )
   }
+
 }
