@@ -33,6 +33,7 @@ object ScycleApp extends JSApp {
         value.asInstanceOf[Double]
       })
       .startWith(0.0)
+
     val changeHeight$ = domDriver
       .selectEvent(".height", "input")
       .map(ev => {
@@ -54,21 +55,23 @@ object ScycleApp extends JSApp {
       .startWith((0.0, 1.0, 0.0))
 
     Map(
-      "dom" -> state$.map({
-        case (weight, height, bmi) =>
-          println(s"weight=$weight, height=$height")
-          Div(id = "app", children = Seq(
-            Div(children = Seq(
-              Label(children = Seq(Text(s"Weight: $weight kg"))),
-              Input(className = "weight", kind = "range", value = s"$weight")
-            )),
-            Div(children = Seq(
-              Label(children = Seq(Text(s"Height: $height cm"))),
-              Input(className = "height", kind = "range", value = s"$height")
-            )),
-            H1(children = Seq(Text(s"BMI is $bmi")))
-          ))
-      }: ((Double, Double, Double)) => Hyperscript)
+      "dom" -> {
+        state$.map({
+          case (weight, height, bmi) =>
+            println(s"weight=$weight, height=$height")
+            Div(id = "app", children = Seq(
+              Div(children = Seq(
+                Label(children = Seq(Text(s"Weight: $weight kg"))),
+                Input(className = "weight", kind = "range", value = s"$weight")
+              )),
+              Div(children = Seq(
+                Label(children = Seq(Text(s"Height: $height cm"))),
+                Input(className = "height", kind = "range", value = s"$height")
+              )),
+              H1(children = Seq(Text(s"BMI is $bmi")))
+            ))
+        }: ((Double, Double, Double)) => Hyperscript)
+      }
     )
   }
 
