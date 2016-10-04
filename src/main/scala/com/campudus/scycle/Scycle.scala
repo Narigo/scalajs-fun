@@ -19,10 +19,8 @@ object Scycle {
         proxyMap + (key -> (driver, proxy))
     })
 
-    val sinks = mainFn(proxies.foldLeft(Map[String, Driver]()) {
-      case (acc, (key, driverAndProxy)) =>
-        acc + (key -> driverAndProxy._1)
-    })
+    val driversForMain = proxies.mapValues(_._1)
+    val sinks = mainFn(driversForMain)
 
     drivers.foreach {
       case (key, driverFn) =>
