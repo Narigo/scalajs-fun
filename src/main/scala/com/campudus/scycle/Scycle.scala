@@ -25,7 +25,6 @@ object Scycle {
     drivers.foreach {
       case (key, driverFn) =>
         wireProxyToSink(sinks(key), key, proxies)
-        drivers(key)(sinks(key))
     }
   }
 
