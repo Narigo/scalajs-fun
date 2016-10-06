@@ -23,26 +23,28 @@ object ScycleApp extends JSApp {
 
   def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {
     println("called logic")
-    val domDriver = drivers("dom").asInstanceOf[DomDriver]
-    val changeWeight$ = domDriver
-      .selectEvent(".weight", "input")
-      .map(ev => {
-        org.scalajs.dom.console.log("hello in .weight map")
-        val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-        org.scalajs.dom.console.log("got a weight input event", value)
-        value.asInstanceOf[Double]
-      })
-      .startWith(0.0)
+    val domDriver$ = drivers("dom").asInstanceOf[Observable[DomDriver]]
+    val changeWeight$ = domDriver$.flatMap(
+      _.selectEvent(".weight", "input")
+        .map(ev => {
+          org.scalajs.dom.console.log("hello in .weight map")
+          val value = ev.srcElement.asInstanceOf[js.Dynamic].value
+          org.scalajs.dom.console.log("got a weight input event", value)
+          value.asInstanceOf[Double]
+        })
+        .startWith(0.0)
+    )
 
-    val changeHeight$ = domDriver
-      .selectEvent(".height", "input")
-      .map(ev => {
-        org.scalajs.dom.console.log("hello in .height map")
-        val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-        org.scalajs.dom.console.log("got a height input event", value)
-        value.asInstanceOf[Double]
-      })
-      .startWith(1.0)
+    val changeHeight$ = domDriver$.flatMap(
+      _.selectEvent(".height", "input")
+        .map(ev => {
+          org.scalajs.dom.console.log("hello in .height map")
+          val value = ev.srcElement.asInstanceOf[js.Dynamic].value
+          org.scalajs.dom.console.log("got a height input event", value)
+          value.asInstanceOf[Double]
+        })
+        .startWith(1.0)
+    )
 
     val state$ = changeWeight$.combineLatest(changeHeight$).map({
       case (weight, height) =>
