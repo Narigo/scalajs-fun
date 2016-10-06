@@ -17,17 +17,17 @@ object ScycleApp extends JSApp {
     Scycle.run(logic, drivers)
   }
 
-  val drivers: Map[String, Observable[_] => Driver] = Map(
+  val drivers: Map[String, Observable[_] => Observable[_]] = Map(
     "dom" -> DomDriver.apply _
   )
 
-  def logic(drivers: (Map[String, Driver])): Map[String, Observable[_]] = {
+  def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {
     println("called logic")
     val domDriver = drivers("dom").asInstanceOf[DomDriver]
     val changeWeight$ = domDriver
       .selectEvent(".weight", "input")
       .map(ev => {
-        org.scalajs.dom.console.log("got a weight input event")
+        org.scalajs.dom.console.log("hello in .weight map")
         val value = ev.srcElement.asInstanceOf[js.Dynamic].value
         org.scalajs.dom.console.log("got a weight input event", value)
         value.asInstanceOf[Double]

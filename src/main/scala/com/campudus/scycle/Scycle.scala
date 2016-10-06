@@ -5,36 +5,34 @@ import rxscalajs._
 object Scycle {
 
   def run(
-           mainFn: Map[String, Driver] => Map[String, Observable[_]],
-           drivers: Map[String, Observable[_] => Driver]
+           mainFn: Map[String, Observable[_]] => Map[String, Observable[_]],
+           drivers: Map[String, Observable[_] => Observable[_]]
          ): Unit = {
 
     println("run method")
 
     println(s"init sinks")
-    val proxies = drivers.foldLeft(Map[String, (Driver, Subject[_])]())({
+    val proxies = drivers.foldLeft(Map[String, Subject[_]]())({
       case (proxyMap, (key, driverFn)) =>
-        val proxy = createProxy(driverFn)
-        val driver = driverFn(proxy)
-        proxyMap + (key -> (driver, proxy))
+        val proxy = Subject()
+        proxyMap + (key -> proxy)
     })
 
-    val driversForMain = proxies.mapValues(_._1)
-    val sinks = mainFn(driversForMain)
+    val sinks = mainFn(proxies)
 
     drivers.foreach {
       case (key, driverFn) =>
-        wireProxyToSink(sinks(key), key, proxies)
+        wireProxyToSink(driverFn(sinks(key)), key, proxies)
     }
   }
 
-  def wireProxyToSink[T](source: Observable[T], key: String, proxies: Map[String, (Driver, Subject[_])]): Unit = {
-    val proxy = proxies(key)._2.asInstanceOf[Subject[T]]
-    source.subscribe({ ev =>
+  def wireProxyToSink[T](source: Observable[T], key: String, proxies: Map[String, Subject[_]]): Unit = {
+    println(s"wireProxyToSink $key -> $source")
+    val proxy = proxies(key).asInstanceOf[Subject[T]]
+    source.map({ ev =>
+      println("in wired apply")
       proxy.next(ev)
     })
   }
-
-  def createProxy[T](driverFn: Observable[T] => Driver): Subject[T] = Subject[T]()
 
 }

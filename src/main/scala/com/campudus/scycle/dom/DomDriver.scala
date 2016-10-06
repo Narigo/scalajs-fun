@@ -5,7 +5,7 @@ import com.campudus.scycle.vdom.VirtualDom
 import org.scalajs.dom._
 import rxscalajs._
 
-class DomDriver(input: Observable[Hyperscript]) extends Driver {
+class DomDriver(input: Observable[Hyperscript]) extends Observable[Hyperscript](input.inner) {
 
   println(s"apply domdriver")
 
@@ -14,6 +14,8 @@ class DomDriver(input: Observable[Hyperscript]) extends Driver {
     val diff = VirtualDom.diff(VirtualDom(container), hs)
     VirtualDom.update(container, diff)
   })
+
+
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
     val elem = document.querySelector("#app")
