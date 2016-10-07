@@ -14,7 +14,7 @@ object ScycleApp extends JSApp {
   def main(): Unit = {
     println("main export")
 
-    Scycle.run(logic, drivers)
+//    Scycle.run(logic, drivers)
   }
 
   val drivers: Map[String, Observable[_] => Observable[_]] = Map(
