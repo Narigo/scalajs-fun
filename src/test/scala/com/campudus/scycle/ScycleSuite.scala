@@ -22,7 +22,11 @@ class ScycleSuite extends AsyncFunSpec {
             println("test main???")
             val input$ = Observable.just(inputText)
             println(s"observable.main=${input$}")
-            input$
+            val mapped = input$.map({ input =>
+              println(s"mapped main-input=$input")
+              input
+            })
+            mapped
           }
         )
       },
@@ -31,10 +35,9 @@ class ScycleSuite extends AsyncFunSpec {
             println("test driver???")
             println(s"observable.driver=${sth$}")
             val mapped = sth$.map({ text =>
-              println("mapped!")
+              println(s"mapped driver-input=$text")
               p.success(text.asInstanceOf[String])
             })
-            mapped.subscribe(_ => {})
             mapped
           }
         )

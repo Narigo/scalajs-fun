@@ -14,15 +14,25 @@ object Scycle {
         case (m, (key, driverFn)) =>
           val proxy = createProxy(driverFn)
           val driver = driverFn(proxy)
+          driver.subscribe(_ => {})
           m + (key -> (proxy, driver))
       }
 
-      mainFn(proxyDriverMap.mapValues(_._2))
+      val effects = mainFn(proxyDriverMap.mapValues(_._2))
+      effects.foreach({
+        case (key, readEffect$) => readEffect$.map({ ev =>
+          println(s"effect ev=$ev")
+          ev
+        }).subscribe(feedIntoProxy(key, proxyDriverMap) _)
+      })
     }
   }
 
   private def createProxy[A](driverFn: Observable[A] => Observable[_]): Subject[A] = Subject[A]()
 
+  private def feedIntoProxy[A](key: String, proxies: Map[String, (Subject[_], Observable[_])])(event: A): Unit = {
+    proxies(key)._1.asInstanceOf[Subject[A]].next(event)
+  }
   //  def run(
   //           mainFn: Map[String, Observable[_]] => Map[String, Observable[_]],
   //           drivers: Map[String, Observable[_] => Observable[_]]
