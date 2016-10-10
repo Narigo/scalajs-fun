@@ -14,7 +14,10 @@ object Scycle {
         case (m, (key, driverFn)) =>
           val proxy = createProxy(driverFn)
           val driver = driverFn(proxy)
-          driver.subscribe(_ => {})
+          driver.map({ in =>
+            println(s"driver-in=$in")
+            in
+          }).subscribe(_ => {})
           m + (key -> (proxy, driver))
       }
 
@@ -33,6 +36,7 @@ object Scycle {
   private def feedIntoProxy[A](key: String, proxies: Map[String, (Subject[_], Observable[_])])(event: A): Unit = {
     proxies(key)._1.asInstanceOf[Subject[A]].next(event)
   }
+
   //  def run(
   //           mainFn: Map[String, Observable[_]] => Map[String, Observable[_]],
   //           drivers: Map[String, Observable[_] => Observable[_]]
