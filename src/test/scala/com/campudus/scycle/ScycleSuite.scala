@@ -18,7 +18,7 @@ class ScycleSuite extends AsyncFunSpec {
       val p = Promise[String]
       Scycle.run(
         drivers => Map("test" -> Observable.just(inputText)),
-        Map("test" -> { (sth$: Observable[_]) => sth$.map(text => p.success(text.asInstanceOf[String])) })
+        Map("test" -> { (sth$: Observable[_]) => new Driver(sth$.map({ t => p.success(t.asInstanceOf[String]) })) })
       )
       p.future.map(text => assert(text === inputText))
     }
@@ -31,10 +31,10 @@ class ScycleSuite extends AsyncFunSpec {
           p.success(i)
         }).startWith(0)),
         Map("test" -> { (sth$: Observable[_]) =>
-          sth$.map({ i =>
-            println(s"test-driver-i=$i")
+          new Driver(sth$.map({ i =>
+            println(s"test-driver-map-i=$i")
             i.asInstanceOf[Int] + 1
-          })
+          }))
         })
       )
       p.future.map(i => assert(i === 1))

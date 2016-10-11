@@ -37,7 +37,7 @@ class DomDriver(input: Observable[Hyperscript]) extends Observable[Hyperscript](
 
 }
 
-object DomDriver extends Driver {
+object DomDriver {
 
   def apply(input: Observable[_]): DomDriver = new DomDriver(input.asInstanceOf[Observable[Hyperscript]])
 

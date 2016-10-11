@@ -5,35 +5,31 @@ import rxscalajs._
 object Scycle {
 
   def run(
-           mainFn: Map[String, Observable[_]] => Map[String, Observable[_]],
-           drivers: Map[String, Observable[_] => Observable[_]]
+           mainFn: Map[String, Driver[_]] => Map[String, Observable[_]],
+           drivers: Map[String, Observable[_] => Driver[_]]
          ): Unit = {
 
     if (drivers.nonEmpty) {
-      val proxyDriverMap = drivers.foldLeft(Map[String, (Subject[_], Observable[_])]()) {
+      val proxyDriverMap = drivers.foldLeft(Map[String, (Subject[_], Driver[_])]()) {
         case (m, (key, driverFn)) =>
           val proxy = createProxy(driverFn)
           val driver = driverFn(proxy)
-          driver.map({ in =>
-            println(s"driver-in=$in")
-            in
-          }).subscribe(_ => {})
           m + (key -> (proxy, driver))
       }
 
       val effects = mainFn(proxyDriverMap.mapValues(_._2))
       effects.foreach({
         case (key, readEffect$) => readEffect$.map({ ev =>
-          println(s"effect ev=$ev")
+          println(s"main-in=$ev")
           ev
         }).subscribe(feedIntoProxy(key, proxyDriverMap) _)
       })
     }
   }
 
-  private def createProxy[A](driverFn: Observable[A] => Observable[_]): Subject[A] = Subject[A]()
+  private def createProxy[A](driverFn: Observable[A] => Driver[_]): Subject[A] = Subject[A]()
 
-  private def feedIntoProxy[A](key: String, proxies: Map[String, (Subject[_], Observable[_])])(event: A): Unit = {
+  private def feedIntoProxy[A](key: String, proxies: Map[String, (Subject[_], Driver[_])])(event: A): Unit = {
     proxies(key)._1.asInstanceOf[Subject[A]].next(event)
   }
 
