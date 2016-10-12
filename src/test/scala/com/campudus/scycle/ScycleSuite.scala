@@ -24,21 +24,41 @@ class ScycleSuite extends AsyncFunSpec {
     }
 
     it("can cycle") {
+      println("cycle test")
       val p = Promise[Int]
       Scycle.run(
-        drivers => Map("test" -> drivers("test").asInstanceOf[Observable[Int]].map({ i =>
-          println(s"test-main-map-i=$i")
-          p.success(i)
-        }).startWith(0)),
+        { drivers =>
+          println(s"main got drivers $drivers")
+          Map("test" -> {
+            val testDriver = drivers("test")
+            println(s"got a testDriver? $testDriver")
+            val mapped = testDriver.asInstanceOf[TestDriver].int$.map({ i =>
+              println(s"test-main-map-i=$i")
+              p.success(i)
+            }).startWith(0)
+            println(s"main done $mapped")
+            mapped
+          })
+        },
         Map("test" -> { (sth$: Observable[_]) =>
-          new Driver(sth$.map({ i =>
+          val mapped = sth$.map({ i =>
             println(s"test-driver-map-i=$i")
-            i.asInstanceOf[Int] + 1
-          }))
+            val nextI = i.asInstanceOf[Int] + 1
+            println(s"nextI=$nextI")
+            nextI
+          })
+          println(s"call new Driver with $mapped")
+          new TestDriver(mapped)
         })
       )
       p.future.map(i => assert(i === 1))
     }
   }
 
+}
+
+class TestDriver(input: Observable[Int]) extends Driver(input) {
+  def int$: Observable[Int] = input
+
+  override def toString = s"TestDriver($input)"
 }

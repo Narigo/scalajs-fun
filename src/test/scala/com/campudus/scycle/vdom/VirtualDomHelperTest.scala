@@ -11,7 +11,6 @@ class VirtualDomHelperTest extends FunSpec {
   describe("firstReplacementsCanBeInsertions") {
 
     it("tells if single insert can be moved at front of list") {
-      println("test1")
       val elem = Div(children = Seq(
         Text("a")
       ))
@@ -20,7 +19,6 @@ class VirtualDomHelperTest extends FunSpec {
     }
 
     it("tells if insert cant be moved at front of list") {
-      println("test2")
       val elem = Div(children = Seq(
         Text("a")
       ))

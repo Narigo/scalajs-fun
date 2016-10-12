@@ -4,7 +4,13 @@ import rxscalajs.Observable
 
 class Driver[A](input: Observable[A]) {
 
-  input.subscribe(_ => {})
+  println(s"create new Driver with $input")
+
+  input.subscribe({ a =>
+    println(s"got an A in Driver[A]=$a")
+  })
+
+  override def toString: String = s"Driver:$input"
 
 }
 
