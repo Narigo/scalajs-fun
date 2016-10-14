@@ -1,7 +1,7 @@
 package com.campudus.scycle
 
 import org.scalatest.AsyncFunSpec
-import rxscalajs.Observable
+import rxscalajs.{Observable, Subject}
 
 import scala.concurrent.Promise
 
@@ -59,7 +59,15 @@ class ScycleSuite extends AsyncFunSpec {
 }
 
 class TestDriver(input: Observable[Int]) extends Driver(input) {
-  def int$: Observable[Int] = input
+
+  val int$: Observable[Int] = {
+    val sub = Subject[Int]()
+    input.subscribe(sub)
+    sub.subscribe(ev => {
+      println(s"hello sub int$$=$ev")
+    })
+    sub
+  }
 
   override def toString = s"TestDriver($input)"
 }
