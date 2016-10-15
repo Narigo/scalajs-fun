@@ -10,12 +10,9 @@ object Scycle {
          ): Unit = {
 
     if (drivers.nonEmpty) {
-      val proxyDriverMap = drivers.foldLeft(Map[String, (Subject[_], Driver[_])]()) {
-        case (m, (key, driverFn)) =>
-          m + (key -> createProxy(driverFn))
-      }
+      val sinkProxies = makeSinkProxies(drivers)
 
-      val effects = mainFn(proxyDriverMap.mapValues(_._2))
+      val effects = mainFn(sinkProxies.mapValues(_._2))
       effects.foreach({
         case (key, readEffect$) =>
           readEffect$.map({ ev =>
@@ -23,9 +20,15 @@ object Scycle {
             ev
           }).subscribe({ ev =>
             println(s"got a new event in effect=$ev")
-            feedIntoProxy(key, proxyDriverMap)(ev)
+            feedIntoProxy(key, sinkProxies)(ev)
           })
       })
+    }
+  }
+
+  private def makeSinkProxies(drivers: Map[String, Observable[_] => Driver[_]]): Map[String, (Subject[_], Driver[_])] = {
+    drivers.foldLeft(Map[String, (Subject[_], Driver[_])]()) {
+      case (m, (key, driver)) => m + (key -> createProxy(driver))
     }
   }
 
