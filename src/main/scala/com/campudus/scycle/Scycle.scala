@@ -4,13 +4,40 @@ import rxscalajs._
 
 object Scycle {
 
+  type DisposeFunction = () => Unit
+
+  type StreamSubscribe[T] = (Any, Observer[T]) => DisposeFunction
+
+  trait ScycleSubject[T] {
+    val stream: Any
+    val observer: Observer[T]
+  }
+
+  trait StreamAdapter {
+    def adapt[T](originStream: Any, originStreamSubscribe: Option[StreamSubscribe[T]]): Any
+
+    def remember[T](stream: Any): Any
+
+    def makeSubject[T](): ScycleSubject[T]
+
+    def isValidStream(stream: Any): Boolean
+
+    val streamSubscribe: Option[StreamSubscribe[_]]
+  }
+
+  trait DriverFunction {
+    def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any
+
+    val streamAdapter: Option[StreamAdapter] = None
+  }
+
   def run(
            mainFn: Map[String, Driver[_]] => Map[String, Observable[_]],
-           drivers: Map[String, Observable[_] => Driver[_]]
+           drivers: Map[String, DriverFunction]
          ): Unit = {
 
     if (drivers.nonEmpty) {
-      val sinkProxies = makeSinkProxies(drivers)
+      val sinkProxies = makeSinkProxies(drivers, null)
 
       val effects = mainFn(sinkProxies.mapValues(_._2))
       effects.foreach({
@@ -26,9 +53,20 @@ object Scycle {
     }
   }
 
-  private def makeSinkProxies(drivers: Map[String, Observable[_] => Driver[_]]): Map[String, (Subject[_], Driver[_])] = {
-    drivers.foldLeft(Map[String, (Subject[_], Driver[_])]()) {
-      case (m, (key, driver)) => m + (key -> createProxy(driver))
+  private def makeSinkProxies(
+                               drivers: Map[String, DriverFunction],
+                               streamAdapter: StreamAdapter
+                             ): Map[String, (Any, Observer[_])] = {
+    drivers.foldLeft(Map[String, (Any, Observer[_])]()) {
+      case (m, (key, driver)) =>
+        val holdSubject = streamAdapter.makeSubject()
+        val driverStreamAdapter = drivers.get(key).flatMap(_.streamAdapter).getOrElse(streamAdapter)
+
+        val stream = driverStreamAdapter.adapt(holdSubject.stream, streamAdapter.streamSubscribe)
+        val observer = holdSubject.observer
+
+        m + (key -> (stream, observer))
+
     }
   }
 
