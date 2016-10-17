@@ -32,7 +32,7 @@ object Scycle {
   }
 
   def run(
-           mainFn: Map[String, Driver[_]] => Map[String, Observable[_]],
+           mainFn: Map[String, Observer[_]] => Map[String, Observable[_]],
            drivers: Map[String, DriverFunction]
          ): Unit = {
 
@@ -75,8 +75,8 @@ object Scycle {
     (proxy, driverFn(proxy))
   }
 
-  private def feedIntoProxy[A](key: String, proxies: Map[String, (Subject[_], Driver[_])])(event: A): Unit = {
-    proxies(key)._1.asInstanceOf[Subject[A]].next(event)
+  private def feedIntoProxy[A](key: String, proxies: Map[String, (Any, Observer[_])])(event: A): Unit = {
+    proxies(key)._2.asInstanceOf[Observer[A]].next(event)
   }
 
 }
