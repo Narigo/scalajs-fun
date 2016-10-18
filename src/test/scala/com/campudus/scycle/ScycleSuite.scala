@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
 import org.scalatest.AsyncFunSpec
 import rxscalajs.{Observable, Subject}
 
@@ -18,7 +19,13 @@ class ScycleSuite extends AsyncFunSpec {
       val p = Promise[String]
       Scycle.run(
         drivers => Map("test" -> Observable.just(inputText)),
-        Map("test" -> { (sth$: Observable[_]) => new Driver(sth$.map({ t => p.success(t.asInstanceOf[String]) })) })
+        Map("test" -> new DriverFunction {
+
+          def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any = {
+            stream.asInstanceOf[Observable[_]].map({ t => p.success(t.asInstanceOf[String]) })
+          }
+
+        })
       )
       p.future.map(text => assert(text === inputText))
     }
@@ -41,15 +48,19 @@ class ScycleSuite extends AsyncFunSpec {
             mapped
           })
         },
-        Map("test" -> { (sth$: Observable[_]) =>
-          val mapped = sth$.map({ i =>
-            println(s"test-driver-map-i=$i")
-            val nextI = i.asInstanceOf[Int] + 1
-            println(s"nextI=$nextI")
-            nextI
-          })
-          println(s"call new Driver with $mapped")
-          new TestDriver(mapped)
+        Map("test" -> new DriverFunction {
+
+          override def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any = {
+            val mapped = stream.asInstanceOf[Observable[_]].map({ i =>
+              println(s"test-driver-map-i=$i")
+              val nextI = i.asInstanceOf[Int] + 1
+              println(s"nextI=$nextI")
+              nextI
+            })
+            println(s"call new Driver with $mapped")
+            new TestDriver(mapped)
+          }
+
         })
       )
       p.future.map(i => assert(i === 1))

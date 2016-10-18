@@ -22,10 +22,10 @@ object Scycle {
 
     def isValidStream(stream: Any): Boolean
 
-    val streamSubscribe: Option[StreamSubscribe[_]]
+    def streamSubscribe[T]: Option[StreamSubscribe[T]]
   }
 
-  trait DriverFunction {
+  trait DriverFunction extends ((Any, StreamAdapter, String) => Any) {
     def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any
 
     val streamAdapter: Option[StreamAdapter] = None
