@@ -70,11 +70,6 @@ object Scycle {
     }
   }
 
-  private def createProxy[A](driverFn: Observable[A] => Driver[_]): (Subject[A], Driver[_]) = {
-    val proxy = Subject[A]()
-    (proxy, driverFn(proxy))
-  }
-
   private def feedIntoProxy[A](key: String, proxies: Map[String, (Any, Observer[_])])(event: A): Unit = {
     proxies(key)._2.asInstanceOf[Observer[A]].next(event)
   }
