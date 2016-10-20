@@ -31,13 +31,17 @@ object Scycle {
     val streamAdapter: Option[StreamAdapter] = None
   }
 
+  type DriversDefinition = Map[String, DriverFunction]
+
   def run(
            mainFn: Map[String, Observer[_]] => Map[String, Observable[_]],
-           drivers: Map[String, DriverFunction]
+           drivers: DriversDefinition
          ): Unit = {
 
     if (drivers.nonEmpty) {
-      val sinkProxies = makeSinkProxies(drivers, null)
+      val streamAdapter = null
+      val sinkProxies = makeSinkProxies(drivers, streamAdapter)
+      val sources = callDrivers(drivers, sinkProxies, streamAdapter)
 
       val effects = mainFn(sinkProxies.mapValues(_._2))
       effects.foreach({
@@ -53,8 +57,32 @@ object Scycle {
     }
   }
 
+  private def callDrivers(
+                           drivers: DriversDefinition,
+                           sinkProxies: Map[String, (Any, Observer[_])],
+                           streamAdapter: StreamAdapter
+                         ): Any = {
+    drivers.foldLeft(Map[String, Any]()) {
+      case (m, (name, driverFn)) =>
+        val driverOutput = driverFn(
+          sinkProxies(name)._1,
+          streamAdapter,
+          name
+        )
+
+        val result = driverFn.streamAdapter.map({ sa =>
+          streamAdapter.adapt(
+            driverOutput,
+            sa.streamSubscribe
+          )
+        }).getOrElse(driverOutput)
+
+        m + (name -> result)
+    }
+  }
+
   private def makeSinkProxies(
-                               drivers: Map[String, DriverFunction],
+                               drivers: DriversDefinition,
                                streamAdapter: StreamAdapter
                              ): Map[String, (Any, Observer[_])] = {
     drivers.foldLeft(Map[String, (Any, Observer[_])]()) {
@@ -66,7 +94,6 @@ object Scycle {
         val observer = holdSubject.observer
 
         m + (key -> (stream, observer))
-
     }
   }
 
