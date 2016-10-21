@@ -32,29 +32,41 @@ object Scycle {
   }
 
   type DriversDefinition = Map[String, DriverFunction]
+  type Sources = Map[String, Observer[_]]
+  type Sinks = Map[String, Observable[_]]
 
   def run(
-           mainFn: Map[String, Observer[_]] => Map[String, Observable[_]],
+           mainFn: Sources => Sinks,
            drivers: DriversDefinition
-         ): Unit = {
+         ): () => Unit = {
 
     if (drivers.nonEmpty) {
       val streamAdapter = null
       val sinkProxies = makeSinkProxies(drivers, streamAdapter)
-      val sources = callDrivers(drivers, sinkProxies, streamAdapter)
+      val sources = callDrivers(drivers, sinkProxies, streamAdapter).asInstanceOf[Sources]
+      val sinks = mainFn(sources)
+      val disposeReplication = replicateMany(sinks, sinkProxies, streamAdapter)
 
-      val effects = mainFn(sinkProxies.mapValues(_._2))
-      effects.foreach({
-        case (key, readEffect$) =>
-          readEffect$.map({ ev =>
-            println(s"main-in=$ev")
-            ev
-          }).subscribe({ ev =>
-            println(s"got a new event in effect=$ev")
-            feedIntoProxy(key, sinkProxies)(ev)
-          })
-      })
+      () => {
+        disposeSources(sources)
+        disposeReplication()
+      }
+    } else {
+      () => {}
     }
+  }
+
+  private def replicateMany(
+                             sinks: Sinks,
+                             sinkProxies: Map[String, (Any, Observer[_])],
+                             streamAdapter: StreamAdapter
+                           ): () => Unit = {
+    // TODO replicateMany
+    () => {}
+  }
+
+  private def disposeSources(sources: Sources): Unit = {
+    // TODO disposeSources
   }
 
   private def callDrivers(
