@@ -2,6 +2,8 @@ package com.campudus.scycle
 
 import rxscalajs._
 
+import scala.scalajs.js.Any
+
 object Scycle {
 
   type DisposeFunction = () => Unit
@@ -61,8 +63,31 @@ object Scycle {
                              sinkProxies: Map[String, (Any, Observer[_])],
                              streamAdapter: StreamAdapter
                            ): () => Unit = {
+
+    type X = Any
+
     // TODO replicateMany
-    () => {}
+    val results = sinks.keys
+      .filter(name => sinkProxies.exists(_._1 == name))
+      .map(name => streamAdapter.streamSubscribe(sinks(name), new Observer[Any] {
+
+        override def next(t: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
+
+        override def error(err: Any): Unit = {
+          // TODO logToConsoleError(err)
+          sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
+        }
+
+        override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
+
+      }))
+
+    //TODO disposeFunctions
+    //    val disposeFunctions = results.
+
+    () => {
+      //      disposeFunctions.forEach(dispose => dispose());
+    }
   }
 
   private def disposeSources(sources: Sources): Unit = {
