@@ -67,27 +67,27 @@ object Scycle {
     type X = Any
 
     // TODO replicateMany
-    val results = sinks.keys
+    val disposeFunctions: List[DisposeFunction] = sinks.keys
       .filter(name => sinkProxies.exists(_._1 == name))
-      .map(name => streamAdapter.streamSubscribe(sinks(name), new Observer[Any] {
+      .map(name => (name, streamAdapter.streamSubscribe))
+      .foldLeft(List[DisposeFunction]()) {
+        case (list, (name, Some(fn))) =>
+          fn.apply(sinks(name).asInstanceOf[Any], new Observer[Any] {
 
-        override def next(t: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
+            override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
 
-        override def error(err: Any): Unit = {
-          // TODO logToConsoleError(err)
-          sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
-        }
+            override def error(err: Any): Unit = {
+              // TODO logToConsoleError(err)
+              sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
+            }
 
-        override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
+            override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
 
-      }))
+          }.asInstanceOf[Observer[Nothing]]) :: list
+        case (list, _) => list
+      }
 
-    //TODO disposeFunctions
-    //    val disposeFunctions = results.
-
-    () => {
-      //      disposeFunctions.forEach(dispose => dispose());
-    }
+    () => disposeFunctions.foreach(_.apply())
   }
 
   private def disposeSources(sources: Sources): Unit = {
