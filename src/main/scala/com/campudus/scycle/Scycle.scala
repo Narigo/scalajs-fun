@@ -77,7 +77,7 @@ object Scycle {
             override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
 
             override def error(err: Any): Unit = {
-              // TODO logToConsoleError(err)
+              logToConsoleError(err)
               sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
             }
 
@@ -88,6 +88,10 @@ object Scycle {
       }
 
     () => disposeFunctions.foreach(_.apply())
+  }
+
+  private def logToConsoleError(error: Any): Unit = {
+    // TODO logToConsoleError
   }
 
   private def disposeSources(sources: Sources): Unit = {
