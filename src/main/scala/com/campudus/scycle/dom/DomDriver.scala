@@ -9,13 +9,10 @@ class DomDriver(input: Observable[Hyperscript]) extends Observable[Hyperscript](
   println(s"apply domdriver")
 
   input.subscribe(
-    { hs => {
-      {
-        val container = document.querySelector("#app")
-        val diff = VirtualDom.diff(VirtualDom(container), hs)
-        VirtualDom.update(container, diff)
-      }
-    }
+    hs => {
+      val container = document.querySelector("#app")
+      val diff = VirtualDom.diff(VirtualDom(container), hs)
+      VirtualDom.update(container, diff)
     }
   )
 
