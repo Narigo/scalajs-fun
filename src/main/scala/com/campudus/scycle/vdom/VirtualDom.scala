@@ -8,64 +8,72 @@ import scala.util.Try
 
 object VirtualDom {
 
-  def apply(element: dom.Element): Hyperscript = element match {
-    case null => null
-    case HyperscriptElement(elem) => elem
+  def apply(element: dom.Element): Hyperscript = {
+    element match {
+      case null => null
+      case HyperscriptElement(elem) => elem
+    }
   }
 
-  def update(container: dom.Node, diffs: List[Diff]): Unit = diffs.foreach({
-    case Replacement(ListBuffer(), null) =>
-      do {
-        container.removeChild(container.firstChild)
-      } while (container.hasChildNodes())
-    case Replacement(ListBuffer(), node) =>
-      val parent = container.parentNode
-      if (parent != null) {
-        container.parentNode.replaceChild(node.toNode, container)
-      } else {
-        node.toNode
-      }
-    case Replacement(path, node) =>
-      val toReplace = path.foldLeft(container) {
-        (subNode, childIdx) => subNode.childNodes(childIdx)
-      }
-      toReplace match {
-        case currentElement: dom.Element if node.isInstanceOf[HyperscriptElement] =>
-          val nodeElement = node.toNode
-          val newAttributes = for {
-            i <- 0 until nodeElement.attributes.length
-          } yield nodeElement.attributes(i)
+  def update(container: dom.Node, diffs: List[Diff]): Unit = {
+    diffs.foreach(
+      {
+        case Replacement(ListBuffer(), null) =>
+          do {
+            container.removeChild(container.firstChild)
+          } while (container.hasChildNodes())
+        case Replacement(ListBuffer(), node) =>
+          val parent = container.parentNode
+          if (parent != null) {
+            container.parentNode.replaceChild(node.toNode, container)
+          } else {
+            node.toNode
+          }
+        case Replacement(path, node) =>
+          val toReplace = path.foldLeft(container) {
+            (subNode, childIdx) => subNode.childNodes(childIdx)
+          }
+          toReplace match {
+            case currentElement: dom.Element if node.isInstanceOf[HyperscriptElement] =>
+              val nodeElement = node.toNode
+              val newAttributes = for {
+                i <- 0 until nodeElement.attributes.length
+              } yield {
+                nodeElement.attributes(i)
+              }
 
-          newAttributes.filter(_.specified).foreach(attr => currentElement.setAttribute(attr.name, attr.value))
-          val applied = apply(currentElement)
-          val diffs = diff(applied, node)
-          update(currentElement, diffs)
-        case currentElement: dom.Element =>
-          currentElement.parentNode.replaceChild(node.toNode, currentElement)
-        case n: dom.Node =>
-          n.parentNode.replaceChild(node.toNode, n)
+              newAttributes.filter(_.specified).foreach(attr => currentElement.setAttribute(attr.name, attr.value))
+              val applied = apply(currentElement)
+              val diffs = diff(applied, node)
+              update(currentElement, diffs)
+            case currentElement: dom.Element =>
+              currentElement.parentNode.replaceChild(node.toNode, currentElement)
+            case n: dom.Node =>
+              n.parentNode.replaceChild(node.toNode, n)
+          }
+        case Insertion(path, node) =>
+          if (path.nonEmpty) {
+            val lastPath = path.last
+            val parent = path.dropRight(1).foldLeft(container) {
+              (subNode, childIdx) => subNode.childNodes(childIdx)
+            }
+            if (lastPath < parent.childNodes.length) {
+              val elem = parent.childNodes(lastPath)
+              parent.insertBefore(node.toNode, elem)
+            } else {
+              parent.appendChild(node.toNode)
+            }
+          } else {
+            container.appendChild(node.toNode)
+          }
+        case Remove(path, oldNode) =>
+          val toRemove = path.foldLeft(container) {
+            (subNode, childIdx) => subNode.childNodes(childIdx)
+          }
+          toRemove.parentNode.removeChild(toRemove)
       }
-    case Insertion(path, node) =>
-      if (path.nonEmpty) {
-        val lastPath = path.last
-        val parent = path.dropRight(1).foldLeft(container) {
-          (subNode, childIdx) => subNode.childNodes(childIdx)
-        }
-        if (lastPath < parent.childNodes.length) {
-          val elem = parent.childNodes(lastPath)
-          parent.insertBefore(node.toNode, elem)
-        } else {
-          parent.appendChild(node.toNode)
-        }
-      } else {
-        container.appendChild(node.toNode)
-      }
-    case Remove(path, oldNode) =>
-      val toRemove = path.foldLeft(container) {
-        (subNode, childIdx) => subNode.childNodes(childIdx)
-      }
-      toRemove.parentNode.removeChild(toRemove)
-  })
+    )
+  }
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {
     if (a == null) {
@@ -79,10 +87,10 @@ object VirtualDom {
   }
 
   def optimizeReplacementsAndInsertions(
-                                         a: Hyperscript,
-                                         b: Hyperscript,
-                                         replacementsAndInserts: ListBuffer[Diff]
-                                       ): List[Diff] = {
+    a: Hyperscript,
+    b: Hyperscript,
+    replacementsAndInserts: ListBuffer[Diff]
+  ): List[Diff] = {
     if (replacementsAndInserts.length > 1 && firstReplacementsCanBeInsertions(a, replacementsAndInserts)) {
       val first = replacementsAndInserts.head
       first match {
@@ -102,22 +110,28 @@ object VirtualDom {
   def firstReplacementsCanBeInsertions[T <: Diff](a: Hyperscript, list: ListBuffer[T]): Boolean = {
     if (list.exists(_.isInstanceOf[Insertion])) {
       val aElem = a.asInstanceOf[HyperscriptElement]
-      val lastElements = aElem.subElements.reverse.zip(list.reverse).takeWhile({
-        case (aChild, Diff(_, node)) => aChild == node
-      })
+      val lastElements = aElem.subElements.reverse.zip(list.reverse).takeWhile(
+        {
+          case (aChild, Diff(_, node)) => aChild == node
+        }
+      )
       lastElements.nonEmpty || firstReplacementsCanBeInsertions(a, list.dropRight(1))
     } else {
       false
     }
   }
 
-  def getElem(a: Hyperscript, path: Path): Hyperscript = a match {
-    case a: HyperscriptElement =>
-      if (path.nonEmpty) {
-        val next = Try(a.subElements(path.head)).getOrElse(throw new NoSuchElementException)
-        getElem(next, path.tail)
-      } else a
-    case _ => a
+  def getElem(a: Hyperscript, path: Path): Hyperscript = {
+    a match {
+      case a: HyperscriptElement =>
+        if (path.nonEmpty) {
+          val next = Try(a.subElements(path.head)).getOrElse(throw new NoSuchElementException)
+          getElem(next, path.tail)
+        } else {
+          a
+        }
+      case _ => a
+    }
   }
 
   def naiveDiff(a: Hyperscript, b: Hyperscript, currentPath: ListBuffer[Int] = ListBuffer()): ListBuffer[Diff] = {
@@ -126,18 +140,26 @@ object VirtualDom {
         case (aElem: HyperscriptElement, bElem: HyperscriptElement) =>
           if (aElem.attrs.equals(bElem.attrs)) {
             val aChildrenPlusIdx = aElem.subElements.zipWithIndex
-            val first = aChildrenPlusIdx.takeWhile(_._2 < bElem.subElements.length).flatMap({
-              case (elem, idx) =>
-                naiveDiff(elem, bElem.subElements(idx), currentPath :+ idx)
-            })
+            val first = aChildrenPlusIdx.takeWhile(_._2 < bElem.subElements.length).flatMap(
+              {
+                case (elem, idx) =>
+                  naiveDiff(elem, bElem.subElements(idx), currentPath :+ idx)
+              }
+            )
             val added: Seq[Insertion] = if (aElem.subElements.length < bElem.subElements.length) {
-              bElem.subElements.zipWithIndex.dropWhile(_._2 < aElem.subElements.length).map({
-                case (newNode, idx) => Insertion(currentPath :+ idx, newNode)
-              })
-            } else Nil
-            val removed: Seq[Remove] = aChildrenPlusIdx.dropWhile(_._2 < bElem.subElements.length).map({
-              case (nodeToRemove, idx) => Remove(currentPath :+ idx, nodeToRemove)
-            })
+              bElem.subElements.zipWithIndex.dropWhile(_._2 < aElem.subElements.length).map(
+                {
+                  case (newNode, idx) => Insertion(currentPath :+ idx, newNode)
+                }
+              )
+            } else {
+              Nil
+            }
+            val removed: Seq[Remove] = aChildrenPlusIdx.dropWhile(_._2 < bElem.subElements.length).map(
+              {
+                case (nodeToRemove, idx) => Remove(currentPath :+ idx, nodeToRemove)
+              }
+            )
             first ++: ListBuffer(added: _*) ++: ListBuffer(removed: _*)
           } else {
             ListBuffer(Replacement(currentPath, bElem))
@@ -166,11 +188,13 @@ object VirtualDom {
 
   object Diff {
 
-    def unapply[T <: Diff](e: T): Option[(Path, Hyperscript)] = e match {
-      case Replacement(p, n) => Some(p, n)
-      case Insertion(p, n) => Some(p, n)
-      case Remove(p, n) => Some(p, n)
-      case _ => None
+    def unapply[T <: Diff](e: T): Option[(Path, Hyperscript)] = {
+      e match {
+        case Replacement(p, n) => Some(p, n)
+        case Insertion(p, n) => Some(p, n)
+        case Remove(p, n) => Some(p, n)
+        case _ => None
+      }
     }
 
   }
