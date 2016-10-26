@@ -16,63 +16,59 @@ object VirtualDom {
   }
 
   def update(container: dom.Node, diffs: List[Diff]): Unit = {
-    diffs.foreach(
-      {
-        case Replacement(ListBuffer(), null) =>
-          do {
-            container.removeChild(container.firstChild)
-          } while (container.hasChildNodes())
-        case Replacement(ListBuffer(), node) =>
-          val parent = container.parentNode
-          if (parent != null) {
-            container.parentNode.replaceChild(node.toNode, container)
-          } else {
-            node.toNode
-          }
-        case Replacement(path, node) =>
-          val toReplace = path.foldLeft(container) {
-            (subNode, childIdx) => subNode.childNodes(childIdx)
-          }
-          toReplace match {
-            case currentElement: dom.Element if node.isInstanceOf[HyperscriptElement] =>
-              val nodeElement = node.toNode
-              val newAttributes = for {
-                i <- 0 until nodeElement.attributes.length
-              } yield {
-                nodeElement.attributes(i)
-              }
+    diffs.foreach({
+      case Replacement(ListBuffer(), null) =>
+        do {
+          container.removeChild(container.firstChild)
+        } while (container.hasChildNodes())
+      case Replacement(ListBuffer(), node) =>
+        val parent = container.parentNode
+        if (parent != null) {
+          container.parentNode.replaceChild(node.toNode, container)
+        } else {
+          node.toNode
+        }
+      case Replacement(path, node) =>
+        val toReplace = path.foldLeft(container)((subNode, childIdx) => {
+          subNode.childNodes(childIdx)
+        })
+        toReplace match {
+          case currentElement: dom.Element if node.isInstanceOf[HyperscriptElement] =>
+            val nodeElement = node.toNode
+            val newAttributes = for {
+              i <- 0 until nodeElement.attributes.length
+            } yield nodeElement.attributes(i)
 
-              newAttributes.filter(_.specified).foreach(attr => currentElement.setAttribute(attr.name, attr.value))
-              val applied = apply(currentElement)
-              val diffs = diff(applied, node)
-              update(currentElement, diffs)
-            case currentElement: dom.Element =>
-              currentElement.parentNode.replaceChild(node.toNode, currentElement)
-            case n: dom.Node =>
-              n.parentNode.replaceChild(node.toNode, n)
-          }
-        case Insertion(path, node) =>
-          if (path.nonEmpty) {
-            val lastPath = path.last
-            val parent = path.dropRight(1).foldLeft(container) {
-              (subNode, childIdx) => subNode.childNodes(childIdx)
-            }
-            if (lastPath < parent.childNodes.length) {
-              val elem = parent.childNodes(lastPath)
-              parent.insertBefore(node.toNode, elem)
-            } else {
-              parent.appendChild(node.toNode)
-            }
-          } else {
-            container.appendChild(node.toNode)
-          }
-        case Remove(path, oldNode) =>
-          val toRemove = path.foldLeft(container) {
+            newAttributes.filter(_.specified).foreach(attr => currentElement.setAttribute(attr.name, attr.value))
+            val applied = apply(currentElement)
+            val diffs = diff(applied, node)
+            update(currentElement, diffs)
+          case currentElement: dom.Element =>
+            currentElement.parentNode.replaceChild(node.toNode, currentElement)
+          case n: dom.Node =>
+            n.parentNode.replaceChild(node.toNode, n)
+        }
+      case Insertion(path, node) =>
+        if (path.nonEmpty) {
+          val lastPath = path.last
+          val parent = path.dropRight(1).foldLeft(container) {
             (subNode, childIdx) => subNode.childNodes(childIdx)
           }
-          toRemove.parentNode.removeChild(toRemove)
-      }
-    )
+          if (lastPath < parent.childNodes.length) {
+            val elem = parent.childNodes(lastPath)
+            parent.insertBefore(node.toNode, elem)
+          } else {
+            parent.appendChild(node.toNode)
+          }
+        } else {
+          container.appendChild(node.toNode)
+        }
+      case Remove(path, oldNode) =>
+        val toRemove = path.foldLeft(container)((subNode, childIdx) => {
+          subNode.childNodes(childIdx)
+        })
+        toRemove.parentNode.removeChild(toRemove)
+    })
   }
 
   def diff(a: Hyperscript, b: Hyperscript): List[Diff] = {

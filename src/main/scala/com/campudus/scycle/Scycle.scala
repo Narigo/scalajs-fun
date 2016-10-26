@@ -119,14 +119,12 @@ object Scycle {
           name
         )
 
-        val result = driverFn.streamAdapter.map(
-          sa => {
-            streamAdapter.adapt(
-              driverOutput,
-              sa.streamSubscribe
-            )
-          }
-        ).getOrElse(driverOutput)
+        val result = driverFn.streamAdapter.map(sa => {
+          streamAdapter.adapt(
+            driverOutput,
+            sa.streamSubscribe
+          )
+        }).getOrElse(driverOutput)
 
         m + (name -> result)
     }

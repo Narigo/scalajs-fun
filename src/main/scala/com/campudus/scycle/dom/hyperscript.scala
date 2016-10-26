@@ -33,32 +33,27 @@ object HyperscriptElement {
             A.curried(element.getAttribute("id"))(element.getAttribute("class"))(element.getAttribute("href"))
           )
           case _ => None
-        }).map(
-          parent => {
-            val children = for {
-              i <- 0 until element.childNodes.length
-              children <- unapply(element.childNodes(i)).toSeq
-            } yield {
-              children
-            }
-            parent(children)
-          }
-        ).orElse(
-          {
-            element.tagName.toLowerCase match {
-              case "input" => Some(
-                Input(
-                  element.getAttribute("id"),
-                  element.getAttribute("class"),
-                  element.getAttribute("type"),
-                  element.getAttribute("value")
-                )
+        }).map(parent => {
+          val children = for {
+            i <- 0 until element.childNodes.length
+            children <- unapply(element.childNodes(i)).toSeq
+          } yield children
+
+          parent(children)
+        }).orElse({
+          element.tagName.toLowerCase match {
+            case "input" => Some(
+              Input(
+                element.getAttribute("id"),
+                element.getAttribute("class"),
+                element.getAttribute("type"),
+                element.getAttribute("value")
               )
-              case "hr" => Some(Hr(element.getAttribute("class")))
-              case _ => None
-            }
+            )
+            case "hr" => Some(Hr(element.getAttribute("class")))
+            case _ => None
           }
-        )
+        })
       case _ => Some(Text(node.textContent))
     }
   }
@@ -76,11 +71,9 @@ abstract class HyperscriptElement(val tagName: String, val subElements: Seq[Hype
     } {
       value.foreach(element.setAttribute(key, _))
     }
-    subElements.foreach(
-      child => {
-        element.appendChild(child.toNode)
-      }
-    )
+    subElements.foreach(child => {
+      element.appendChild(child.toNode)
+    })
     element
 
   }
