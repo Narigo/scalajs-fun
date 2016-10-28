@@ -99,7 +99,7 @@ object Scycle {
   }
 
   private def logToConsoleError(error: Any): Unit = {
-    // TODO logToConsoleError
+    println(error)
   }
 
   private def disposeSources(sources: Sources): Unit = {
