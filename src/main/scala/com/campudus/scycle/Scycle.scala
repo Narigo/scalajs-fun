@@ -72,7 +72,6 @@ object Scycle {
 
     type X = Any
 
-    // TODO replicateMany
     val disposeFunctions: List[DisposeFunction] = sinks.keys
       .filter(name => sinkProxies.exists(_._1 == name))
       .map(name => (name, streamAdapter.streamSubscribe))
@@ -144,10 +143,6 @@ object Scycle {
 
         m + (key -> (stream, observer))
     }
-  }
-
-  private def feedIntoProxy[A](key: String, proxies: Map[String, (Any, Observer[_])])(event: A): Unit = {
-    proxies(key)._2.asInstanceOf[Observer[A]].next(event)
   }
 
 }
