@@ -2,8 +2,6 @@ package com.campudus.scycle
 
 import rxscalajs._
 
-import scala.scalajs.js.Any
-
 object Scycle {
 
   type DisposeFunction = () => Unit
@@ -82,7 +80,7 @@ object Scycle {
 
               override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
 
-              override def error(err: Any): Unit = {
+              override def error(err: scala.scalajs.js.Any): Unit = {
                 logToConsoleError(err)
                 sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
               }
@@ -110,7 +108,7 @@ object Scycle {
     sinkProxies: Map[String, (Any, Observer[_])],
     streamAdapter: StreamAdapter
   ): Any = {
-    drivers.foldLeft(Map[String, Any]()) {
+    drivers.foldLeft(Map[String, scala.Any]()) {
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
           sinkProxies(name)._1,

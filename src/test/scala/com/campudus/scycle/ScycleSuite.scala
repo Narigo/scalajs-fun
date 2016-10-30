@@ -3,6 +3,7 @@ package com.campudus.scycle
 import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
 import org.scalatest.AsyncFunSpec
 import rxscalajs.{Observable, Subject}
+import scala.scalajs.js.Any
 
 import scala.concurrent.Promise
 
@@ -21,8 +22,9 @@ class ScycleSuite extends AsyncFunSpec {
         drivers => Map("test" -> Observable.just(inputText)),
         Map("test" -> new DriverFunction {
 
-          def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any = {
-            stream.asInstanceOf[Observable[_]].map({ t => p.success(t.asInstanceOf[String]) })
+          def apply(stream: scala.Any, adapter: StreamAdapter, driverName: String): scala.Any = {
+            stream.asInstanceOf[Observable[String]].map({ t => p.success(t) })
+            null
           }
 
         })
@@ -50,10 +52,10 @@ class ScycleSuite extends AsyncFunSpec {
         },
         Map("test" -> new DriverFunction {
 
-          override def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any = {
-            val mapped = stream.asInstanceOf[Observable[_]].map({ i =>
+          override def apply(stream: scala.Any, adapter: StreamAdapter, driverName: String): scala.Any = {
+            val mapped = stream.asInstanceOf[Observable[Int]].map({ i =>
               println(s"test-driver-map-i=$i")
-              val nextI = i.asInstanceOf[Int] + 1
+              val nextI = i + 1
               println(s"nextI=$nextI")
               nextI
             })
