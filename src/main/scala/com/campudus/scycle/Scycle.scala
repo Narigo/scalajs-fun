@@ -44,10 +44,14 @@ object Scycle {
   ): () => Unit = {
 
     if (drivers.nonEmpty) {
-      val streamAdapter = null
+      val streamAdapter = null // FIXME this needs to be a real streamAdapter
+      println("Scycle.run:sinkProxies")
       val sinkProxies = makeSinkProxies(drivers, streamAdapter)
+      println("Scycle.run:sources")
       val sources = callDrivers(drivers, sinkProxies, streamAdapter).asInstanceOf[Sources]
+      println("Scycle.run:sinks")
       val sinks = mainFn(sources)
+      println("Scycle.run:replicateMany")
       val disposeReplication = replicateMany(sinks, sinkProxies, streamAdapter)
 
       val result = () => {
@@ -57,6 +61,7 @@ object Scycle {
 
       result
     } else {
+      println("Scycle.run:no drivers -> empty")
       val result = () => {}
       result
     }
@@ -70,11 +75,13 @@ object Scycle {
 
     type X = Any
 
+    println("in replicateMany")
     val disposeFunctions: List[DisposeFunction] = sinks.keys
       .filter(name => sinkProxies.exists(_._1 == name))
       .map(name => (name, streamAdapter.streamSubscribe))
       .foldLeft(List[DisposeFunction]()) {
         case (list, (name, Some(fn))) =>
+          println(s"fold left ($list, ($name, Some($fn)))")
           fn.apply(
             sinks(name).asInstanceOf[Any], new Observer[Any] {
 
@@ -131,14 +138,20 @@ object Scycle {
     drivers: DriversDefinition,
     streamAdapter: StreamAdapter
   ): Map[String, (Any, Observer[_])] = {
+    println("inner makeSinkProxies")
     drivers.foldLeft(Map[String, (Any, Observer[_])]()) {
       case (m, (key, driver)) =>
+        println("inner makeSinkProxies:foldLeft:holdSubject")
         val holdSubject = streamAdapter.makeSubject()
+        println("inner makeSinkProxies:foldLeft:driverStreamAdapter")
         val driverStreamAdapter = drivers.get(key).flatMap(_.streamAdapter).getOrElse(streamAdapter)
 
+        println("inner makeSinkProxies:foldLeft:stream")
         val stream = driverStreamAdapter.adapt(holdSubject.stream, streamAdapter.streamSubscribe)
+        println("inner makeSinkProxies:foldLeft:observer")
         val observer = holdSubject.observer
 
+        println("inner makeSinkProxies:foldLeft:return")
         m + (key -> (stream, observer))
     }
   }
