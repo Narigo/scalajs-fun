@@ -43,7 +43,9 @@ object Scycle {
     drivers: DriversDefinition
   ): () => Unit = {
 
-    if (drivers.nonEmpty) {
+    if (drivers.isEmpty) {
+      throw new IllegalArgumentException("Scycle needs at least one driver to work.")
+    } else {
       val streamAdapter = null // FIXME this needs to be a real streamAdapter
       println("Scycle.run:sinkProxies")
       val sinkProxies = makeSinkProxies(drivers, streamAdapter)
@@ -59,10 +61,6 @@ object Scycle {
         disposeReplication()
       }
 
-      result
-    } else {
-      println("Scycle.run:no drivers -> empty")
-      val result = () => {}
       result
     }
   }

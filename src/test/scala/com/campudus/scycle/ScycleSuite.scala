@@ -9,9 +9,9 @@ import scala.concurrent.Promise
 class ScycleSuite extends AsyncFunSpec {
 
   describe("Scycle") {
-    it("works with empty maps") {
-      Scycle.run(Map.empty, Map.empty)
-      succeed
+    it("should not work with an empty main") {
+      val thrown = intercept[IllegalArgumentException](Scycle.run(Map.empty, Map.empty))
+      assert(thrown.getMessage.contains("driver"))
     }
 
     it("can read data from a logic") {
@@ -55,23 +55,27 @@ class ScycleSuite extends AsyncFunSpec {
       Scycle.run(
         { drivers => {
           {
-            println(s"main got drivers $drivers")
-            Map("test" -> {
-              val testDriver = drivers("test")
-              println(s"got a testDriver? $testDriver")
-              // TODO int$.map results in new observable which is not looked at in the test driver...
-              val mapped = testDriver.asInstanceOf[TestDriver].int$.map({ i => {
-                {
+            {
+              println(s"main got drivers $drivers")
+              Map("test" -> {
+                val testDriver = drivers("test")
+                println(s"got a testDriver? $testDriver")
+                // TODO int$.map results in new observable which is not looked at in the test driver...
+                val mapped = testDriver.asInstanceOf[TestDriver].int$.map({ i => {
                   {
-                    println(s"test-main-map-i=$i")
-                    p.success(i)
+                    {
+                      {
+                        println(s"test-main-map-i=$i")
+                        p.success(i)
+                      }
+                    }
                   }
                 }
-              }
-              }).startWith(0)
-              println(s"main done $mapped")
-              mapped
-            })
+                }).startWith(0)
+                println(s"main done $mapped")
+                mapped
+              })
+            }
           }
         }
         },
@@ -80,10 +84,12 @@ class ScycleSuite extends AsyncFunSpec {
           override def apply(stream: scala.Any, adapter: StreamAdapter, driverName: String): scala.Any = {
             val mapped = stream.asInstanceOf[Observable[Int]].map({ i => {
               {
-                println(s"test-driver-map-i=$i")
-                val nextI = i + 1
-                println(s"nextI=$nextI")
-                nextI
+                {
+                  println(s"test-driver-map-i=$i")
+                  val nextI = i + 1
+                  println(s"nextI=$nextI")
+                  nextI
+                }
               }
             }
             })
