@@ -16,7 +16,7 @@ object Scycle {
 
   trait StreamAdapter {
 
-    def adapt[T](originStream: Any, originStreamSubscribe: Option[StreamSubscribe[T]]): Any
+    def adapt[T](originStream: Any, originStreamSubscribe: StreamSubscribe[T]): Observable[T]
 
     def remember[T](stream: Any): Any
 
@@ -24,7 +24,8 @@ object Scycle {
 
     def isValidStream(stream: Any): Boolean
 
-    def streamSubscribe[T]: Option[StreamSubscribe[T]]
+    def streamSubscribe[T]: StreamSubscribe[T]
+
   }
 
   trait DriverFunction extends ((Any, StreamAdapter, String) => Any) {
@@ -78,7 +79,7 @@ object Scycle {
       .filter(name => sinkProxies.exists(_._1 == name))
       .map(name => (name, streamAdapter.streamSubscribe))
       .foldLeft(List[DisposeFunction]()) {
-        case (list, (name, Some(fn))) =>
+        case (list, (name, fn)) =>
           println(s"fold left ($list, ($name, Some($fn)))")
           fn.apply(
             sinks(name).asInstanceOf[Any], new Observer[Any] {
