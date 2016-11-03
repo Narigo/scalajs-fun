@@ -22,11 +22,11 @@ class StreamAdapterSuite extends AsyncFunSpec {
         } else {
           Observable.create((observer: Observer[T]) => {
             val dispose = originStreamSubscribe(originStream, observer)
-            dispose // TODO check that this is doing something!
+            dispose // FIXME this should do something when a new release is done
           })
         }
       }
-      override def remember[T](stream: Any): Any = ???
+      override def remember[T](stream: Observable[T]): Observable[T] = stream.publishReplay(1)
       override def makeSubject[T](): ScycleSubject[T] = ???
       override def isValidStream(stream: Any): Boolean = true
       override def streamSubscribe[T]: StreamSubscribe[T] = ???
@@ -43,17 +43,26 @@ class StreamAdapterSuite extends AsyncFunSpec {
       }
 
       val dummyStream = Array(1, 2, 3)
+      println("SAS: rxStream")
       val rxStream = RxJSAdapter.adapt(dummyStream, arraySubscribe[Int])
+      println("SAS: assert")
       assert(RxJSAdapter.isValidStream(rxStream) === true)
+      println("SAS: expected")
       val expected = ListBuffer(1, 2, 3)
+      println("SAS: subscribe")
       rxStream.subscribe((x: Int) => {
+        println("SAS: subscribe.assert")
         assert(x === expected.remove(0))
       }, (error: Any) => {
+        println("SAS: subscribe.error!")
         fail(s"should not occur $error")
       }, () => {
+        println("SAS: subscribe.complete.assert")
         assert(expected.length === 0)
+        println("SAS: subscribe.complete.succeed")
         succeed
       })
+      println("SAS: wait for future")
       p.future.map(i => assert(i === 1))
     }
 

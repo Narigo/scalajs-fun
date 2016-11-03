@@ -10,7 +10,7 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-  "com.github.lukajcb" %%% "rxscala-js" % "0.4.0",
+  "com.github.lukajcb" %%% "rxscala-js" % "0.6.0",
   "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
 )
 

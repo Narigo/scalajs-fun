@@ -18,7 +18,7 @@ object Scycle {
 
     def adapt[T](originStream: Any, originStreamSubscribe: StreamSubscribe[T]): Observable[T]
 
-    def remember[T](stream: Any): Any
+    def remember[T](stream: Observable[T]): Observable[T]
 
     def makeSubject[T](): ScycleSubject[T]
 
