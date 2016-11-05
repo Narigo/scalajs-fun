@@ -30,7 +30,7 @@ class DomDriver(input: Observable[Hyperscript]) extends Observable[Hyperscript](
           src.isSameNode(target)
         })
 
-      obs.subscribe(observer)
+      obs.subscribe(observer): Unit
     })
   }
 
