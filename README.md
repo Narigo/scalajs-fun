@@ -205,3 +205,21 @@ During this video, we can see how to build a small application in Cycle.js that 
 sliders (input fields of type range), we should get a calculated value. The first thing we do is to build structure of 
 the resulting DOM tree.
 
+# Break!
+
+So after fiddling around a lot with the new `RxScala` library, I've switched to just try to write tests and port over 
+the CycleJS code to Scala by looking at the sources. I'm still not sure if that's a good idea or try to re-implement the
+core idea in ScalaJS. Especially as it uses quite a few `any` types and I'm unsure if that helps us at all here. On the 
+other hand, I guess I'd need to reinvent an API that resonates more with Scala developers, but will not really resemble
+the current CycleJS implementation (through JavaScript Objects - or in our case Scala Maps).
+
+Most probably I'll go on porting and then see if I can come up with a more Scala-ish API and rewrite it once I've 
+learned enough on the way.
+
+## Porting the code
+
+While porting the code, there was the need to add a small missing piece to the RxScala library. It did not fully support
+the dispose mechanism as CycleJS uses it. After fixing this, the library updated to the newest ScalaJS version and this
+port updated it as well. After updating, we need to install the `jsdom` NPM module through `npm i jsdom`, which seems to
+be new in order to get the tests for the still embedded virtual dom implementation working again.
+
