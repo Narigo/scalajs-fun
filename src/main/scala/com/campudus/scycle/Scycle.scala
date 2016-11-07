@@ -12,6 +12,7 @@ object Scycle {
 
     val stream: Any
     val observer: Observer[T]
+
   }
 
   trait StreamAdapter {

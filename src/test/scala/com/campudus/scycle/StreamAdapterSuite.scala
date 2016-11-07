@@ -2,10 +2,11 @@ package com.campudus.scycle
 
 import com.campudus.scycle.Scycle.{DisposeFunction, ScycleSubject, StreamAdapter, StreamSubscribe}
 import org.scalatest.AsyncFunSpec
-import rxscalajs.{Observable, Observer}
+import rxscalajs.{Observable, Observer, Subject}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Promise
+import scala.scalajs.js
 
 class StreamAdapterSuite extends AsyncFunSpec {
 
@@ -22,12 +23,23 @@ class StreamAdapterSuite extends AsyncFunSpec {
         } else {
           Observable.create((observer: Observer[T]) => {
             val dispose = originStreamSubscribe(originStream, observer)
-            dispose // FIXME this should do something when a new release is done
+            dispose
           })
         }
       }
       override def remember[T](stream: Observable[T]): Observable[T] = stream.publishReplay(1)
-      override def makeSubject[T](): ScycleSubject[T] = ???
+      override def makeSubject[T](): ScycleSubject[T] = {
+        val _stream: Subject[T] = Subject[T]()
+        val _observer: Observer[T] = new Observer[T] {
+          override def next(x: T): Unit = _stream.next(x)
+          override def error(err: js.Any): Unit = _stream.error(err)
+          override def complete(): Unit = _stream.complete()
+        }
+        new ScycleSubject[T] {
+          override val stream: Any = _stream
+          override val observer: Observer[T] = _observer
+        }
+      }
       override def isValidStream(stream: Any): Boolean = true
       override def streamSubscribe[T]: StreamSubscribe[T] = ???
 
