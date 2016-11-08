@@ -41,7 +41,15 @@ class StreamAdapterSuite extends AsyncFunSpec {
         }
       }
       override def isValidStream(stream: Any): Boolean = stream.isInstanceOf[Observable[_]]
-      override def streamSubscribe[T]: StreamSubscribe[T] = ???
+      override def streamSubscribe[T]: StreamSubscribe[T] = myStreamSubscribe[T]
+
+      private def myStreamSubscribe[T](stream: Any, observer: Observer[T]): DisposeFunction = {
+        val subscription = stream.asInstanceOf[Observable[T]].subscribe(observer)
+        val dispose: DisposeFunction = () => {
+          subscription.unsubscribe()
+        }
+        dispose
+      }
 
     }
 
@@ -68,6 +76,10 @@ class StreamAdapterSuite extends AsyncFunSpec {
         p.success(1)
       })
       p.future.map(i => assert(i === 1))
+    }
+
+    it("") {
+      assert(false)
     }
 
   }
