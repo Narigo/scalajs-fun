@@ -223,3 +223,8 @@ the dispose mechanism as CycleJS uses it. After fixing this, the library updated
 port updated it as well. After updating, we need to install the `jsdom` NPM module through `npm i jsdom`, which seems to
 be new in order to get the tests for the still embedded virtual dom implementation working again.
 
+After putting a lot of work into getting at least the adapter tests pass, it was time for a refactor. Refactoring the 
+current code would mean to be able to cut a lot of unnecessary checks that CycleJS has due to JavaScript. While doing 
+that, there are some type issues that are pretty tricky to fix, due to type erasure. I'm actually unsure if it is 
+possible to fix that at all right now...
+
