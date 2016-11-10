@@ -71,7 +71,6 @@ class StreamAdapterSuite extends AsyncFunSpec {
       }, (error: Any) => {
         p.failure(new RuntimeException(s"should not occur $error"))
       }, () => {
-        println("SAS: subscribe.complete.assert")
         assert(expected.length === 0)
         p.success(1)
       })
