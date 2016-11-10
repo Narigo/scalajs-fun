@@ -122,7 +122,7 @@ object Scycle {
     drivers.foldLeft(Map[String, Observable[_]]()) {
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
-          sinkProxies(name)._1.asInstanceOf[Observable[driverFn.In]],
+          sinkProxies(name)._1.asInstanceOf[Observable[driverFn.In]], // FIXME scala doesnt allow this
           streamAdapter,
           name
         )
