@@ -4,9 +4,11 @@ import com.campudus.scycle.Scycle.{DisposeFunction, ScycleSubject, StreamAdapter
 import org.scalatest.AsyncFunSpec
 import rxscalajs.{Observable, Observer, Subject}
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Promise
 import scala.scalajs.js
+import scala.scalajs.js.Any
 
 class StreamAdapterSuite extends AsyncFunSpec {
 
@@ -15,14 +17,14 @@ class StreamAdapterSuite extends AsyncFunSpec {
     object RxJSAdapter extends StreamAdapter {
 
       override def adapt[T](
-        originStream: Any,
+        originStream: Observable[_],
         originStreamSubscribe: StreamSubscribe[T]
       ): Observable[T] = {
-        if (this.isValidStream(originStream)) {
+        if (this.isValidStream[T](originStream)) {
           originStream.asInstanceOf[Observable[T]]
         } else {
           Observable.create((observer: Observer[T]) => {
-            val dispose = originStreamSubscribe(originStream, observer)
+            val dispose = originStreamSubscribe(originStream.asInstanceOf[Observable[T]], observer)
             dispose
           })
         }
@@ -36,14 +38,14 @@ class StreamAdapterSuite extends AsyncFunSpec {
           override def complete(): Unit = _stream.complete()
         }
         new ScycleSubject[T] {
-          override val stream: Any = _stream
+          override val stream: Observable[T] = _stream
           override val observer: Observer[T] = _observer
         }
       }
-      override def isValidStream(stream: Any): Boolean = stream.isInstanceOf[Observable[_]]
+      override def isValidStream[T](stream: Observable[_]): Boolean = stream.isInstanceOf[Observable[T]]
       override def streamSubscribe[T]: StreamSubscribe[T] = myStreamSubscribe[T]
 
-      private def myStreamSubscribe[T](stream: Any, observer: Observer[T]): DisposeFunction = {
+      private def myStreamSubscribe[T](stream: Observable[T], observer: Observer[T]): DisposeFunction = {
         val subscription = stream.asInstanceOf[Observable[T]].subscribe(observer)
         val dispose: DisposeFunction = () => {
           subscription.unsubscribe()
@@ -55,15 +57,15 @@ class StreamAdapterSuite extends AsyncFunSpec {
 
     it("should adapt from a dummy adapter to this adapter stream") {
       val p = Promise[Int]()
-      def arraySubscribe[A](array: Any, observer: Observer[A]): DisposeFunction = {
+      def arraySubscribe[A](array: Observable[_], observer: Observer[A]): DisposeFunction = {
         val arr = array.asInstanceOf[Array[A]]
         arr.foreach(observer.next)
         observer.complete()
         () => {}
       }
 
-      val dummyStream = Array(1, 2, 3)
-      val rxStream = RxJSAdapter.adapt(dummyStream, arraySubscribe[Int])
+      val dummyStream = Observable.just(1, 2, 3)
+      val rxStream = RxJSAdapter.adapt[Int](dummyStream, arraySubscribe[Int])
       assert(RxJSAdapter.isValidStream(rxStream) === true)
       val expected = ListBuffer(1, 2, 3)
       rxStream.subscribe((x: Int) => {
@@ -77,8 +79,34 @@ class StreamAdapterSuite extends AsyncFunSpec {
       p.future.map(i => assert(i === 1))
     }
 
-    it("") {
-      assert(false)
+    it("should create a subject which can be fed and subscribed to") {
+      val subject = RxJSAdapter.makeSubject[Int]()
+      assert(subject.stream.isInstanceOf[Subject[_]])
+      assert(RxJSAdapter.isValidStream(subject.stream))
+
+      val observer1Expected = mutable.Queue(1, 2, 3, 4)
+      val observer2Expected = mutable.Queue(3, 4)
+
+      RxJSAdapter.streamSubscribe(subject.stream, new Observer[Int] {
+        override def next(x: Int) = assert(x === observer1Expected.dequeue())
+        override def error(err: Any): Unit = fail("should not happen")
+        override def complete(): Unit = assert(observer1Expected.length === 0)
+      })
+
+      subject.observer.next(1)
+      subject.observer.next(2)
+
+      RxJSAdapter.streamSubscribe(subject.stream, new Observer[Int] {
+        override def next(x: Int) = assert(x === observer2Expected.dequeue())
+        override def error(err: Any): Unit = fail("should not happen")
+        override def complete(): Unit = assert(observer2Expected.length === 0)
+      })
+
+      subject.observer.next(3)
+      subject.observer.next(4)
+      subject.observer.complete()
+
+      assert(true)
     }
 
   }

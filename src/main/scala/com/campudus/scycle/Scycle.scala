@@ -6,37 +6,41 @@ object Scycle {
 
   type DisposeFunction = () => Unit
 
-  type StreamSubscribe[T] = (Any, Observer[T]) => DisposeFunction
+  type StreamSubscribe[T] = (Observable[T], Observer[T]) => DisposeFunction
 
   trait ScycleSubject[T] {
 
-    val stream: Any
+    val stream: Observable[T]
     val observer: Observer[T]
 
   }
 
   trait StreamAdapter {
 
-    def adapt[T](originStream: Any, originStreamSubscribe: StreamSubscribe[T]): Observable[T]
+    def adapt[T](originStream: Observable[_], originStreamSubscribe: StreamSubscribe[T]): Observable[T]
 
     def remember[T](stream: Observable[T]): Observable[T]
 
     def makeSubject[T](): ScycleSubject[T]
 
-    def isValidStream(stream: Any): Boolean
+    def isValidStream[T](stream: Observable[_]): Boolean
 
     def streamSubscribe[T]: StreamSubscribe[T]
 
   }
 
-  trait DriverFunction extends ((Any, StreamAdapter, String) => Any) {
+  trait DriverFunction[A, B] extends ((Observable[A], StreamAdapter, String) => Observable[B]) {
 
-    def apply(stream: Any, adapter: StreamAdapter, driverName: String): Any
+    type In = A
+    type Out = B
+
+    def apply(stream: Observable[A], adapter: StreamAdapter, driverName: String): Observable[B]
 
     val streamAdapter: Option[StreamAdapter] = None
+
   }
 
-  type DriversDefinition = Map[String, DriverFunction]
+  type DriversDefinition = Map[String, DriverFunction[_, _]]
   type Sources = Map[String, Observer[_]]
   type Sinks = Map[String, Observable[_]]
 
@@ -83,7 +87,7 @@ object Scycle {
         case (list, (name, fn)) =>
           println(s"fold left ($list, ($name, Some($fn)))")
           fn.apply(
-            sinks(name).asInstanceOf[Any], new Observer[Any] {
+            sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
 
               override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
 
@@ -112,13 +116,13 @@ object Scycle {
 
   private def callDrivers(
     drivers: DriversDefinition,
-    sinkProxies: Map[String, (Any, Observer[_])],
+    sinkProxies: Map[String, (Observable[_], Observer[_])],
     streamAdapter: StreamAdapter
   ): Any = {
-    drivers.foldLeft(Map[String, scala.Any]()) {
+    drivers.foldLeft(Map[String, Observable[_]]()) {
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
-          sinkProxies(name)._1,
+          sinkProxies(name)._1.asInstanceOf[Observable[driverFn.In]],
           streamAdapter,
           name
         )
@@ -137,9 +141,9 @@ object Scycle {
   private def makeSinkProxies(
     drivers: DriversDefinition,
     streamAdapter: StreamAdapter
-  ): Map[String, (Any, Observer[_])] = {
+  ): Map[String, (Observable[_], Observer[_])] = {
     println("inner makeSinkProxies")
-    drivers.foldLeft(Map[String, (Any, Observer[_])]()) {
+    drivers.foldLeft(Map[String, (Observable[_], Observer[_])]()) {
       case (m, (key, driver)) =>
         println("inner makeSinkProxies:foldLeft:holdSubject")
         val holdSubject = streamAdapter.makeSubject()
