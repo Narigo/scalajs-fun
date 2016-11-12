@@ -228,3 +228,7 @@ current code would mean to be able to cut a lot of unnecessary checks that Cycle
 that, there are some type issues that are pretty tricky to fix, due to type erasure. I'm actually unsure if it is 
 possible to fix that at all right now...
 
+Thinking more about this, it might be a good idea to try and find a more scala-ish way. Using Maps feels a bit strange 
+and, regarding the usage syntax in the tests, is not very user friendly. Maybe having a new type for `Sinks` and 
+`Sources` could help. Got to investigate this idea further.
+
