@@ -73,11 +73,9 @@ object Scycle {
 
   private def replicateMany(
     sinks: Sinks,
-    sinkProxies: Map[String, (Any, Observer[_])],
+    sinkProxies: Map[String, (Observable[_], Observer[_])],
     streamAdapter: StreamAdapter
   ): () => Unit = {
-
-    type X = Any
 
     println("in replicateMany")
     val disposeFunctions: List[DisposeFunction] = sinks.keys
@@ -87,18 +85,18 @@ object Scycle {
         case (list, (name, fn)) =>
           println(s"fold left ($list, ($name, Some($fn)))")
           fn.apply(
-            sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
+            sinks(name), new Observer[_] {
 
-              override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
+              override def next(x: _): Unit = sinkProxies(name)._2.asInstanceOf[Observer[_]].next(x)
 
               override def error(err: scala.scalajs.js.Any): Unit = {
                 logToConsoleError(err)
-                sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
+                sinkProxies(name)._2.asInstanceOf[Observer[_]].error(err)
               }
 
-              override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
+              override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[_]].complete()
 
-            }.asInstanceOf[Observer[Nothing]]
+            }.asInstanceOf[Observer[_]]
           ) :: list
         case (list, _) => list
       }
