@@ -77,6 +77,8 @@ object Scycle {
     streamAdapter: StreamAdapter
   ): () => Unit = {
 
+    type X = Any
+
     println("in replicateMany")
     val disposeFunctions: List[DisposeFunction] = sinks.keys
       .filter(name => sinkProxies.exists(_._1 == name))
@@ -85,18 +87,18 @@ object Scycle {
         case (list, (name, fn)) =>
           println(s"fold left ($list, ($name, Some($fn)))")
           fn.apply(
-            sinks(name), new Observer[_] {
+            sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
 
-              override def next(x: _): Unit = sinkProxies(name)._2.asInstanceOf[Observer[_]].next(x)
+              override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
 
               override def error(err: scala.scalajs.js.Any): Unit = {
                 logToConsoleError(err)
-                sinkProxies(name)._2.asInstanceOf[Observer[_]].error(err)
+                sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
               }
 
-              override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[_]].complete()
+              override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
 
-            }.asInstanceOf[Observer[_]]
+            }.asInstanceOf[Observer[Nothing]]
           ) :: list
         case (list, _) => list
       }
@@ -120,7 +122,7 @@ object Scycle {
     drivers.foldLeft(Map[String, Observable[_]]()) {
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
-          sinkProxies(name)._1.asInstanceOf[Observable[driverFn.In]], // FIXME scala doesnt allow this
+          sinkProxies(name)._1.asInstanceOf[Observable[Nothing]], // FIXME scala doesnt allow this
           streamAdapter,
           name
         )

@@ -2,7 +2,7 @@ package com.campudus.scycle
 
 import rxscalajs.Observable
 
-class Driver[A](input: Observable[A]) {
+class Driver[A](input: Observable[A]) extends Observable[A](input.inner) {
 
   println(s"create new Driver with $input")
 
