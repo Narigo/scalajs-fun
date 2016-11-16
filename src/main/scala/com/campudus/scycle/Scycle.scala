@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.adapters.RxJsAdapter
 import rxscalajs._
 
 object Scycle {
@@ -52,7 +53,7 @@ object Scycle {
     if (drivers.isEmpty) {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
-      val streamAdapter = null // FIXME this needs to be a real streamAdapter
+      val streamAdapter = RxJsAdapter
       println("Scycle.run:sinkProxies")
       val sinkProxies = makeSinkProxies(drivers, streamAdapter)
       println("Scycle.run:sources")
