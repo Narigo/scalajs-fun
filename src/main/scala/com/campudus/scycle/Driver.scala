@@ -1,27 +1,18 @@
 package com.campudus.scycle
 
-import rxscalajs.Observable
+import rxscalajs.{Observable, Observer}
 
-class Driver[A](input: Observable[A]) extends Observable[A](input.inner) {
+import scala.scalajs.js.Any
+
+class Driver[A](input: Observable[A], output: Observer[A]) extends Observable[A](input.inner) with Observer[A] {
 
   println(s"create new Driver with $input")
 
-  input.subscribe(a => {
-    println(s"got an A in Driver[A]=$a")
-  })
+  input.subscribe(output)
 
   override def toString: String = s"Driver:$input"
 
-}
-
-object Driver {
-
-  def apply[A](input: Observable[A]): Driver[A] = {
-    new Driver[A](
-      input.map(i => {
-        println(s"standard i=$i")
-        i
-      })
-    )
-  }
+  override def next(t: A): Unit = output.next(t)
+  override def error(err: Any): Unit = output.error(err)
+  override def complete(): Unit = output.complete()
 }

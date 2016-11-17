@@ -2,9 +2,10 @@ package com.campudus.scycle
 
 import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
 import org.scalatest.AsyncFunSpec
-import rxscalajs.{Observable, Subject}
+import rxscalajs.{Observable, Observer, Subject}
 
 import scala.concurrent.Promise
+import scala.scalajs.js.Any
 
 class ScycleSuite extends AsyncFunSpec {
 
@@ -76,7 +77,7 @@ class ScycleSuite extends AsyncFunSpec {
               nextI
             })
             println(s"call new Driver with $mapped")
-            new TestDriver(mapped)
+            new TestDriver(mapped, adapter.makeSubject[Int]().observer)
           }
 
         })
@@ -87,7 +88,7 @@ class ScycleSuite extends AsyncFunSpec {
 
 }
 
-class TestDriver(input: Observable[Int]) extends Driver(input) {
+class TestDriver(input: Observable[Int], output: Observer[Int]) extends Driver(input, output) {
 
   val int$: Observable[Int] = {
     val sub = Subject[Int]()
