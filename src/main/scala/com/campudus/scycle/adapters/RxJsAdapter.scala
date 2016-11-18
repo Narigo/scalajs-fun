@@ -39,6 +39,7 @@ object RxJsAdapter extends StreamAdapter {
   private def myStreamSubscribe[T](stream: Observable[T], observer: Observer[T]): DisposeFunction = {
     val subscription = stream.asInstanceOf[Observable[T]].subscribe(observer)
     val dispose: DisposeFunction = () => {
+      println(s"disposing streamSubscribe of $this")
       subscription.unsubscribe()
     }
     dispose

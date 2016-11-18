@@ -68,6 +68,7 @@ object Scycle {
         disposeReplication()
       }
 
+      println("Scycle.run:return result")
       result
     }
   }
@@ -82,12 +83,18 @@ object Scycle {
 
     println("in replicateMany")
     val disposeFunctions: List[DisposeFunction] = sinks.keys
-      .filter(name => sinkProxies.exists(_._1 == name))
-      .map(name => (name, streamAdapter.streamSubscribe))
+      .filter(name => {
+        println(s"filtering sinks that listen to name $name")
+        sinkProxies.exists(_._1 == name)
+      })
+      .map(name => {
+        println(s"mapping a sink called $name")
+        (name, streamAdapter.streamSubscribe)
+      })
       .foldLeft(List[DisposeFunction]()) {
         case (list, (name, fn)) =>
           println(s"fold left ($list, ($name, Some($fn)))")
-          fn.apply(
+          val result = fn.apply(
             sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
 
               override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
@@ -100,7 +107,9 @@ object Scycle {
               override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
 
             }.asInstanceOf[Observer[Nothing]]
-          ) :: list
+          )
+          println(s"result of fn = $result")
+          result :: list
         case (list, _) => list
       }
 
