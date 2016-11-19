@@ -31,11 +31,14 @@ class ScycleSuite extends AsyncFunSpec {
         },
         Map("test" -> {
           println("driver map, creating new DriverFunction")
-          val df = new DriverFunction[Int, Int] {
+          val df = new DriverFunction[String, Unit] {
 
-            def apply(stream: Observable[Int], adapter: StreamAdapter, driverName: String): Observable[Int] = {
-              stream.asInstanceOf[Observable[String]].map({ t => p.success(t) })
-              null
+            def apply(stream: Observable[String], adapter: StreamAdapter, driverName: String): Observable[Unit] = {
+              println(s"driver map -> DriverFunction.apply $stream $adapter $driverName")
+              stream.map(t => {
+                println("stream.map in DriverFunction.apply")
+                p.success(t)
+              })
             }
 
           }
