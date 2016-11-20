@@ -12,9 +12,12 @@ object RxJsAdapter extends StreamAdapter {
     originStreamSubscribe: StreamSubscribe[T]
   ): Observable[T] = {
     if (this.isValidStream[T](originStream)) {
+      println(s"RxJsAdapter.adapt:isValidStream($originStream) = true")
       originStream.asInstanceOf[Observable[T]]
     } else {
+      println(s"RxJsAdapter.adapt:isValidStream($originStream) = false")
       Observable.create((observer: Observer[T]) => {
+        println(s"RxJsAdapter.apadt:Observable.create($observer).originStreamSubscribe")
         val dispose = originStreamSubscribe(originStream.asInstanceOf[Observable[T]], observer)
         dispose
       })

@@ -50,9 +50,12 @@ object Scycle {
     drivers: DriversDefinition
   ): () => Unit = {
 
+    println("Scycle.run:start")
+
     if (drivers.isEmpty) {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
+      println("Scycle.run:streamAdapter")
       val streamAdapter = RxJsAdapter
       println("Scycle.run:sinkProxies")
       val sinkProxies = makeSinkProxies(drivers, streamAdapter)
@@ -63,6 +66,7 @@ object Scycle {
       println("Scycle.run:replicateMany")
       val disposeReplication = replicateMany(sinks, sinkProxies, streamAdapter)
 
+      println("Scycle.run:result")
       val result = () => {
         disposeSources(sources)
         disposeReplication()
@@ -79,38 +83,47 @@ object Scycle {
     streamAdapter: StreamAdapter
   ): () => Unit = {
 
+    println("Scycle.replicateMany")
     type X = Any
 
-    println("in replicateMany")
     val disposeFunctions: List[DisposeFunction] = sinks.keys
       .filter(name => {
-        println(s"filtering sinks that listen to name $name")
+        println(s"Scycle.replicateMany:disposeFunctions:filter -> $name")
         sinkProxies.exists(_._1 == name)
       })
       .map(name => {
-        println(s"mapping a sink called $name")
+        println(s"Scycle.replicateMany:disposeFunctions:map -> $name")
         (name, streamAdapter.streamSubscribe)
       })
       .foldLeft(List[DisposeFunction]()) {
         case (list, (name, fn)) =>
-          println(s"fold left ($list, ($name, Some($fn)))")
+          println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn))")
           val result = fn.apply(
             sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
 
-              override def next(x: Any): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
+              override def next(x: Any): Unit = {
+                println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):Observer.next($x)")
+                sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
+              }
 
               override def error(err: scala.scalajs.js.Any): Unit = {
+                println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):Observer.err($err)")
                 logToConsoleError(err)
                 sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
               }
 
-              override def complete(): Unit = sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
+              override def complete(): Unit = {
+                println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):Observer.complete()")
+                sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
+              }
 
             }.asInstanceOf[Observer[Nothing]]
           )
-          println(s"result of fn = $result")
+          println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):result = $result :: $list")
           result :: list
-        case (list, _) => list
+        case (list, ignored) =>
+          println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, $ignored) -> case2")
+          list
       }
 
     () => disposeFunctions.foreach(_.apply())
@@ -129,21 +142,26 @@ object Scycle {
     sinkProxies: Map[String, (Observable[_], Observer[_])],
     streamAdapter: StreamAdapter
   ): Any = {
+    println("Scycle.callDrivers")
     drivers.foldLeft(Map[String, Observable[_]]()) {
       case (m, (name, driverFn)) =>
+        println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn))")
         val driverOutput = driverFn(
           sinkProxies(name)._1.asInstanceOf[Observable[Nothing]], // FIXME scala doesnt allow this
           streamAdapter,
           name
         )
 
+        println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):driverOutput = $driverOutput")
         val result = driverFn.streamAdapter.map(sa => {
+          println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):$driverFn:streamAdapter.map")
           streamAdapter.adapt(
             driverOutput,
             sa.streamSubscribe
           )
         }).getOrElse(driverOutput)
 
+        println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)) -> add $name -> $result")
         m + (name -> result)
     }
   }
@@ -152,20 +170,20 @@ object Scycle {
     drivers: DriversDefinition,
     streamAdapter: StreamAdapter
   ): Map[String, (Observable[_], Observer[_])] = {
-    println("inner makeSinkProxies")
+    println("Scylce.makeSinkProxies")
     drivers.foldLeft(Map[String, (Observable[_], Observer[_])]()) {
       case (m, (key, driver)) =>
-        println("inner makeSinkProxies:foldLeft:holdSubject")
+        println("Sycle.makeSinkProxies:foldLeft:holdSubject")
         val holdSubject = streamAdapter.makeSubject()
-        println("inner makeSinkProxies:foldLeft:driverStreamAdapter")
+        println("Sycle.makeSinkProxies:foldLeft:driverStreamAdapter")
         val driverStreamAdapter = drivers.get(key).flatMap(_.streamAdapter).getOrElse(streamAdapter)
 
-        println("inner makeSinkProxies:foldLeft:stream")
+        println("Sycle.makeSinkProxies:foldLeft:stream")
         val stream = driverStreamAdapter.adapt(holdSubject.stream, streamAdapter.streamSubscribe)
-        println("inner makeSinkProxies:foldLeft:observer")
+        println("Sycle.makeSinkProxies:foldLeft:observer")
         val observer = holdSubject.observer
 
-        println("inner makeSinkProxies:foldLeft:return")
+        println("Sycle.makeSinkProxies:foldLeft:return")
         m + (key -> (stream, observer))
     }
   }

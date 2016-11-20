@@ -16,37 +16,37 @@ class ScycleSuite extends AsyncFunSpec {
     }
 
     it("can read data from a logic") {
+      println("TEST START can read data from a logic")
       val inputText = "Hello World!"
       val p = Promise[String]
-      println("before run")
       Scycle.run(
         drivers => {
-          println(s"main function returning a map from $drivers")
+          println(s"ScycleSuite.main($drivers)")
           Map("test" -> {
-            println("main function, returning Observable.just(inputText)")
+            println(s"ScycleSuite.main($drivers):test")
             val obs = Observable.just(inputText)
-            println("created observable in main fn, returning it")
+            println(s"ScycleSuite.main($drivers):test -> return $obs")
             obs
           })
         },
         Map("test" -> {
-          println("driver map, creating new DriverFunction")
+          println(s"ScycleSuite.drivers(test)")
           val df = new DriverFunction[String, Unit] {
 
             def apply(stream: Observable[String], adapter: StreamAdapter, driverName: String): Observable[Unit] = {
-              println(s"driver map -> DriverFunction.apply $stream $adapter $driverName")
+              println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName)")
               stream.map(t => {
-                println("stream.map in DriverFunction.apply")
+                println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName):map($t)")
                 p.success(t)
               })
             }
 
           }
-          println("DriverFunction created in driver map, returning it")
+          println(s"ScycleSuite.drivers(test):return DriverFunction")
           df
         })
       )
-      println("wait for future")
+      println(s"ScycleSuite: Wait for future")
       p.future.map(text => {
         println("asserting text===inputText")
         assert(text === inputText)
