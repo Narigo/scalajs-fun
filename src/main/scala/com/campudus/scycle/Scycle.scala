@@ -57,13 +57,13 @@ object Scycle {
     } else {
       println("Scycle.run:streamAdapter")
       val streamAdapter = RxJsAdapter
-      println("Scycle.run:sinkProxies")
+      println(s"Scycle.run:sinkProxies - streamAdapter=$streamAdapter")
       val sinkProxies = makeSinkProxies(drivers, streamAdapter)
-      println("Scycle.run:sources")
+      println(s"Scycle.run:sources - sinkProxies=$sinkProxies")
       val sources = callDrivers(drivers, sinkProxies, streamAdapter).asInstanceOf[Sources]
-      println("Scycle.run:sinks")
+      println(s"Scycle.run:sinks - sources=$sources")
       val sinks = mainFn(sources)
-      println("Scycle.run:replicateMany")
+      println(s"Scycle.run:replicateMany - sinks=$sinks")
       val disposeReplication = replicateMany(sinks, sinkProxies, streamAdapter)
 
       println("Scycle.run:result")
@@ -144,6 +144,7 @@ object Scycle {
 
         println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):driverOutput = $driverOutput")
         val driverStreamAdapter = driverFn.streamAdapter
+        println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):driverStreamAdapter = $driverStreamAdapter")
         val result = driverStreamAdapter.map(dsa => {
           println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):$driverFn:streamAdapter.map")
           streamAdapter.adapt(
@@ -161,7 +162,7 @@ object Scycle {
     drivers: DriversDefinition,
     streamAdapter: StreamAdapter
   ): Map[String, (Observable[_], Observer[_])] = {
-    println("Scylce.makeSinkProxies")
+    println("Scycle.makeSinkProxies")
     drivers.foldLeft(Map[String, (Observable[_], Observer[_])]()) {
       case (m, (key, driver)) =>
         println("Scycle.makeSinkProxies:foldLeft:holdSubject")
