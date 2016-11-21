@@ -86,45 +86,35 @@ object Scycle {
     println("Scycle.replicateMany")
     type X = Any
 
-    val disposeFunctions: List[DisposeFunction] = sinks.keys
+    val disposeFunctions = sinks.keys
       .filter(name => {
         println(s"Scycle.replicateMany:disposeFunctions:filter -> $name")
         sinkProxies.exists(_._1 == name)
       })
       .map(name => {
         println(s"Scycle.replicateMany:disposeFunctions:map -> $name")
-        (name, streamAdapter.streamSubscribe)
+        streamAdapter.streamSubscribe(
+          sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
+
+            override def next(x: Any): Unit = {
+              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x)")
+              sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
+            }
+
+            override def error(err: scala.scalajs.js.Any): Unit = {
+              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err)")
+              logToConsoleError(err)
+              sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
+            }
+
+            override def complete(): Unit = {
+              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete()")
+              sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
+            }
+
+          }.asInstanceOf[Observer[Nothing]]
+        )
       })
-      .foldLeft(List[DisposeFunction]()) {
-        case (list, (name, fn)) =>
-          println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn))")
-          val result = fn.apply(
-            sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
-
-              override def next(x: Any): Unit = {
-                println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):Observer.next($x)")
-                sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
-              }
-
-              override def error(err: scala.scalajs.js.Any): Unit = {
-                println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):Observer.err($err)")
-                logToConsoleError(err)
-                sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
-              }
-
-              override def complete(): Unit = {
-                println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):Observer.complete()")
-                sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
-              }
-
-            }.asInstanceOf[Observer[Nothing]]
-          )
-          println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, ($name, Some($fn)):result = $result :: $list")
-          result :: list
-        case (list, ignored) =>
-          println(s"Scycle.replicateMany:disposeFunctions:foldLeft($list, $ignored) -> case2")
-          list
-      }
 
     () => disposeFunctions.foreach(_.apply())
   }
@@ -147,17 +137,18 @@ object Scycle {
       case (m, (name, driverFn)) =>
         println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn))")
         val driverOutput = driverFn(
-          sinkProxies(name)._1.asInstanceOf[Observable[Nothing]], // FIXME scala doesnt allow this
+          sinkProxies(name)._1.asInstanceOf[Observable[Nothing]],
           streamAdapter,
           name
         )
 
         println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):driverOutput = $driverOutput")
-        val result = driverFn.streamAdapter.map(sa => {
+        val driverStreamAdapter = driverFn.streamAdapter
+        val result = driverStreamAdapter.map(dsa => {
           println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)):$driverFn:streamAdapter.map")
           streamAdapter.adapt(
             driverOutput,
-            sa.streamSubscribe
+            dsa.streamSubscribe
           )
         }).getOrElse(driverOutput)
 
