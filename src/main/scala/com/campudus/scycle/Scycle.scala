@@ -94,9 +94,9 @@ object Scycle {
       .map(name => {
         println(s"Scycle.replicateMany:disposeFunctions:map -> $name")
         streamAdapter.streamSubscribe(
-          sinks(name).asInstanceOf[Observable[Nothing]], new Observer[Any] {
+          sinks(name).asInstanceOf[Observable[Nothing]], new Observer[X] {
 
-            override def next(x: Any): Unit = {
+            override def next(x: X): Unit = {
               println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x)")
               sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
             }
@@ -112,7 +112,7 @@ object Scycle {
               sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
             }
 
-          }.asInstanceOf[Observer[Nothing]]
+          }.asInstanceOf[Observer[X]]
         )
       })
 
@@ -131,7 +131,7 @@ object Scycle {
     drivers: DriversDefinition,
     sinkProxies: Map[String, (Observable[_], Observer[_])],
     streamAdapter: StreamAdapter
-  ): Any = {
+  ): Map[String, Observable[_]] = {
     println("Scycle.callDrivers")
     drivers.foldLeft(Map[String, Observable[_]]()) {
       case (m, (name, driverFn)) =>
