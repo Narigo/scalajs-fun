@@ -91,16 +91,16 @@ class ScycleSuite extends AsyncFunSpec {
 
 }
 
-class TestDriver(input: Observable[Int], output: Observer[Int]) extends Driver(input, output) {
-
-  val int$: Observable[Int] = {
-    val sub = Subject[Int]()
-    input.subscribe(sub)
-    sub.subscribe(ev => {
-      println(s"hello sub int$$=$ev")
-    })
-    sub
-  }
-
-  override def toString = s"TestDriver($input)"
-}
+//class TestDriver(input: Observable[Int], output: Observer[Int]) extends Driver(input, output) {
+//
+//  val int$: Observable[Int] = {
+//    val sub = Subject[Int]()
+//    input.subscribe(sub)
+//    sub.subscribe(ev => {
+//      println(s"hello sub int$$=$ev")
+//    })
+//    sub
+//  }
+//
+//  override def toString = s"TestDriver($input)"
+//}

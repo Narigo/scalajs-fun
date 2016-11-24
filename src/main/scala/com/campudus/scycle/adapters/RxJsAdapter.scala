@@ -26,11 +26,7 @@ object RxJsAdapter extends StreamAdapter {
   override def remember[T](stream: Observable[T]): Observable[T] = stream.publishReplay(1)
   override def makeSubject[T](): ScycleSubject[T] = {
     val _stream: Subject[T] = Subject[T]()
-    val _observer: Observer[T] = new Observer[T] {
-      override def next(x: T): Unit = _stream.next(x)
-      override def error(err: js.Any): Unit = _stream.error(err)
-      override def complete(): Unit = _stream.complete()
-    }
+    val _observer: Observer[T] = new StreamObserver(_stream)
     new ScycleSubject[T] {
       override val stream: Observable[T] = _stream
       override val observer: Observer[T] = _observer
@@ -48,4 +44,10 @@ object RxJsAdapter extends StreamAdapter {
     dispose
   }
 
+}
+
+class StreamObserver[T](_stream: Observer[T]) extends Observer[T] {
+  override def next(x: T): Unit = _stream.next(x)
+  override def error(err: js.Any): Unit = _stream.error(err)
+  override def complete(): Unit = _stream.complete()
 }
