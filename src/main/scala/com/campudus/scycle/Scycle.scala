@@ -99,20 +99,20 @@ object Scycle {
             override def next(x: X): Unit = {
               println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x)")
               sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x) went into sinkProxy")
+              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x) went into sinkProxy ${sinkProxies(name)._2}")
             }
 
             override def error(err: scala.scalajs.js.Any): Unit = {
               println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err)")
               logToConsoleError(err)
               sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err) went into sinkProxy")
+              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err) went into sinkProxy ${sinkProxies(name)._2}")
             }
 
             override def complete(): Unit = {
               println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete()")
               sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete() went into sinkProxy")
+              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete() went into sinkProxy ${sinkProxies(name)._2}")
             }
 
           }.asInstanceOf[Observer[X]]
@@ -135,10 +135,11 @@ object Scycle {
     sinkProxies: Map[String, (Observable[_], Observer[_])],
     streamAdapter: StreamAdapter
   ): Map[String, Observable[_]] = {
-    println("Scycle.callDrivers")
+    println(s"Scycle.callDrivers($drivers, $sinkProxies, $streamAdapter)")
     drivers.foldLeft(Map[String, Observable[_]]()) {
       case (m, (name, driverFn)) =>
         println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn))")
+        println(s"Scycle.callDrivers:driverFn(${sinkProxies(name)._1}, $streamAdapter, $name)")
         val driverOutput = driverFn(
           sinkProxies(name)._1.asInstanceOf[Observable[Nothing]],
           streamAdapter,

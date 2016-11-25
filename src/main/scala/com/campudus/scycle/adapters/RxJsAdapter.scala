@@ -28,7 +28,7 @@ object RxJsAdapter extends StreamAdapter {
     val _stream: Subject[T] = Subject[T]()
     val _observer: Observer[T] = new StreamObserver(_stream)
     new ScycleSubject[T] {
-      override val stream: Observable[T] = _stream
+      override val stream: Observable[T] = _stream.asObservable()
       override val observer: Observer[T] = _observer
     }
   }

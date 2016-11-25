@@ -42,7 +42,7 @@ class ScycleSuite extends AsyncFunSpec {
             }
 
           }
-          println(s"ScycleSuite.drivers(test):return DriverFunction")
+          println(s"ScycleSuite.drivers(test):return DriverFunction = $df")
           df
         })
       )
