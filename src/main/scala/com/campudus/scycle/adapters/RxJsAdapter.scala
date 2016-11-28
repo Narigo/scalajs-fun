@@ -17,8 +17,9 @@ object RxJsAdapter extends StreamAdapter {
     } else {
       println(s"RxJsAdapter.adapt:isValidStream($originStream) = false")
       Observable.create((observer: Observer[T]) => {
-        println(s"RxJsAdapter.apadt:Observable.create($observer).originStreamSubscribe")
+        println(s"RxJsAdapter.adapt:Observable.create($observer).originStreamSubscribe")
         val dispose = originStreamSubscribe(originStream.asInstanceOf[Observable[T]], observer)
+        println(s"RxJsAdapter.adapt:Observable.create($observer).dispose = $dispose")
         dispose
       })
     }
@@ -36,11 +37,14 @@ object RxJsAdapter extends StreamAdapter {
   override def streamSubscribe[T]: StreamSubscribe[T] = myStreamSubscribe[T]
 
   private def myStreamSubscribe[T](stream: Observable[T], observer: Observer[T]): DisposeFunction = {
-    val subscription = stream.asInstanceOf[Observable[T]].subscribe(observer)
+    println("RxJsAdapter.streamSubscribe:subscription")
+    val subscription = stream.subscribe(observer)
+    println(s"RxJsAdapter.streamSubscribe:dispose -> $subscription.unsubscribe")
     val dispose: DisposeFunction = () => {
       println(s"disposing streamSubscribe of $this")
       subscription.unsubscribe()
     }
+    println(s"RxJsAdapter.streamSubscribe:return $dispose")
     dispose
   }
 
