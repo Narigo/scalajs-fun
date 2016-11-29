@@ -41,7 +41,7 @@ object RxJsAdapter extends StreamAdapter {
     val subscription = stream.subscribe(observer)
     println(s"RxJsAdapter.streamSubscribe:dispose -> $subscription.unsubscribe")
     val dispose: DisposeFunction = () => {
-      println(s"disposing streamSubscribe of $this")
+      println(s"RxJsAdapter.streamSubscribe:dispose -> disposing streamSubscribe of $this")
       subscription.unsubscribe()
     }
     println(s"RxJsAdapter.streamSubscribe:return $dispose")

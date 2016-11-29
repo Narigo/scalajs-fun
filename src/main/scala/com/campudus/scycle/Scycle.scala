@@ -157,6 +157,10 @@ object Scycle {
           )
         }).getOrElse(driverOutput)
 
+        result.subscribe(obs => {
+          println(s"Scycle.callDrivers:result.subscribe -> $obs")
+        })
+
         println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn)) -> add $name -> $result")
         m + (name -> result)
     }
