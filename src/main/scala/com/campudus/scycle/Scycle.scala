@@ -22,7 +22,7 @@ object Scycle {
 
     def remember[T](stream: Observable[T]): Observable[T]
 
-    def makeSubject[T](): ScycleSubject[T]
+    def makeSubject[T](): Subject[T]
 
     def isValidStream[T](stream: Observable[_]): Boolean
 
@@ -79,11 +79,11 @@ object Scycle {
 
   private def replicateMany(
     sinks: Sinks,
-    sinkProxies: Map[String, (Observable[_], Observer[_])],
+    sinkProxies: Map[String, Subject[_]],
     streamAdapter: StreamAdapter
   ): () => Unit = {
 
-    println("Scycle.replicateMany")
+    println(s"Scycle.replicateMany($sinks, $sinkProxies, $streamAdapter)")
     type X = Any
 
     val disposeFunctions = sinks.keys
@@ -94,28 +94,36 @@ object Scycle {
       .map(name => {
         println(s"Scycle.replicateMany:disposeFunctions:map -> $name")
         streamAdapter.streamSubscribe(
-          sinks(name).asInstanceOf[Observable[Nothing]], new Observer[X] {
-
-            override def next(x: X): Unit = {
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x)")
-              sinkProxies(name)._2.asInstanceOf[Observer[X]].next(x)
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x) went into sinkProxy ${sinkProxies(name)._2}")
-            }
-
-            override def error(err: scala.scalajs.js.Any): Unit = {
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err)")
-              logToConsoleError(err)
-              sinkProxies(name)._2.asInstanceOf[Observer[X]].error(err)
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err) went into sinkProxy ${sinkProxies(name)._2}")
-            }
-
-            override def complete(): Unit = {
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete()")
-              sinkProxies(name)._2.asInstanceOf[Observer[X]].complete()
-              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete() went into sinkProxy ${sinkProxies(name)._2}")
-            }
-
-          }.asInstanceOf[Observer[X]]
+          sinks(name).asInstanceOf[Observable[Nothing]],
+          sinkProxies(name).asInstanceOf[Observer[X]]
+//          new Observer[X] {
+//
+//            override def next(x: X): Unit = {
+//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x)")
+//              sinkProxies(name).asInstanceOf[Observer[X]].next(x)
+//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x) went into sinkProxy ${
+//                sinkProxies(name)
+//              }")
+//            }
+//
+//            override def error(err: scala.scalajs.js.Any): Unit = {
+//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err)")
+//              logToConsoleError(err)
+//              sinkProxies(name).asInstanceOf[Observer[X]].error(err)
+//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err) went into sinkProxy ${
+//                sinkProxies(name)
+//              }")
+//            }
+//
+//            override def complete(): Unit = {
+//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete()")
+//              sinkProxies(name).asInstanceOf[Observer[X]].complete()
+//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete() went into sinkProxy ${
+//                sinkProxies(name)
+//              }")
+//            }
+//
+//          }.asInstanceOf[Observer[X]]
         )
       })
 
@@ -132,16 +140,16 @@ object Scycle {
 
   private def callDrivers(
     drivers: DriversDefinition,
-    sinkProxies: Map[String, (Observable[_], Observer[_])],
+    sinkProxies: Map[String, Subject[_]],
     streamAdapter: StreamAdapter
   ): Map[String, Observable[_]] = {
     println(s"Scycle.callDrivers($drivers, $sinkProxies, $streamAdapter)")
-    drivers.foldLeft(Map[String, Observable[_]]()) {
+    drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
         println(s"Scycle.callDrivers:foldLeft($m, ($name, $driverFn))")
-        println(s"Scycle.callDrivers:driverFn(${sinkProxies(name)._1}, $streamAdapter, $name)")
+        println(s"Scycle.callDrivers:driverFn(${sinkProxies(name)}, $streamAdapter, $name)")
         val driverOutput = driverFn(
-          sinkProxies(name)._1.asInstanceOf[Observable[Nothing]],
+          sinkProxies(name).asInstanceOf[Observable[Nothing]],
           streamAdapter,
           name
         )
@@ -169,9 +177,9 @@ object Scycle {
   private def makeSinkProxies(
     drivers: DriversDefinition,
     streamAdapter: StreamAdapter
-  ): Map[String, (Observable[_], Observer[_])] = {
+  ): Map[String, Subject[_]] = {
     println("Scycle.makeSinkProxies")
-    drivers.foldLeft(Map[String, (Observable[_], Observer[_])]()) {
+    drivers.foldLeft(Map[String, Subject[_]]()){
       case (m, (key, driver)) =>
         println("Scycle.makeSinkProxies:foldLeft:holdSubject")
         val holdSubject = streamAdapter.makeSubject()
@@ -179,12 +187,12 @@ object Scycle {
         val driverStreamAdapter = drivers.get(key).flatMap(_.streamAdapter).getOrElse(streamAdapter)
 
         println("Scycle.makeSinkProxies:foldLeft:stream")
-        val stream = driverStreamAdapter.adapt(holdSubject.stream, streamAdapter.streamSubscribe)
+        val stream = driverStreamAdapter.adapt(holdSubject, streamAdapter.streamSubscribe)
         println("Scycle.makeSinkProxies:foldLeft:observer")
-        val observer = holdSubject.observer
+        val observer = holdSubject
 
         println("Scycle.makeSinkProxies:foldLeft:return")
-        m + (key -> (stream, observer))
+        m + (key -> holdSubject)
     }
   }
 

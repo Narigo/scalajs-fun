@@ -40,30 +40,30 @@ class StreamAdapterSuite extends AsyncFunSpec {
 
     it("should create a subject which can be fed and subscribed to") {
       val subject = RxJsAdapter.makeSubject[Int]()
-      assert(subject.stream.isInstanceOf[Subject[_]])
-      assert(RxJsAdapter.isValidStream(subject.stream))
+      assert(subject.isInstanceOf[Subject[_]])
+      assert(RxJsAdapter.isValidStream(subject))
 
       val observer1Expected = mutable.Queue(1, 2, 3, 4)
       val observer2Expected = mutable.Queue(3, 4)
 
-      RxJsAdapter.streamSubscribe(subject.stream, new Observer[Int] {
+      RxJsAdapter.streamSubscribe(subject, new Observer[Int] {
         override def next(x: Int) = assert(x === observer1Expected.dequeue())
         override def error(err: Any): Unit = fail("should not happen")
         override def complete(): Unit = assert(observer1Expected.length === 0)
       })
 
-      subject.observer.next(1)
-      subject.observer.next(2)
+      subject.next(1)
+      subject.next(2)
 
-      RxJsAdapter.streamSubscribe(subject.stream, new Observer[Int] {
+      RxJsAdapter.streamSubscribe(subject, new Observer[Int] {
         override def next(x: Int) = assert(x === observer2Expected.dequeue())
         override def error(err: Any): Unit = fail("should not happen")
         override def complete(): Unit = assert(observer2Expected.length === 0)
       })
 
-      subject.observer.next(3)
-      subject.observer.next(4)
-      subject.observer.complete()
+      subject.next(3)
+      subject.next(4)
+      subject.complete()
 
       assert(true)
     }

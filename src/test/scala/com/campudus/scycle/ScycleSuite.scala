@@ -9,48 +9,48 @@ import scala.concurrent.Promise
 class ScycleSuite extends AsyncFunSpec {
 
   describe("Scycle"){
-    //    it("should not work with an empty main") {
-    //      val thrown = intercept[IllegalArgumentException](Scycle.run(Map.empty, Map.empty))
-    //      assert(thrown.getMessage.contains("driver"))
-    //    }
-    //
-    //    it("can read data from a logic") {
-    //      println("TEST START can read data from a logic")
-    //      val inputText = "Hello World!"
-    //      val p = Promise[String]
-    //      Scycle.run(
-    //        drivers => {
-    //          println(s"ScycleSuite.main($drivers)")
-    //          Map("test" -> {
-    //            println(s"ScycleSuite.main($drivers):test")
-    //            val obs = Observable.just(inputText)
-    //            println(s"ScycleSuite.main($drivers):test -> return $obs")
-    //            obs
-    //          })
-    //        },
-    //        Map("test" -> {
-    //          println(s"ScycleSuite.drivers(test)")
-    //          val df = new DriverFunction[String, Unit] {
-    //
-    //            def apply(stream: Observable[String], adapter: StreamAdapter, driverName: String): Observable[Unit] = {
-    //              println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName)")
-    //              stream.map(t => {
-    //                println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName):map($t)")
-    //                p.success(t)
-    //              })
-    //            }
-    //
-    //          }
-    //          println(s"ScycleSuite.drivers(test):return DriverFunction = $df")
-    //          df
-    //        })
-    //      )
-    //      println(s"ScycleSuite: Wait for future")
-    //      p.future.map(text => {
-    //        println("asserting text===inputText")
-    //        assert(text === inputText)
-    //      })
-    //    }
+    it("should not work with an empty main"){
+      val thrown = intercept[IllegalArgumentException](Scycle.run(Map.empty, Map.empty))
+      assert(thrown.getMessage.contains("driver"))
+    }
+
+    it("can read data from a logic"){
+      println("TEST START can read data from a logic")
+      val inputText = "Hello World!"
+      val p = Promise[String]
+      Scycle.run(
+        drivers => {
+          println(s"ScycleSuite.main($drivers)")
+          Map("test" -> {
+            println(s"ScycleSuite.main($drivers):test")
+            val obs = Observable.just(inputText)
+            println(s"ScycleSuite.main($drivers):test -> return $obs")
+            obs
+          })
+        },
+        Map("test" -> {
+          println(s"ScycleSuite.drivers(test)")
+          val df = new DriverFunction[String, Unit] {
+
+            def apply(stream: Observable[String], adapter: StreamAdapter, driverName: String): Observable[Unit] = {
+              println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName)")
+              stream.map(t => {
+                println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName):map($t)")
+                p.success(t)
+              })
+            }
+
+          }
+          println(s"ScycleSuite.drivers(test):return DriverFunction = $df")
+          df
+        })
+      )
+      println(s"ScycleSuite: Wait for future")
+      p.future.map(text => {
+        println("asserting text===inputText")
+        assert(text === inputText)
+      })
+    }
 
     it("can cycle"){
       val p = Promise[Int]
@@ -76,7 +76,7 @@ class ScycleSuite extends AsyncFunSpec {
               println(s"ScycleSuite:drivers:stream.map -> i=$i, nextI=$nextI")
               nextI
             })
-            val testDriver = new TestDriver(mapped, adapter.makeSubject[Int]().observer)
+            val testDriver = new TestDriver(mapped, adapter.makeSubject[Int]())
             println(s"ScycleSuite:drivers:returning TestDriver = $testDriver")
             testDriver
           }
