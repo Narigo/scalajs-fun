@@ -92,39 +92,13 @@ object Scycle {
         sinkProxies.exists(_._1 == name)
       })
       .map(name => {
-        println(s"Scycle.replicateMany:disposeFunctions:map -> $name")
-        streamAdapter.streamSubscribe(
+        println(s"Scycle.replicateMany:disposeFunctions:map -> $name, ${sinks(name)}, ${sinkProxies(name)}")
+        val dpf = streamAdapter.streamSubscribe(
           sinks(name).asInstanceOf[Observable[Nothing]],
           sinkProxies(name).asInstanceOf[Observer[X]]
-//          new Observer[X] {
-//
-//            override def next(x: X): Unit = {
-//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x)")
-//              sinkProxies(name).asInstanceOf[Observer[X]].next(x)
-//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.next($x) went into sinkProxy ${
-//                sinkProxies(name)
-//              }")
-//            }
-//
-//            override def error(err: scala.scalajs.js.Any): Unit = {
-//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err)")
-//              logToConsoleError(err)
-//              sinkProxies(name).asInstanceOf[Observer[X]].error(err)
-//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.err($err) went into sinkProxy ${
-//                sinkProxies(name)
-//              }")
-//            }
-//
-//            override def complete(): Unit = {
-//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete()")
-//              sinkProxies(name).asInstanceOf[Observer[X]].complete()
-//              println(s"Scycle.replicateMany:disposeFunctions:map($name):Observer.complete() went into sinkProxy ${
-//                sinkProxies(name)
-//              }")
-//            }
-//
-//          }.asInstanceOf[Observer[X]]
         )
+        sinkProxies(name).asInstanceOf[Observer[X]].next(null)
+        dpf
       })
 
     () => disposeFunctions.foreach(_.apply())
