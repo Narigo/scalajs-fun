@@ -1,26 +1,37 @@
 package com.campudus.scycle.dom
 
+import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
 import com.campudus.scycle.vdom.VirtualDom
 import org.scalajs.dom._
 import rxscalajs._
 
-class DomDriver(input: Observable[Hyperscript]) extends Observable[Hyperscript](input.inner) {
+class DomDriver extends DriverFunction[Hyperscript, Hyperscript] {
 
-  println(s"apply domdriver")
+  private val selectedEvents: Subject[Hyperscript] = Subject[Hyperscript]()
 
-  input.subscribe(
-    hs => {
-      val container = document.querySelector("#app")
-      val diff = VirtualDom.diff(VirtualDom(container), hs)
-      VirtualDom.update(container, diff)
-    }
-  )
+  override def apply(
+    stream: Observable[Hyperscript],
+    adapter: StreamAdapter,
+    driverName: String
+  ): Observable[Hyperscript] = {
+    println(s"apply domdriver")
+
+    stream.subscribe(
+      hs => {
+        val container = document.querySelector("#app")
+        val diff = VirtualDom.diff(VirtualDom(container), hs)
+        VirtualDom.update(container, diff)
+      }
+    )
+
+    selectedEvents
+  }
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
     val elem = document.querySelector("#app")
     console.log("searching for", what, eventName, elem)
 
-    Observable.create(observer => {
+    Observable.create[Event](observer => {
       val obs = Observable
         .fromEvent(elem, eventName)
         .filter(ev => {
@@ -33,11 +44,5 @@ class DomDriver(input: Observable[Hyperscript]) extends Observable[Hyperscript](
       obs.subscribe(observer): Unit
     })
   }
-
-}
-
-object DomDriver {
-
-  def apply(input: Observable[_]): DomDriver = new DomDriver(input.asInstanceOf[Observable[Hyperscript]])
 
 }

@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom._
 import rxscalajs._
 
@@ -14,14 +15,22 @@ object ScycleApp extends JSApp {
   def main(): Unit = {
     println("main export")
 
-    //    Scycle.run(logic, drivers)
+    Scycle.run(logic, drivers)
   }
 
-  val drivers: Map[String, Observable[_] => Observable[_]] = Map(
-    "dom" -> DomDriver.apply _
+  val drivers: DriversDefinition = Map[String, DriverFunction[_, _]](
+    "dom" -> new DriverFunction[Hyperscript, Hyperscript] {
+      override def apply(
+        stream: Observable[Hyperscript],
+        adapter: StreamAdapter,
+        driverName: String
+      ): Observable[Hyperscript] = {
+        ???
+      }
+    }
   )
 
-  def logic(drivers: (Map[String, Observable[_]])): Map[String, Observable[_]] = {
+  def logic(drivers: Sources): Sinks = {
     println("called logic")
     val domDriver$ = drivers("dom").asInstanceOf[Observable[DomDriver]]
     val changeWeight$ = domDriver$.flatMap(
