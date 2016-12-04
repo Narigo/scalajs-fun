@@ -5,15 +5,15 @@ import com.campudus.scycle.vdom.VirtualDom
 import org.scalajs.dom._
 import rxscalajs._
 
-class DomDriver extends DriverFunction[Hyperscript, Hyperscript] {
+class DomDriver extends DriverFunction[Hyperscript, Event] {
 
-  private val selectedEvents: Subject[Hyperscript] = Subject[Hyperscript]()
+  private val selectedEvents: Subject[Event] = Subject()
 
   override def apply(
     stream: Observable[Hyperscript],
     adapter: StreamAdapter,
     driverName: String
-  ): Observable[Hyperscript] = {
+  ): Observable[Event] = {
     println(s"apply domdriver")
 
     stream.subscribe(
@@ -31,18 +31,18 @@ class DomDriver extends DriverFunction[Hyperscript, Hyperscript] {
     val elem = document.querySelector("#app")
     console.log("searching for", what, eventName, elem)
 
-    Observable.create[Event](observer => {
-      val obs = Observable
-        .fromEvent(elem, eventName)
-        .filter(ev => {
-          val src = ev.srcElement
-          val target = document.querySelector(what)
-          console.log("hello", what, eventName, src.isSameNode(target))
-          src.isSameNode(target)
-        })
-
-      obs.subscribe(observer): Unit
-    })
+    Observable
+      .fromEvent(elem, eventName)
+      .filter(ev => {
+        val src = ev.srcElement
+        val target = document.querySelector(what)
+        console.log("hello", what, eventName, src.isSameNode(target))
+        src.isSameNode(target)
+      })
+      .flatMap(ev => {
+        selectedEvents.next(ev)
+        selectedEvents
+      })
   }
 
 }
