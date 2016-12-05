@@ -154,11 +154,11 @@ object Scycle {
   ): Map[String, Subject[_]] = {
     println("Scycle.makeSinkProxies")
     drivers.foldLeft(Map[String, Subject[_]]()){
-      case (m, (key, driver)) =>
+      case (m, (name, _)) =>
         println("Scycle.makeSinkProxies:foldLeft:holdSubject")
         val holdSubject = streamAdapter.makeSubject()
         println("Scycle.makeSinkProxies:foldLeft:driverStreamAdapter")
-        val driverStreamAdapter = drivers.get(key).flatMap(_.streamAdapter).getOrElse(streamAdapter)
+        val driverStreamAdapter = drivers.get(name).flatMap(_.streamAdapter).getOrElse(streamAdapter)
 
         println("Scycle.makeSinkProxies:foldLeft:stream")
         val stream = driverStreamAdapter.adapt(holdSubject, streamAdapter.streamSubscribe)
@@ -166,7 +166,7 @@ object Scycle {
         val observer = holdSubject
 
         println("Scycle.makeSinkProxies:foldLeft:return")
-        m + (key -> holdSubject)
+        m + (name -> holdSubject)
     }
   }
 

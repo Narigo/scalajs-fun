@@ -2,6 +2,7 @@ package com.campudus.scycle
 
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom._
+import org.scalajs.dom.Event
 import rxscalajs._
 
 import scala.scalajs.js
@@ -19,20 +20,12 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: DriversDefinition = Map[String, DriverFunction[_, _]](
-    "dom" -> new DriverFunction[Hyperscript, Hyperscript] {
-      override def apply(
-        stream: Observable[Hyperscript],
-        adapter: StreamAdapter,
-        driverName: String
-      ): Observable[Hyperscript] = {
-        ???
-      }
-    }
+    "dom" -> new DomDriver
   )
 
   def logic(drivers: Sources): Sinks = {
     println("called logic")
-    val domDriver$ = drivers("dom").asInstanceOf[Observable[DomDriver]]
+    val domDriver$ = drivers("dom").asInstanceOf[Subject[DomDriver]]
     val changeWeight$ = domDriver$.flatMap(
       _.selectEvent(".weight", "input")
         .map(ev => {
