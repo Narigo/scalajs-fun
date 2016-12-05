@@ -14,12 +14,13 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
     adapter: StreamAdapter,
     driverName: String
   ): Observable[Event] = {
-    println(s"DomDriver.apply:stream.subscribe")
+    println(s"DomDriver.apply:stream.subscribe = $stream")
+
     stream.subscribe(hs => {
-      println(s"stream.subscribe($hs)")
+      println(s"DomDriver.apply:stream.subscribe($hs)")
       val container = document.querySelector("#app")
       val diff = VirtualDom.diff(VirtualDom(container), hs)
-      console.log("stream.subscribe:update(", container, ",", diff, ")")
+      console.log("DomDriver.apply:stream.subscribe:update(", container, ",", diff, ")")
       VirtualDom.update(container, diff)
     })
 

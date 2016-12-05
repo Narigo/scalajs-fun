@@ -24,40 +24,45 @@ object ScycleApp extends JSApp {
   )
 
   def logic(drivers: Sources): Sinks = {
-    println("called logic")
+    println(s"ScycleApp.logic($drivers)")
     val domDriver$ = drivers("dom").asInstanceOf[Subject[DomDriver]]
+
+    println(s"ScycleApp.logic($drivers):changeWeight$$")
     val changeWeight$ = domDriver$.flatMap(
       _.selectEvent(".weight", "input")
         .map(ev => {
-          org.scalajs.dom.console.log("hello in .weight map")
+          println("ScycleApp.changeWeight$:map event")
           val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-          org.scalajs.dom.console.log("got a weight input event", value)
+          println("got a weight input event", value)
           value.asInstanceOf[Double]
         })
         .startWith(0.0)
     )
 
+    println(s"ScycleApp.logic($drivers):changeHeight$$")
     val changeHeight$ = domDriver$.flatMap(
       _.selectEvent(".height", "input")
         .map(ev => {
-          org.scalajs.dom.console.log("hello in .height map")
+          println("ScycleApp.changeHeight$:map event")
           val value = ev.srcElement.asInstanceOf[js.Dynamic].value
-          org.scalajs.dom.console.log("got a height input event", value)
+          println("got a height input event", value)
           value.asInstanceOf[Double]
         })
         .startWith(1.0)
     )
 
+    println(s"ScycleApp.logic($drivers):state$$")
     val state$ = changeWeight$.combineLatest(changeHeight$).map({
       case (weight, height) =>
-        org.scalajs.dom.console.log("hello in combineLatest")
+        println("ScycleApp.state$:map weight/height")
         val heightMeters = height * 0.01
         val bmi = Math.round(weight / (heightMeters * heightMeters))
-        org.scalajs.dom.console.log("bmi is", bmi)
+        println(s"bmi is $bmi")
         (weight, height, bmi)
     }: ((Double, Double)) => (Double, Double, Double))
       .startWith((0.0, 1.0, 0.0))
 
+    println(s"ScycleApp.logic($drivers):return Map")
     Map(
       "dom" -> {
         state$.map({
