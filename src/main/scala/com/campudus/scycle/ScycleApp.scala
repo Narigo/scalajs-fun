@@ -24,12 +24,19 @@ object ScycleApp extends JSApp {
   def logic(drivers: Sources): Sinks = {
     println(s"ScycleApp.logic($drivers)")
     val domDriver$ = drivers("dom").asInstanceOf[Subject[DomDriver]]
-    val clicks$ = domDriver$.flatMap(driver => driver.selectEvent("#app", "click"))
+    val clicks$ = domDriver$.flatMap(driver => {
+      println(s"ScycleApp.logic($drivers):clicks$$ -> driver=$driver")
+      driver.selectEvent("#app", "click")
+    })
     var counter = 0
+
+    clicks$.subscribe(_ => println("dont care"))
 
     Map(
       "dom" -> {
-        Observable.just(null)/*.concat(clicks$)*/.map(_ => {
+        println("ScycleApp.return:before clicks$")
+        clicks$.map(ev => {
+          println(s"ScycleApp.return:in clicks$$:$ev")
           counter += 1
           Div(id = "app", children = Seq(Text(s"hello from scycle - clicks=$counter")))
         })
