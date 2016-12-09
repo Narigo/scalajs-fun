@@ -30,7 +30,7 @@ object ScycleApp extends JSApp {
     })
     var counter = 0
 
-    clicks$.subscribe(_ => println("dont care"))
+    clicks$.subscribe(_ => println("don't care"))
 
     Map(
       "dom" -> {

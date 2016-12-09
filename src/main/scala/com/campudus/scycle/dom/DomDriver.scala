@@ -2,6 +2,7 @@ package com.campudus.scycle.dom
 
 import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
 import com.campudus.scycle.vdom.VirtualDom
+import com.campudus.scycle.vdom.VirtualDom.Replacement
 import org.scalajs.dom._
 import rxscalajs._
 
@@ -20,8 +21,11 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
       println(s"DomDriver.apply:stream.subscribe($hs)")
       val container = document.querySelector("#app")
       val diff = VirtualDom.diff(VirtualDom(container), hs)
-      console.log("DomDriver.apply:stream.subscribe:update(", container, ",", diff, ")")
-      VirtualDom.update(container, diff)
+      println(s"DomDriver.apply:stream.subscribe:update($container, $diff)")
+      diff match {
+        case List(Replacement(_, null)) => println("DomDriver.apply:stream.subscribe:diff was null")
+        case diffs => VirtualDom.update(container, diffs)
+      }
     })
 
     println(s"DomDriver.apply:return $selectedEvents")
