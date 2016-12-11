@@ -33,15 +33,15 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
   }
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
+    println(s"DomDriver.selectEvent($what, $eventName) -> adding to selectedEvents")
     val elem = document.querySelector("#app")
-    console.log("searching for", what, eventName, elem)
 
     Observable
       .fromEvent(elem, eventName)
       .filter(ev => {
+        println(s"DomDriver.selectEvent($what, $eventName):Observable.filter($ev)")
         val src = ev.srcElement
         val target = document.querySelector(what)
-        console.log("hello", what, eventName, src.isSameNode(target))
         src.isSameNode(target)
       })
       .flatMap(ev => {
