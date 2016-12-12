@@ -2,6 +2,7 @@ package com.campudus.scycle
 
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom._
+import org.scalajs.dom.raw.Event
 import rxscalajs._
 
 import scala.scalajs.js.JSApp
@@ -21,25 +22,20 @@ object ScycleApp extends JSApp {
     "dom" -> new DomDriver
   )
 
-  def logic(drivers: Sources): Sinks = {
-    println(s"ScycleApp.logic($drivers)")
-    val domDriver$ = drivers("dom").asInstanceOf[Subject[DomDriver]]
-    println(s"ScycleApp.logic($drivers):domDriver$$ = ${domDriver$}")
-    val clicks$ = domDriver$.flatMap(driver => {
-      println(s"ScycleApp.logic($drivers):clicks$$ -> driver=$driver")
-      driver.selectEvent("#app", "click")
-    })
-    println(s"ScycleApp.logic($drivers):clicks$$ = ${clicks$}")
+  def logic(sources: Sources): Sinks = {
+    println(s"ScycleApp.logic($sources)")
+    val domEvents$ = sources("dom").asInstanceOf[Subject[Event]]
+    println(s"ScycleApp.logic($sources):domEvents$$ = ${domEvents$}")
+    drivers("dom").asInstanceOf[DomDriver].selectEvent("#app", "click").subscribe(domEvents$)
     var counter = 0
 
-    domDriver$.subscribe(_ => println("don't care about domDriver$"))
-    clicks$.subscribe(_ => println("don't care about clicks$"))
+    domEvents$.subscribe(_ => println("don't care about domDriver$"))
 
     Map(
       "dom" -> {
-        println("ScycleApp.return:before clicks$")
-        clicks$.map(ev => {
-          println(s"ScycleApp.return:in clicks$$:$ev")
+        println("ScycleApp.return:before domEvents$")
+        domEvents$.map(ev => {
+          println(s"ScycleApp.return:in domEvents$$:$ev")
           counter += 1
           Div(id = "app", children = Seq(Text(s"hello from scycle - clicks=$counter")))
         })
