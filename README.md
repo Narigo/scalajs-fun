@@ -232,3 +232,6 @@ Thinking more about this, it might be a good idea to try and find a more scala-i
 and, regarding the usage syntax in the tests, is not very user friendly. Maybe having a new type for `Sinks` and 
 `Sources` could help. Got to investigate this idea further.
 
+After fiddling around with lots of type issues, the main test for doing a complete cycle seems to work. Now the next 
+step is to fix the DomDriver to emit the correct events. Right now this does not seem to be as trivial as expected even 
+though the cycling test works.
