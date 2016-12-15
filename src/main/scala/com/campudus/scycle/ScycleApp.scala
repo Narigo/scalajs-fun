@@ -26,7 +26,9 @@ object ScycleApp extends JSApp {
     println(s"ScycleApp.logic($sources)")
     val domEvents$ = sources("dom").asInstanceOf[Subject[Event]]
     println(s"ScycleApp.logic($sources):domEvents$$ = ${domEvents$}")
-    drivers("dom").asInstanceOf[DomDriver].selectEvent("#app", "click").subscribe(domEvents$)
+    val clicks$ = drivers("dom").asInstanceOf[DomDriver].selectEvent("#app", "click")
+    println(s"ScycleApp.logic:feed domEvents$$ into clicks$$")
+    clicks$.subscribe(domEvents$)
     var counter = 0
 
     domEvents$.subscribe(_ => println("don't care about domDriver$"))
