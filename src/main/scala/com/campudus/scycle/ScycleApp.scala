@@ -36,8 +36,9 @@ object ScycleApp extends JSApp {
     Map(
       "dom" -> {
         println("ScycleApp.return:before domEvents$")
-        domEvents$.map(ev => {
-          println(s"ScycleApp.return:in domEvents$$:$ev")
+        // domEvents$.map(ev => {
+        Observable.just({
+          println(s"ScycleApp.return:in domEvents$$:$$ev")
           counter += 1
           Div(id = "app", children = Seq(Text(s"hello from scycle - clicks=$counter")))
         })

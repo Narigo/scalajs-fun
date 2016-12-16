@@ -45,6 +45,7 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
         src.isSameNode(target)
       })
       .flatMap(ev => {
+        println(s"DomDriver.selectEvent($what, $eventName):Observable.map($ev)")
         selectedEvents.next(ev)
         selectedEvents
       })
