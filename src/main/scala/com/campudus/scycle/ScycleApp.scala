@@ -31,17 +31,16 @@ object ScycleApp extends JSApp {
     clicks$.subscribe(domEvents$)
     var counter = 0
 
-    domEvents$.subscribe(_ => println("don't care about domDriver$"))
-
     Map(
       "dom" -> {
         println("ScycleApp.return:before domEvents$")
-        // domEvents$.map(ev => {
-        Observable.just({
+        val cObs = clicks$.map(ev => {
           println(s"ScycleApp.return:in domEvents$$:$$ev")
           counter += 1
           Div(id = "app", children = Seq(Text(s"hello from scycle - clicks=$counter")))
         })
+        cObs.subscribe(_ => println("don't care about cObs ?"))
+        cObs
       }
     )
   }
