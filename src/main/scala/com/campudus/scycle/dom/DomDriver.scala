@@ -44,10 +44,10 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
         val target = document.querySelector(what)
         src.isSameNode(target)
       })
-      .flatMap(ev => {
+      .map(ev => {
         println(s"DomDriver.selectEvent($what, $eventName):Observable.map($ev)")
         selectedEvents.next(ev)
-        selectedEvents
+        ev
       })
   }
 
