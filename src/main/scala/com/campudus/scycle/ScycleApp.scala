@@ -2,8 +2,6 @@ package com.campudus.scycle
 
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom._
-import org.scalajs.dom.raw.Event
-import rxscalajs._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -24,7 +22,8 @@ object ScycleApp extends JSApp {
 
   def logic(sources: Sources): Sinks = {
     println(s"ScycleApp.logic($sources)")
-    val clicks$ = drivers("dom").asInstanceOf[DomDriver].selectEvent("#app", "click")
+    val domDriver = drivers("dom").asInstanceOf[DomDriver]
+    val clicks$ = domDriver.selectEvent("#app", "click")
     println(s"ScycleApp.logic:feed domEvents$$ into clicks$$")
     var counter = 0
 
