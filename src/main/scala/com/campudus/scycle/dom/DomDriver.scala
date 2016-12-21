@@ -15,13 +15,10 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
     adapter: StreamAdapter,
     driverName: String
   ): Observable[Event] = {
-    println(s"DomDriver.apply:stream.subscribe = $stream")
 
     stream.subscribe(hs => {
-      println(s"DomDriver.apply:stream.subscribe($hs)")
       val container = document.querySelector("#app")
       val diff = VirtualDom.diff(VirtualDom(container), hs)
-      println(s"DomDriver.apply:stream.subscribe:update($container, $diff)")
       diff match {
         case List(Replacement(_, null)) => println("DomDriver.apply:stream.subscribe:diff was null")
         case diffs => VirtualDom.update(container, diffs)
@@ -39,13 +36,11 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
     Observable
       .fromEvent(elem, eventName)
       .filter(ev => {
-        println(s"DomDriver.selectEvent($what, $eventName):Observable.filter($ev)")
         val src = ev.srcElement
         val target = document.querySelector(what)
         src.isSameNode(target)
       })
       .map(ev => {
-        println(s"DomDriver.selectEvent($what, $eventName):Observable.map($ev)")
         selectedEvents.next(ev)
         ev
       })
