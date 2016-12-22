@@ -1,22 +1,35 @@
 package com.campudus.scycle.http
 
+import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
 import rxscalajs._
 
-object HttpDriver extends (Observable[_] => Observable[UserResponse]) {
+class HttpDriver extends DriverFunction[Request, UserResponse] {
 
-  def apply(input: Observable[_]): Observable[UserResponse] = work(input.asInstanceOf[Observable[Request]])
+  override def apply(
+    stream: Observable[Request],
+    adapter: StreamAdapter,
+    driverName: String
+  ): Observable[UserResponse] = {
+    stream.map(_ => null)
+  }
 
-  private def work(input: Observable[Request]): Observable[UserResponse] = {
-    input.flatMap(r => {
-      println("request in httpdriver")
+  val responses: Subject[User] = Subject()
+  val lastResponse$: Observable[User] = responses.startWith(null)
 
-      Observable
-        .ajax(r.url)
-        .map(p => {
-          val user = p.response
-          UserResponse(r.url, User(user.username.toString, user.email.toString, user.website.toString))
-        })
+  def requestUser(number: Double): Observable[User] = {
+    work(Get(s"http://jsonplaceholder.typicode.com/users/$number")).map(user => {
+      responses.next(user)
+      user
     })
+  }
+
+  private def work(request: Request): Observable[User] = {
+    Observable
+      .ajax(request.url)
+      .map(p => {
+        val user = p.response
+        User(user.username.toString, user.email.toString, user.website.toString)
+      })
   }
 
 }
