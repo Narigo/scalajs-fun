@@ -20,17 +20,15 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
       val container = document.querySelector("#app")
       val diff = VirtualDom.diff(VirtualDom(container), hs)
       diff match {
-        case List(Replacement(_, null)) => println("DomDriver.apply:stream.subscribe:diff was null")
+        case List(Replacement(_, null)) =>
         case diffs => VirtualDom.update(container, diffs)
       }
     })
 
-    println(s"DomDriver.apply:return $selectedEvents")
     selectedEvents
   }
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
-    println(s"DomDriver.selectEvent($what, $eventName) -> adding to selectedEvents")
     val elem = document.querySelector("#app")
 
     Observable
