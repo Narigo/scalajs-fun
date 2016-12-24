@@ -136,9 +136,6 @@ object Scycle {
         val holdSubject = streamAdapter.makeSubject()
         val driverStreamAdapter = drivers.get(name).flatMap(_.streamAdapter).getOrElse(streamAdapter)
 
-        val stream = driverStreamAdapter.adapt(holdSubject, streamAdapter.streamSubscribe)
-        val observer = holdSubject
-
         m + (name -> holdSubject)
     }
   }
