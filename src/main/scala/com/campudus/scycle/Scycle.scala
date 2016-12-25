@@ -134,8 +134,6 @@ object Scycle {
     drivers.foldLeft(Map[String, Subject[_]]()){
       case (m, (name, _)) =>
         val holdSubject = streamAdapter.makeSubject()
-        val driverStreamAdapter = drivers.get(name).flatMap(_.streamAdapter).getOrElse(streamAdapter)
-
         m + (name -> holdSubject)
     }
   }
