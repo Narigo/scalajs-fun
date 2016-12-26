@@ -23,9 +23,7 @@ object RxJsAdapter extends StreamAdapter {
   override def remember[T](stream: Observable[T]): Observable[T] = stream.publishReplay(1)
   override def makeSubject[T](): Subject[T] = Subject[T]()
   override def isValidStream[T](stream: Observable[_]): Boolean = stream.isInstanceOf[Observable[T]]
-  override def streamSubscribe[T]: StreamSubscribe[T] = myStreamSubscribe[T]
-
-  private def myStreamSubscribe[T](stream: Observable[T], observer: Observer[T]): DisposeFunction = {
+  override def streamSubscribe[T](stream: Observable[T], observer: Observer[T]): DisposeFunction = {
     val subscription = stream.subscribe(observer)
     val dispose: DisposeFunction = () => {
       subscription.unsubscribe()

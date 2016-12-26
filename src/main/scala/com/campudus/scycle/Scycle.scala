@@ -1,7 +1,7 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.adapters.RxJsAdapter
-import rxscalajs._
+import rxscalajs.{Observable, Observer, _}
 
 object Scycle {
 
@@ -26,7 +26,7 @@ object Scycle {
 
     def isValidStream[T](stream: Observable[_]): Boolean
 
-    def streamSubscribe[T]: StreamSubscribe[T]
+    def streamSubscribe[T](a: Observable[T], b: Observer[T]): DisposeFunction
 
   }
 
@@ -121,7 +121,7 @@ object Scycle {
           )
         }).getOrElse(driverOutput)
 
-        result.subscribe(obs => {})
+        result.subscribe(_ => {})
 
         m + (name -> result)
     }
