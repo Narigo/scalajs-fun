@@ -233,5 +233,12 @@ and, regarding the usage syntax in the tests, is not very user friendly. Maybe h
 `Sources` could help. Got to investigate this idea further.
 
 After fiddling around with lots of type issues, the main test for doing a complete cycle seems to work. Now the next 
-step is to fix the DomDriver to emit the correct events. Right now this does not seem to be as trivial as expected even 
-though the cycling test works.
+step is to fix the `DomDriver` to emit the correct events. Right now this does not seem to be as trivial as expected 
+even though the cycling test works.
+
+## Got the cycle working!
+
+Okay, so in the last few commits a small application could do the cycle with the `DomDriver` and a very simple 
+`HttpDriver`. As the Scycle code is now a lot like the real CycleJS implementation and we can try to simplify the 
+implementation a bit.
+
