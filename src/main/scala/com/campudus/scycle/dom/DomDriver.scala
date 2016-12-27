@@ -12,7 +12,6 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
 
   override def apply(
     stream: Observable[Hyperscript],
-    adapter: StreamAdapter,
     driverName: String
   ): Observable[Event] = {
 

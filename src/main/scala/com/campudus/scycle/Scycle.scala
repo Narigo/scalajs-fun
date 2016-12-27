@@ -30,12 +30,12 @@ object Scycle {
 
   }
 
-  trait DriverFunction[A, B] extends ((Observable[A], StreamAdapter, String) => Observable[B]) {
+  trait DriverFunction[A, B] extends ((Observable[A], String) => Observable[B]) {
 
     type In = A
     type Out = B
 
-    def apply(stream: Observable[A], adapter: StreamAdapter, driverName: String): Observable[B]
+    def apply(stream: Observable[A], driverName: String): Observable[B]
 
     val streamAdapter: Option[StreamAdapter] = None
 
@@ -105,25 +105,15 @@ object Scycle {
     sinkProxies: Map[String, Subject[_]],
     streamAdapter: StreamAdapter
   ): Map[String, Observable[_]] = {
+    println("folding drivers")
     drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
           sinkProxies(name).asInstanceOf[Observable[Nothing]],
-          streamAdapter,
           name
         )
 
-        val driverStreamAdapter = driverFn.streamAdapter
-        val result = driverStreamAdapter.map(dsa => {
-          streamAdapter.adapt(
-            driverOutput,
-            dsa.streamSubscribe
-          )
-        }).getOrElse(driverOutput)
-
-        result.subscribe(_ => {})
-
-        m + (name -> result)
+        m + (name -> driverOutput)
     }
   }
 

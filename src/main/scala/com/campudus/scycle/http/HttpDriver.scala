@@ -7,7 +7,6 @@ class HttpDriver extends DriverFunction[Request, UserResponse] {
 
   override def apply(
     stream: Observable[Request],
-    adapter: StreamAdapter,
     driverName: String
   ): Observable[UserResponse] = {
     stream.map(_ => null)
