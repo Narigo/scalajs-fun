@@ -32,10 +32,10 @@ class ScycleSuite extends AsyncFunSpec {
           println(s"ScycleSuite.drivers(test)")
           val df = new DriverFunction[String, Unit] {
 
-            def apply(stream: Observable[String], adapter: StreamAdapter, driverName: String): Observable[Unit] = {
-              println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName)")
+            def apply(stream: Observable[String], driverName: String): Observable[Unit] = {
+              println(s"ScycleSuite.drivers(test):df($stream, $driverName)")
               stream.map(t => {
-                println(s"ScycleSuite.drivers(test):df($stream, $adapter, $driverName):map($t)")
+                println(s"ScycleSuite.drivers(test):df($stream, $driverName):map($t)")
                 p.success(t)
               })
             }
@@ -70,13 +70,13 @@ class ScycleSuite extends AsyncFunSpec {
       },
         Map("test" -> new DriverFunction[Int, Int] {
 
-          override def apply(stream: Observable[Int], adapter: StreamAdapter, driverName: String): Observable[Int] = {
+          override def apply(stream: Observable[Int], driverName: String): Observable[Int] = {
             val mapped = stream.map(i => {
               val nextI = i + 1
               println(s"ScycleSuite:drivers:stream.map -> i=$i, nextI=$nextI")
               nextI
             })
-            val testDriver = new TestDriver(mapped, adapter.makeSubject[Int]())
+            val testDriver = new TestDriver(mapped, Subject[Int]())
             println(s"ScycleSuite:drivers:returning TestDriver = $testDriver")
             testDriver
           }
