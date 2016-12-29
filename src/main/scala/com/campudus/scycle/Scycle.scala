@@ -113,6 +113,8 @@ object Scycle {
           name
         )
 
+        driverOutput.subscribe(_ => {})
+
         m + (name -> driverOutput)
     }
   }
