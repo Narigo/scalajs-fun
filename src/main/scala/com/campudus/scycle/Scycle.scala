@@ -105,7 +105,6 @@ object Scycle {
     sinkProxies: Map[String, Subject[_]],
     streamAdapter: StreamAdapter
   ): Map[String, Observable[_]] = {
-    println("folding drivers")
     drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(

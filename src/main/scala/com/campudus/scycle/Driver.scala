@@ -6,8 +6,6 @@ import scala.scalajs.js.Any
 
 class Driver[A](input: Observable[A], output: Observer[A]) extends Observable[A](input.inner) with Observer[A] {
 
-  println(s"create new Driver with $input")
-
   input.subscribe(output)
 
   override def toString: String = s"Driver:$input"
