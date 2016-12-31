@@ -1,6 +1,6 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
+import com.campudus.scycle.Scycle.DriverFunction
 import org.scalatest.AsyncFunSpec
 import rxscalajs.{Observable, Observer, Subject}
 

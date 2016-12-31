@@ -1,6 +1,6 @@
 package com.campudus.scycle.dom
 
-import com.campudus.scycle.Scycle.{DriverFunction, StreamAdapter}
+import com.campudus.scycle.Scycle.DriverFunction
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
 import org.scalajs.dom._

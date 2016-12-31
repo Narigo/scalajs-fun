@@ -38,7 +38,7 @@ object ScycleApp extends JSApp {
           })
           .combineLatest(http.lastResponse$)
           .map((evUser, _) => {
-            Div(id = "app", children = Seq(Text(s"hello from scycle - clicks=$counter, user=${evUser._2}")))
+            Div(id = "app", children = Seq(Text(s"Hello from Scycle - clicks=$counter, user=${evUser._2}")))
           })
       },
       "http" -> {

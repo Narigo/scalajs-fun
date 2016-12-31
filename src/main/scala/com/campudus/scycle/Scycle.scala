@@ -1,6 +1,5 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.adapters.RxJsAdapter
 import rxscalajs.{Observable, Observer, _}
 
 object Scycle {
@@ -16,28 +15,12 @@ object Scycle {
 
   }
 
-  trait StreamAdapter {
-
-    def adapt[T](originStream: Observable[_], originStreamSubscribe: StreamSubscribe[T]): Observable[T]
-
-    def remember[T](stream: Observable[T]): Observable[T]
-
-    def makeSubject[T](): Subject[T]
-
-    def isValidStream[T](stream: Observable[_]): Boolean
-
-    def streamSubscribe[T](a: Observable[T], b: Observer[T]): DisposeFunction
-
-  }
-
   trait DriverFunction[A, B] extends ((Observable[A], String) => Observable[B]) {
 
     type In = A
     type Out = B
 
     def apply(stream: Observable[A], driverName: String): Observable[B]
-
-    val streamAdapter: Option[StreamAdapter] = None
 
   }
 
@@ -53,11 +36,10 @@ object Scycle {
     if (drivers.isEmpty) {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
-      val streamAdapter = RxJsAdapter
       val sinkProxies = makeSinkProxies(drivers)
-      val sources = callDrivers(drivers, sinkProxies, streamAdapter).asInstanceOf[Sources]
+      val sources = callDrivers(drivers, sinkProxies).asInstanceOf[Sources]
       val sinks = mainFn(sources)
-      val disposeReplication = replicateMany(sinks, sinkProxies, streamAdapter)
+      val disposeReplication = replicateMany(sinks, sinkProxies)
 
       val result = () => {
         disposeSources(sources)
@@ -70,8 +52,7 @@ object Scycle {
 
   private def replicateMany(
     sinks: Sinks,
-    sinkProxies: Map[String, Subject[_]],
-    streamAdapter: StreamAdapter
+    sinkProxies: Map[String, Subject[_]]
   ): () => Unit = {
 
     type X = Any
@@ -81,12 +62,10 @@ object Scycle {
         sinkProxies.exists(_._1 == name)
       })
       .map(name => {
-        val dpf = streamAdapter.streamSubscribe(
-          sinks(name).asInstanceOf[Observable[Nothing]],
-          sinkProxies(name).asInstanceOf[Observer[X]]
-        )
+        val subs = sinks(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
+        val dispose = subs.unsubscribe _
         sinkProxies(name).asInstanceOf[Observer[X]].next(null)
-        dpf
+        dispose
       })
 
     () => disposeFunctions.foreach(_.apply())
@@ -102,8 +81,7 @@ object Scycle {
 
   private def callDrivers(
     drivers: DriversDefinition,
-    sinkProxies: Map[String, Subject[_]],
-    streamAdapter: StreamAdapter
+    sinkProxies: Map[String, Subject[_]]
   ): Map[String, Observable[_]] = {
     drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
