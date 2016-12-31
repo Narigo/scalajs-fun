@@ -54,7 +54,7 @@ object Scycle {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
       val streamAdapter = RxJsAdapter
-      val sinkProxies = makeSinkProxies(drivers, streamAdapter)
+      val sinkProxies = makeSinkProxies(drivers)
       val sources = callDrivers(drivers, sinkProxies, streamAdapter).asInstanceOf[Sources]
       val sinks = mainFn(sources)
       val disposeReplication = replicateMany(sinks, sinkProxies, streamAdapter)
@@ -119,12 +119,11 @@ object Scycle {
   }
 
   private def makeSinkProxies(
-    drivers: DriversDefinition,
-    streamAdapter: StreamAdapter
+    drivers: DriversDefinition
   ): Map[String, Subject[_]] = {
     drivers.foldLeft(Map[String, Subject[_]]()){
       case (m, (name, _)) =>
-        val holdSubject = streamAdapter.makeSubject()
+        val holdSubject = Subject()
         m + (name -> holdSubject)
     }
   }
