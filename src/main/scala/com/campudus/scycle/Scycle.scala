@@ -83,10 +83,13 @@ object Scycle {
     drivers: DriversDefinition,
     sinkProxies: Map[String, Subject[_]]
   ): Map[String, Observable[_]] = {
+
+    type X = Nothing
+
     drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
-          sinkProxies(name).asInstanceOf[Observable[Nothing]],
+          sinkProxies(name).asInstanceOf[Observable[X]],
           name
         )
 
