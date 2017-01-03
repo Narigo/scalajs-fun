@@ -6,18 +6,18 @@ import com.campudus.scycle.vdom.VirtualDom.Replacement
 import org.scalajs.dom._
 import rxscalajs._
 
-class DomDriver extends DriverFunction[Hyperscript, Event] {
+class DomDriver extends DriverFunction {
 
   private val selectedEvents: Subject[Event] = Subject()
 
   override def apply(
-    stream: Observable[Hyperscript],
+    stream: Observable[_],
     driverName: String
   ): Observable[Event] = {
 
     stream.subscribe(hs => {
       val container = document.querySelector("#app")
-      val diff = VirtualDom.diff(VirtualDom(container), hs)
+      val diff = VirtualDom.diff(VirtualDom(container), hs.asInstanceOf[Hyperscript])
       diff match {
         case List(Replacement(_, null)) =>
         case diffs => VirtualDom.update(container, diffs)

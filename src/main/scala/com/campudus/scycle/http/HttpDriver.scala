@@ -3,10 +3,10 @@ package com.campudus.scycle.http
 import com.campudus.scycle.Scycle.DriverFunction
 import rxscalajs._
 
-class HttpDriver extends DriverFunction[Request, UserResponse] {
+class HttpDriver extends DriverFunction {
 
   override def apply(
-    stream: Observable[Request],
+    stream: Observable[_],
     driverName: String
   ): Observable[UserResponse] = {
     stream.map(_ => null)

@@ -15,16 +15,13 @@ object Scycle {
 
   }
 
-  trait DriverFunction[A, B] extends ((Observable[A], String) => Observable[B]) {
+  trait DriverFunction extends ((Observable[_], String) => Observable[_]) {
 
-    type In = A
-    type Out = B
-
-    def apply(stream: Observable[A], driverName: String): Observable[B]
+    def apply(stream: Observable[_], driverName: String): Observable[_]
 
   }
 
-  type DriversDefinition = Map[String, DriverFunction[_, _]]
+  type DriversDefinition = Map[String, DriverFunction]
   type Sources = Map[String, Observer[_]]
   type Sinks = Map[String, Observable[_]]
 
@@ -89,7 +86,7 @@ object Scycle {
     drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
-          sinkProxies(name).asInstanceOf[Observable[X]],
+          sinkProxies(name),
           name
         )
 
