@@ -19,10 +19,7 @@ class ScycleSuite extends AsyncFunSpec {
       val p = Promise[String]
       Scycle.run(
         drivers => {
-          Map("test" -> {
-            val obs = Observable.just(inputText)
-            obs
-          })
+          Map("test" -> Observable.just(inputText))
         },
         Map("test" -> {
           val df = new DriverFunction {
@@ -48,10 +45,7 @@ class ScycleSuite extends AsyncFunSpec {
         Map("test" -> {
           val testDriver = drivers("test")
           // TODO int$.map results in new observable which is not looked at in the test driver...
-          val mapped = testDriver.asInstanceOf[TestDriver].int$.map(i => {
-            p.success(i)
-          }).startWith(0)
-          mapped
+          testDriver.asInstanceOf[TestDriver].int$.map(p.success _).startWith(0)
         })
       },
         Map("test" -> new DriverFunction {
