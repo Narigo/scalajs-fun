@@ -18,7 +18,7 @@ class ScycleSuite extends AsyncFunSpec {
       val inputText = "Hello World!"
       val p = Promise[String]
       Scycle.run(
-        drivers => {
+        _ => {
           Map("test" -> Observable.just(inputText))
         },
         Map("test" -> {
