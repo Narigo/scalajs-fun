@@ -24,8 +24,8 @@ class ScycleSuite extends AsyncFunSpec {
         Map("test" -> {
           val df = new DriverFunction {
 
-            override def apply(stream: Observable[_], driverName: String): Observable[_] = {
-              myApply(stream.asInstanceOf[Observable[String]], driverName)
+            override def apply[A, B](stream: Observable[A], driverName: String): Observable[B] = {
+              myApply(stream.asInstanceOf[Observable[String]], driverName).asInstanceOf[Observable[B]]
             }
 
             def myApply(stream: Observable[String], driverName: String): Observable[Unit] = {
@@ -54,7 +54,11 @@ class ScycleSuite extends AsyncFunSpec {
       },
         Map("test" -> new DriverFunction {
 
-          override def apply(stream: Observable[_], driverName: String): Observable[_] = {
+          override def apply[A, B](stream: Observable[A], driverName: String): Observable[B] = {
+            myApply(stream, driverName).asInstanceOf[Observable[B]]
+          }
+
+          def myApply(stream: Observable[_], driverName: String): Observable[_] = {
             val mapped = stream.map(i => {
               val nextI = i.asInstanceOf[Int] + 1
               nextI

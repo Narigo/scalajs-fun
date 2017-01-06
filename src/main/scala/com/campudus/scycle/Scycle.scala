@@ -15,9 +15,9 @@ object Scycle {
 
   }
 
-  trait DriverFunction extends ((Observable[_], String) => Observable[_]) {
+  trait DriverFunction {
 
-    def apply(stream: Observable[_], driverName: String): Observable[_]
+    def apply[A, B](stream: Observable[A], driverName: String): Observable[B]
 
   }
 

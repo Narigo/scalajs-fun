@@ -10,14 +10,18 @@ class DomDriver extends DriverFunction {
 
   private val selectedEvents: Subject[Event] = Subject()
 
-  override def apply(
-    stream: Observable[_],
+  override def apply[A, B](stream: Observable[A], driverName: String): Observable[B] = {
+    myApply(stream.asInstanceOf[Observable[Hyperscript]], driverName).asInstanceOf[Observable[B]]
+  }
+
+  def myApply(
+    stream: Observable[Hyperscript],
     driverName: String
   ): Observable[Event] = {
 
     stream.subscribe(hs => {
       val container = document.querySelector("#app")
-      val diff = VirtualDom.diff(VirtualDom(container), hs.asInstanceOf[Hyperscript])
+      val diff = VirtualDom.diff(VirtualDom(container), hs)
       diff match {
         case List(Replacement(_, null)) =>
         case diffs => VirtualDom.update(container, diffs)

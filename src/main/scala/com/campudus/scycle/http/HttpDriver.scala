@@ -5,7 +5,11 @@ import rxscalajs._
 
 class HttpDriver extends DriverFunction {
 
-  override def apply(
+  override def apply[A, B](stream: Observable[A], driverName: String) = {
+    myApply(stream, driverName).asInstanceOf[Observable[B]]
+  }
+
+  def myApply(
     stream: Observable[_],
     driverName: String
   ): Observable[UserResponse] = {
