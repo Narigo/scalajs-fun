@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.http.UserResponse
 import rxscalajs.{Observable, Observer, _}
 
 object Scycle {
@@ -15,13 +16,13 @@ object Scycle {
 
   }
 
-  trait DriverFunction {
+  trait DriverFunction[A, B] extends ((Observable[A], String) => Observable[B]) {
 
-    def apply[A, B](stream: Observable[A], driverName: String): Observable[B]
+    def apply(stream: Observable[A], driverName: String): Observable[B]
 
   }
 
-  type DriversDefinition = Map[String, DriverFunction]
+  type DriversDefinition = Map[String, DriverFunction[_, _]]
   type Sources = Map[String, Observer[_]]
   type Sinks = Map[String, Observable[_]]
 
@@ -86,7 +87,7 @@ object Scycle {
     drivers.foldLeft(Map[String, Observable[_]]()){
       case (m, (name, driverFn)) =>
         val driverOutput = driverFn(
-          sinkProxies(name),
+          sinkProxies(name).asInstanceOf[Observable[X]],
           name
         )
 

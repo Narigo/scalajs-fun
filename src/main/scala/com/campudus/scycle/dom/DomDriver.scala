@@ -6,15 +6,11 @@ import com.campudus.scycle.vdom.VirtualDom.Replacement
 import org.scalajs.dom._
 import rxscalajs._
 
-class DomDriver extends DriverFunction {
+class DomDriver extends DriverFunction[Hyperscript, Event] {
 
   private val selectedEvents: Subject[Event] = Subject()
 
-  override def apply[A, B](stream: Observable[A], driverName: String): Observable[B] = {
-    myApply(stream.asInstanceOf[Observable[Hyperscript]], driverName).asInstanceOf[Observable[B]]
-  }
-
-  def myApply(
+  override def apply(
     stream: Observable[Hyperscript],
     driverName: String
   ): Observable[Event] = {
