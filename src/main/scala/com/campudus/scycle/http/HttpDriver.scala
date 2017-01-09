@@ -16,10 +16,7 @@ class HttpDriver extends DriverFunction[Request, UserResponse] {
   val lastResponse$: Observable[User] = responses.startWith(null)
 
   def requestUser(number: Double): Observable[User] = {
-    work(Get(s"http://jsonplaceholder.typicode.com/users/$number")).map(user => {
-      responses.next(user)
-      user
-    })
+    work(Get(s"http://jsonplaceholder.typicode.com/users/$number")).map(side(responses.next))
   }
 
   private def work(request: Request): Observable[User] = {

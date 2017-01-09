@@ -37,10 +37,7 @@ class DomDriver extends DriverFunction[Hyperscript, Event] {
         val target = document.querySelector(what)
         src.isSameNode(target)
       })
-      .map(ev => {
-        selectedEvents.next(ev)
-        ev
-      })
+      .map(side(selectedEvents.next))
   }
 
 }
