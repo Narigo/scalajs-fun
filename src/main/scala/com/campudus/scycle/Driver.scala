@@ -13,4 +13,5 @@ class Driver[A](input: Observable[A], output: Observer[A]) extends Observable[A]
   override def next(t: A): Unit = output.next(t)
   override def error(err: Any): Unit = output.error(err)
   override def complete(): Unit = output.complete()
+
 }

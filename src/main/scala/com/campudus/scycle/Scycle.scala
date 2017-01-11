@@ -1,6 +1,5 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.http.UserResponse
 import rxscalajs.{Observable, Observer, _}
 
 object Scycle {
@@ -17,10 +16,14 @@ object Scycle {
   }
 
   trait DriverFunction[A, +B] extends ((Observable[A], String) => Observable[B]) {
-    protected[this] def side[X](someNext: X => _): X => X = x => {
-      someNext(x)
-      x
+
+    protected[this] def side[X](someNext: X => _): X => X = {
+      x => {
+        someNext(x)
+        x
+      }
     }
+
   }
 
   type DriversDefinition = Map[String, DriverFunction[_, _]]
