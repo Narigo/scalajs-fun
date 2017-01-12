@@ -3,6 +3,7 @@ package com.campudus.scycle
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom._
 import com.campudus.scycle.http.HttpDriver
+import org.scalajs.dom.Event
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -32,10 +33,7 @@ object ScycleApp extends JSApp {
       "dom" -> {
         clicks$
           .startWith(null)
-          .map(click => {
-            counter += 1
-            click
-          })
+          .map(side((_: Event) => counter += 1))
           .combineLatest(http.lastResponse$)
           .map(eventUser => {
             Div(id = "app", children = Seq(Text(s"Hello from Scycle - clicks=$counter, user=${eventUser._2}")))

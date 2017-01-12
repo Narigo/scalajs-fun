@@ -1,6 +1,6 @@
 package com.campudus.scycle.http
 
-import com.campudus.scycle.Scycle.DriverFunction
+import com.campudus.scycle.Scycle.{DriverFunction, side}
 import rxscalajs._
 
 class HttpDriver extends DriverFunction[Request, UserResponse] {

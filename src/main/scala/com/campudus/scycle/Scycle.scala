@@ -15,16 +15,7 @@ object Scycle {
 
   }
 
-  trait DriverFunction[A, +B] extends ((Observable[A], String) => Observable[B]) {
-
-    protected[this] def side[X](someNext: X => _): X => X = {
-      x => {
-        someNext(x)
-        x
-      }
-    }
-
-  }
+  trait DriverFunction[A, +B] extends ((Observable[A], String) => Observable[B])
 
   type DriversDefinition = Map[String, DriverFunction[_, _]]
   type Sources = Map[String, Observer[_]]
@@ -49,6 +40,13 @@ object Scycle {
       }
 
       result
+    }
+  }
+
+  def side[X](someNext: X => _): X => X = {
+    x => {
+      someNext(x)
+      x
     }
   }
 
