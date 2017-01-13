@@ -44,7 +44,6 @@ class ScycleSuite extends AsyncFunSpec {
       Scycle.run(drivers => {
         Map("test" -> {
           val testDriver = drivers("test")
-          // TODO int$.map results in new observable which is not looked at in the test driver...
           testDriver.asInstanceOf[TestDriver].int$.map(p.success _).startWith(0)
         })
       },
