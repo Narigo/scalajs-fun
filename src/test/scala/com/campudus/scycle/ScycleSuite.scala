@@ -71,8 +71,7 @@ class TestDriver(input: Observable[Int], output: Observer[Int]) extends Driver(i
   val int$: Observable[Int] = {
     val sub = Subject[Int]()
     input.subscribe(sub)
-    sub.subscribe(ev => {
-    })
+    sub.subscribe(_ => {})
     sub
   }
 
