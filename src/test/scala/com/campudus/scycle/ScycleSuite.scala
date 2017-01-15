@@ -1,6 +1,5 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.Scycle.DriverFunction
 import org.scalatest.AsyncFunSpec
 import rxscalajs.{Observable, Observer, Subject}
 
@@ -22,16 +21,11 @@ class ScycleSuite extends AsyncFunSpec {
           Map("test" -> Observable.just(inputText))
         },
         Map("test" -> {
-          val df = new DriverFunction[String, Unit] {
-
-            override def apply(stream: Observable[String], driverName: String): Observable[Unit] = {
-              stream.map(t => {
-                p.success(t)
-              })
-            }
-
+          (stream: Observable[String], driverName: String) => {
+            stream.map(t => {
+              p.success(t)
+            })
           }
-          df
         })
       )
       p.future.map(text => {
@@ -47,9 +41,8 @@ class ScycleSuite extends AsyncFunSpec {
           testDriver.asInstanceOf[TestDriver].int$.map(p.success _).startWith(0)
         })
       },
-        Map("test" -> new DriverFunction[Int, Int] {
-
-          override def apply(stream: Observable[Int], driverName: String): Observable[Int] = {
+        Map("test" -> {
+          (stream: Observable[Int], driverName: String) => {
             val mapped = stream.map(i => {
               val nextI = i + 1
               nextI
@@ -57,7 +50,6 @@ class ScycleSuite extends AsyncFunSpec {
             val testDriver = new TestDriver(mapped, Subject[Int]())
             testDriver
           }
-
         })
       )
       p.future.map(i => assert(i === 1))

@@ -15,7 +15,7 @@ object Scycle {
 
   }
 
-  trait DriverFunction[A, +B] extends ((Observable[A], String) => Observable[B])
+  type DriverFunction[A, +B] = ((Observable[A], String) => Observable[B])
 
   type DriversDefinition = Map[String, DriverFunction[_, _]]
   type Sources = Map[String, Observer[_]]
