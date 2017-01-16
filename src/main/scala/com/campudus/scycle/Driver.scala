@@ -1,17 +1,10 @@
 package com.campudus.scycle
 
-import rxscalajs.{Observable, Observer}
+import rxscalajs.Observable
+import rxscalajs.subscription.AnonymousSubscription
 
-import scala.scalajs.js.Any
+class Driver[A] {
 
-class Driver[A](input: Observable[A], output: Observer[A]) extends Observable[A](input.inner) with Observer[A] {
-
-  input.subscribe(output)
-
-  override def toString: String = s"Driver:$input"
-
-  override def next(t: A): Unit = output.next(t)
-  override def error(err: Any): Unit = output.error(err)
-  override def complete(): Unit = output.complete()
+  def subscribe(inputs: Observable[A]): AnonymousSubscription = inputs.subscribe(_ => null)
 
 }

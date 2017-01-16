@@ -18,7 +18,7 @@ object ScycleApp extends JSApp {
     Scycle.run(logic, drivers)
   }
 
-  val drivers: DriversDefinition = Map[String, DriverFunction[_, _]](
+  val drivers: DriversDefinition = Map[String, Driver[_]](
     "dom" -> new DomDriver,
     "http" -> new HttpDriver
   )

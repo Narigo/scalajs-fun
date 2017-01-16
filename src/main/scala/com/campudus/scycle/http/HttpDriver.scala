@@ -1,16 +1,13 @@
 package com.campudus.scycle.http
 
-import com.campudus.scycle.Scycle.{DriverFunction, side}
+import com.campudus.scycle.Driver
+import com.campudus.scycle.Scycle.side
 import rxscalajs._
+import rxscalajs.subscription.AnonymousSubscription
 
-class HttpDriver extends DriverFunction[Request, UserResponse] {
+class HttpDriver extends Driver[Request] {
 
-  override def apply(
-    stream: Observable[Request],
-    driverName: String
-  ): Observable[UserResponse] = {
-    stream.map(_ => null)
-  }
+  override def subscribe(requests: Observable[Request]): AnonymousSubscription = requests.subscribe(_ => null)
 
   val responses: Subject[User] = Subject()
   val lastResponse$: Observable[User] = responses.startWith(null)

@@ -15,9 +15,7 @@ object Scycle {
 
   }
 
-  type DriverFunction[A, +B] = ((Observable[A], String) => Observable[B])
-
-  type DriversDefinition = Map[String, DriverFunction[_, _]]
+  type DriversDefinition = Map[String, Driver[_]]
   type Sources = Map[String, Observer[_]]
   type Sinks = Map[String, Observable[_]]
 
@@ -87,15 +85,10 @@ object Scycle {
     type X = Nothing
 
     drivers.foldLeft(Map[String, Observable[_]]()){
-      case (m, (name, driverFn)) =>
-        val driverOutput = driverFn(
-          sinkProxies(name).asInstanceOf[Observable[X]],
-          name
-        )
-
-        driverOutput.subscribe(_ => {})
-
-        m + (name -> driverOutput)
+      case (m, (name, driver)) =>
+        val proxyObservable = sinkProxies(name).asInstanceOf[Observable[X]]
+        val subscription = driver.subscribe(proxyObservable)
+        m + (name -> proxyObservable)
     }
   }
 
