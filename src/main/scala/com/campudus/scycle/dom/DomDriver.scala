@@ -10,14 +10,16 @@ import rxscalajs.subscription.AnonymousSubscription
 
 class DomDriver extends Driver[Hyperscript] {
 
-  override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = inputs.subscribe(hs => {
-    val container = document.querySelector("#app")
-    val diff = VirtualDom.diff(VirtualDom(container), hs)
-    diff match {
-      case List(Replacement(_, null)) =>
-      case diffs => VirtualDom.update(container, diffs)
-    }
-  })
+  override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
+    inputs.subscribe(hs => {
+      val container = document.querySelector("#app")
+      val diff = VirtualDom.diff(VirtualDom(container), hs)
+      diff match {
+        case List(Replacement(_, null)) =>
+        case diffs => VirtualDom.update(container, diffs)
+      }
+    })
+  }
 
   private val selectedEvents: Subject[Event] = Subject()
 

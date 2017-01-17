@@ -1,5 +1,6 @@
 package com.campudus.scycle
 
+import rxscalajs.subscription.AnonymousSubscription
 import rxscalajs.{Observable, Observer, _}
 
 object Scycle {
@@ -16,7 +17,7 @@ object Scycle {
   }
 
   type DriversDefinition = Map[String, Driver[_]]
-  type Sources = Map[String, Observer[_]]
+  type Sources = Map[String, Driver[_]]
   type Sinks = Map[String, Observable[_]]
 
   def run(
@@ -28,12 +29,12 @@ object Scycle {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
       val sinkProxies = makeSinkProxies(drivers)
-      val sources = callDrivers(drivers, sinkProxies).asInstanceOf[Sources]
-      val sinks = mainFn(sources)
+      val subscriptions = callDrivers(drivers, sinkProxies)
+      val sinks = mainFn(drivers)
       val disposeReplication = replicateMany(sinks, sinkProxies)
 
       val result = () => {
-        disposeSources(sources)
+        disposeSubscriptions(subscriptions)
         disposeReplication()
       }
 
@@ -73,22 +74,22 @@ object Scycle {
     println(error)
   }
 
-  private def disposeSources(sources: Sources): Unit = {
-    // TODO disposeSources
+  private def disposeSubscriptions(subscriptions: Map[String, AnonymousSubscription]): Unit = {
+    subscriptions.foreach(_._2.unsubscribe())
   }
 
   private def callDrivers(
     drivers: DriversDefinition,
     sinkProxies: Map[String, Subject[_]]
-  ): Map[String, Observable[_]] = {
+  ): Map[String, AnonymousSubscription] = {
 
     type X = Nothing
 
-    drivers.foldLeft(Map[String, Observable[_]]()){
+    drivers.foldLeft(Map[String, AnonymousSubscription]()){
       case (m, (name, driver)) =>
         val proxyObservable = sinkProxies(name).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
-        m + (name -> proxyObservable)
+        m + (name -> subscription)
     }
   }
 
@@ -96,9 +97,8 @@ object Scycle {
     drivers: DriversDefinition
   ): Map[String, Subject[_]] = {
     drivers.foldLeft(Map[String, Subject[_]]()){
-      case (m, (name, _)) =>
-        val holdSubject = Subject()
-        m + (name -> holdSubject)
+      case (m, (name, driver)) =>
+        m + (name -> driver.createSubject())
     }
   }
 

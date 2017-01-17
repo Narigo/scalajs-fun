@@ -1,7 +1,8 @@
 package com.campudus.scycle
 
 import org.scalatest.AsyncFunSpec
-import rxscalajs.{Observable, Observer, Subject}
+import rxscalajs.subscription.AnonymousSubscription
+import rxscalajs.{Observable, Subject}
 
 import scala.concurrent.Promise
 
@@ -20,11 +21,9 @@ class ScycleSuite extends AsyncFunSpec {
         _ => {
           Map("test" -> Observable.just(inputText))
         },
-        Map("test" -> {
-          (stream: Observable[String], driverName: String) => {
-            stream.map(t => {
-              p.success(t)
-            })
+        Map("test" -> new Driver[String] {
+          override def subscribe(inputs: Observable[String]): AnonymousSubscription = {
+            inputs.subscribe(t => p.success(t))
           }
         })
       )
@@ -36,21 +35,15 @@ class ScycleSuite extends AsyncFunSpec {
     it("can cycle"){
       val p = Promise[Int]
       Scycle.run(drivers => {
+        val testDriver = drivers("test").asInstanceOf[TestDriver]
         Map("test" -> {
-          val testDriver = drivers("test")
-          testDriver.asInstanceOf[TestDriver].int$.map(p.success _).startWith(0)
+          testDriver.int$.map(i => {
+            p.success(i)
+            i
+          }).startWith(0)
         })
       },
-        Map("test" -> {
-          (stream: Observable[Int], driverName: String) => {
-            val mapped = stream.map(i => {
-              val nextI = i + 1
-              nextI
-            })
-            val testDriver = new TestDriver(mapped, Subject[Int]())
-            testDriver
-          }
-        })
+        Map("test" -> new TestDriver)
       )
       p.future.map(i => assert(i === 1))
     }
@@ -58,14 +51,16 @@ class ScycleSuite extends AsyncFunSpec {
 
 }
 
-class TestDriver(input: Observable[Int], output: Observer[Int]) extends Driver(input, output) {
+class TestDriver extends Driver[Int] {
 
-  val int$: Observable[Int] = {
-    val sub = Subject[Int]()
-    input.subscribe(sub)
-    sub.subscribe(_ => {})
-    sub
+  val int$: Subject[Int] = Subject[Int]()
+
+  override def subscribe(inputs: Observable[Int]): AnonymousSubscription = {
+    inputs.subscribe(i => {
+      int$.next(i + 1)
+    })
   }
 
-  override def toString = s"TestDriver($input)"
+  override def toString = s"TestDriver"
+
 }
