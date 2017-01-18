@@ -41,9 +41,8 @@ object ScycleApp extends JSApp {
       },
       "http" -> {
         clicks$
-          .startWith(http.requestUser(Math.floor(Math.random() * 10) + 1))
+          .startWith(null)
           .map(_ => {
-            println("start request from click")
             http.requestUser(Math.floor(Math.random() * 10) + 1)
           })
       }
