@@ -1,7 +1,6 @@
 package com.campudus.scycle.dom
 
 import com.campudus.scycle.Driver
-import com.campudus.scycle.Scycle.side
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
 import org.scalajs.dom._
@@ -21,8 +20,6 @@ class DomDriver extends Driver[Hyperscript] {
     })
   }
 
-  private val selectedEvents: Subject[Event] = Subject()
-
   def selectEvent(what: String, eventName: String): Observable[Event] = {
     val elem = document.querySelector("#app")
 
@@ -33,7 +30,6 @@ class DomDriver extends Driver[Hyperscript] {
         val target = document.querySelector(what)
         src.isSameNode(target)
       })
-      .map(side(selectedEvents.next))
   }
 
 }
