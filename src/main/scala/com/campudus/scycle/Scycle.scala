@@ -20,10 +20,7 @@ object Scycle {
   type Sources = Map[String, Driver[_]]
   type Sinks = Map[String, Observable[_]]
 
-  def run(
-    mainFn: Sources => Sinks,
-    drivers: DriversDefinition
-  ): () => Unit = {
+  def run(mainFn: Sources => Sinks, drivers: DriversDefinition): () => Unit = {
 
     if (drivers.isEmpty) {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
@@ -49,10 +46,7 @@ object Scycle {
     }
   }
 
-  private def replicateMany(
-    sinks: Sinks,
-    sinkProxies: Map[String, Subject[_]]
-  ): () => Unit = {
+  private def replicateMany(sinks: Sinks, sinkProxies: Map[String, Subject[_]]): () => Unit = {
 
     type X = Any
 
@@ -93,9 +87,7 @@ object Scycle {
     }
   }
 
-  private def makeSinkProxies(
-    drivers: DriversDefinition
-  ): Map[String, Subject[_]] = {
+  private def makeSinkProxies(drivers: DriversDefinition): Map[String, Subject[_]] = {
     drivers.foldLeft(Map[String, Subject[_]]()){
       case (m, (name, driver)) =>
         m + (name -> driver.createSubject())
