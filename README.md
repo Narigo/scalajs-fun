@@ -242,3 +242,16 @@ Okay, so in the last few commits a small application could do the cycle with the
 `HttpDriver`. As the Scycle code is now a lot like the real CycleJS implementation and we can try to simplify the 
 implementation a bit.
 
+The next improvements were meant to get rid of some type issues and things that made the code overly complex. One thing 
+to note is the `DriverFunction[_, _]`. It was used to make a driver always return an observable. If we look closely into
+the Cycle code, this concept does not even exist. By now, the code got rid of this structure and lets all drivers 
+include some function to return an `Observable[_]`. This is more like the real implementation and works quite well now.
+
+## Current status
+
+It seems like the current implementation is at least somewhat okay for now and works for easy apps (see `ScycleApp`).
+Maybe now is the time to test this against the last few videos and see if everything works as expected. We can also make
+some improvements to the creation to the drivers still: Cycle uses `makeXXXDriver` functions to construct a driver. The 
+current code just relies on `new XXXDriver` instead.
+
+
