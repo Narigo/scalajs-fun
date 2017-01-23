@@ -7,11 +7,11 @@ import org.scalajs.dom._
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
 
-class DomDriver extends Driver[Hyperscript] {
+class DomDriver private (domSelector: String) extends Driver[Hyperscript] {
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
-      val container = document.querySelector("#app")
+      val container = document.querySelector(domSelector)
       val diff = VirtualDom.diff(VirtualDom(container), hs)
       diff match {
         case List(Replacement(_, null)) =>
@@ -31,5 +31,11 @@ class DomDriver extends Driver[Hyperscript] {
         src.isSameNode(target)
       })
   }
+
+}
+
+object DomDriver {
+
+  def makeDomDriver(domSelector: String) = new DomDriver(domSelector)
 
 }

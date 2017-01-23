@@ -1,8 +1,10 @@
 package com.campudus.scycle
 
 import com.campudus.scycle.Scycle._
+import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
 import com.campudus.scycle.http.HttpDriver
+import com.campudus.scycle.http.HttpDriver.makeHttpDriver
 import org.scalajs.dom.Event
 
 import scala.scalajs.js.JSApp
@@ -19,8 +21,8 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: DriversDefinition = Map[String, Driver[_]](
-    "dom" -> new DomDriver,
-    "http" -> new HttpDriver
+    "dom" -> makeDomDriver("#app"),
+    "http" -> makeHttpDriver
   )
 
   def logic(sources: Sources): Sinks = {

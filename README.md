@@ -254,4 +254,6 @@ Maybe now is the time to test this against the last few videos and see if everyt
 some improvements to the creation to the drivers still: Cycle uses `makeXXXDriver` functions to construct a driver. The 
 current code just relies on `new XXXDriver` instead.
 
+With the newest commit, the `makeXXXDriver` was implemented. This factory method will create the correct driver as Cycle
+itself does it.
 

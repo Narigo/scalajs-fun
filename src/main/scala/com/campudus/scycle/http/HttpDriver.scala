@@ -35,3 +35,9 @@ class HttpDriver extends Driver[Request] {
   }
 
 }
+
+object HttpDriver {
+
+  def makeHttpDriver() = new HttpDriver
+
+}
