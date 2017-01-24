@@ -4,7 +4,7 @@ import com.campudus.scycle.Driver
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
 
-class HttpDriver extends Driver[Request] {
+class HttpDriver private extends Driver[Request] {
 
   override def subscribe(requests: Observable[Request]): AnonymousSubscription = {
     requests
