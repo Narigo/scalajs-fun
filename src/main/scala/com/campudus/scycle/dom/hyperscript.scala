@@ -1,6 +1,7 @@
 package com.campudus.scycle.dom
 
 import org.scalajs.dom
+import org.scalajs.dom.Attr
 
 sealed trait Hyperscript {
 
@@ -42,14 +43,19 @@ object HyperscriptElement {
           parent(children)
         }).orElse({
           element.tagName.toLowerCase match {
-            case "input" => Some(
+            case "input" => Some({
+              val attributes = for {
+                i <- 0 until element.attributes.length
+              } yield {
+                val attr = element.attributes(i)
+                attr.name -> attr.value
+              }
               Input(
                 element.getAttribute("id"),
                 element.getAttribute("class"),
-                element.getAttribute("type"),
-                element.getAttribute("value")
+                attributes
               )
-            )
+            })
             case "hr" => Some(Hr(element.getAttribute("class")))
             case _ => None
           }
@@ -131,16 +137,14 @@ case class Hr(className: String = null, final val children: Seq[Hyperscript] = S
 case class Input(
   id: String = null,
   className: String = null,
-  kind: String = null,
-  value: String = "",
+  options: Seq[(String, String)] = Seq.empty,
   final val children: Seq[Hyperscript] = Seq.empty
 ) extends HyperscriptElement("input", children) with IdAttr with ClassNameAttr {
 
   override def attrs: Map[String, Option[String]] = {
-    super.attrs.+(
-      "type" -> Option(kind),
-      "value" -> Option(value)
-    )
+    val opts: Seq[(String, Option[String])] = options.map(t => t._1 -> Some(t._2))
+
+    super.attrs ++ opts
   }
 
 }

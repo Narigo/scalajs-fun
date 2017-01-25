@@ -5,7 +5,7 @@ import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
 import com.campudus.scycle.http.HttpDriver
 import com.campudus.scycle.http.HttpDriver.makeHttpDriver
-import org.scalajs.dom.Event
+import rxscalajs.Observable
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -33,20 +33,23 @@ object ScycleApp extends JSApp {
 
     Map(
       "dom" -> {
-        clicks$
-          .startWith(null)
-          .map(side((_: Event) => counter += 1))
-          .combineLatest(http.lastResponse$)
-          .map(eventUser => {
-            Div(id = "app", children = Seq(Text(s"Hello from Scycle - clicks=$counter, user=${eventUser._2}")))
-          })
-      },
-      "http" -> {
-        clicks$
-          .startWith(null)
-          .map(_ => {
-            http.requestUser(Math.floor(Math.random() * 10) + 1)
-          })
+        Observable.of(
+          Div(children = List(
+            Div(children = List(
+              Label(children = List(Text("Weight: 00kg"))),
+              Input(className = "weight", options = List(
+                "type" -> "range", "min" -> "40", "max" -> "150", "value" -> "70"
+              ))
+            )),
+            Div(children = List(
+              Label(children = List(Text("Height: 00kg"))),
+              Input(className = "height", options = List(
+                "type" -> "range", "min" -> "140", "max" -> "220", "value" -> "170"
+              ))
+            )),
+            H1(children = List(Text("BMI is 000")))
+          ))
+        )
       }
     )
   }

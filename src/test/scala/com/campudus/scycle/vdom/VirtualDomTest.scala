@@ -448,7 +448,7 @@ class VirtualDomTest extends FunSpec {
 
       val containerBefore = VirtualDom(container)
       val containerAfter = Div(children = Seq(
-        Input(value = "bye")
+        Input(options = List("value" -> "bye"))
       ))
       val diff = VirtualDom.diff(containerBefore, containerAfter)
 

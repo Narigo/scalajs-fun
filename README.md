@@ -257,3 +257,15 @@ current code just relies on `new XXXDriver` instead.
 With the newest commit, the `makeXXXDriver` was implemented. This factory method will create the correct driver as Cycle
 itself does it.
 
+# Unbreak!
+
+We continue with the videos again. After getting everything to run, we can finally do the last few videos again and see
+how using the API works now.
+
+## Video 14 - Body Mass Index calculator built in Cycle.js
+
+As mentioned before, we start by creating a small template with sliders. While doing that, we can see an issue with the
+current virtual dom implementation. Input tags did not allow `min` and `max` attributes yet and therefore had to be 
+changed a bit in order to allow any kind of key/value pair. After fixing the tests, we can continue implementing 
+everything.  
+
