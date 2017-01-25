@@ -7,7 +7,12 @@ import org.scalajs.dom._
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
 
-class DomDriver private (domSelector: String) extends Driver[Hyperscript] {
+import scala.collection.mutable
+
+class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
+
+  // FIXME maybe use a subject and feed it new values whenever dom changes?
+  private val selectedEvents: mutable.Map[(String, String), Observable[Event]] = mutable.Map.empty
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
@@ -17,19 +22,24 @@ class DomDriver private (domSelector: String) extends Driver[Hyperscript] {
         case List(Replacement(_, null)) =>
         case diffs => VirtualDom.update(container, diffs)
       }
+
+      println("updated dom")
+
+      selectedEvents.foreach({
+        case ((what, eventName), event$) =>
+          println(s"foreach selectedEvents $what -> $eventName -> ${event$}")
+          event$.concat(Observable.fromEvent(document.querySelector(what), eventName))
+      })
     })
   }
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
-    val elem = document.querySelector("#app")
-
-    Observable
-      .fromEvent(elem, eventName)
-      .filter(ev => {
-        val src = ev.srcElement
-        val target = document.querySelector(what)
-        src.isSameNode(target)
-      })
+    val event$ = Observable.fromEvent(document.querySelector(what), eventName).map(ev => {
+      println("selected event happened")
+      ev
+    })
+    selectedEvents += (what -> eventName) -> event$
+    event$
   }
 
 }

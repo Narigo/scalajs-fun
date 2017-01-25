@@ -3,7 +3,6 @@ package com.campudus.scycle
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
-import com.campudus.scycle.http.HttpDriver
 import com.campudus.scycle.http.HttpDriver.makeHttpDriver
 import rxscalajs.Observable
 
@@ -26,12 +25,38 @@ object ScycleApp extends JSApp {
   )
 
   def logic(sources: Sources): Sinks = {
-    val domDriver = drivers("dom").asInstanceOf[DomDriver]
+    val domDriver = sources("dom").asInstanceOf[DomDriver]
+    val changeWeight$ = domDriver
+      .selectEvent(".weight", "click")
+      .map(ev => {
+        println("hello weight?")
+        ev.target.valueOf()
+      }).startWith(70)
+    val changeHeight$ = domDriver
+      .selectEvent(".height", "input")
+      .map(ev => {
+        println("hello height?")
+        ev.target.valueOf()
+      })
+      .startWith(170)
+
+    val bmi$ = Observable
+      .combineLatest(List(changeWeight$, changeHeight$))(
+        seq => {
+          println("hello bmi?")
+          val weight = seq.head.toString.toInt
+          val height = seq(1).toString.toInt
+          val heightMeters = height * 0.01
+          val bmi = Math.round(weight / (heightMeters * heightMeters))
+          bmi
+        }
+      )
+      .startWith(15)
 
     Map(
       "dom" -> {
-        Observable.of(
-          Div(children = List(
+        bmi$.map(l => {
+          Div("#app", children = List(
             Div(children = List(
               Label(children = List(Text("Weight: 00kg"))),
               Input(className = "weight", options = List(
@@ -46,7 +71,7 @@ object ScycleApp extends JSApp {
             )),
             H1(children = List(Text("BMI is 000")))
           ))
-        )
+        })
       }
     )
   }
