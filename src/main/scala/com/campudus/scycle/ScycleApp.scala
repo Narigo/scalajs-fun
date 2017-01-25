@@ -27,9 +27,6 @@ object ScycleApp extends JSApp {
 
   def logic(sources: Sources): Sinks = {
     val domDriver = drivers("dom").asInstanceOf[DomDriver]
-    val clicks$ = domDriver.selectEvent("#app", "click")
-    val http = drivers("http").asInstanceOf[HttpDriver]
-    var counter = 0
 
     Map(
       "dom" -> {
