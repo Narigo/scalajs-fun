@@ -12,7 +12,7 @@ import scala.collection.mutable
 class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
 
   // FIXME maybe use a subject and feed it new values whenever dom changes?
-  private val selectedEvents: mutable.Map[(String, String), Observable[Event]] = mutable.Map.empty
+  private val selectedEvents: mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)] = mutable.Map.empty
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
@@ -26,20 +26,26 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
       println("updated dom")
 
       selectedEvents.foreach({
-        case ((what, eventName), event$) =>
-          println(s"foreach selectedEvents $what -> $eventName -> ${event$}")
-          event$.concat(Observable.fromEvent(document.querySelector(what), eventName))
+        case ((what, eventName), (subj, subs)) =>
+          println(s"unsubscribe old event $eventName on $what into $subj with $subs")
+          subs.unsubscribe()
+          println(s"subscribe new event $eventName on $what into $subj")
+          val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
+          println(s"subscribed to new event $eventName on $what into $subj with $subsNew")
+          (what, eventName) -> (subj, subsNew)
       })
     })
   }
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
-    val event$ = Observable.fromEvent(document.querySelector(what), eventName).map(ev => {
+    val subj = Subject[Event]()
+    val subs = Observable.fromEvent(document.querySelector(what), eventName).map(ev => {
       println("selected event happened")
       ev
-    })
-    selectedEvents += (what -> eventName) -> event$
-    event$
+    }).subscribe(subj.next(_))
+    selectedEvents += (what -> eventName) -> (subj, subs)
+    println(s"added event $eventName on $what into $subj")
+    subj
   }
 
 }

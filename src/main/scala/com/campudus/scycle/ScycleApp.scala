@@ -33,7 +33,7 @@ object ScycleApp extends JSApp {
         ev.target.valueOf()
       }).startWith(70)
     val changeHeight$ = domDriver
-      .selectEvent(".height", "input")
+      .selectEvent(".height", "click")
       .map(ev => {
         println("hello height?")
         ev.target.valueOf()
