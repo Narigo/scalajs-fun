@@ -27,11 +27,11 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
 
       selectedEvents.foreach({
         case ((what, eventName), (subj, subs)) =>
-          println(s"unsubscribe old event $eventName on $what into $subj with $subs")
+          println(s"unsubscribe old event $eventName on $what into $subj with subscription ${subs.hashCode()}")
           subs.unsubscribe()
           println(s"subscribe new event $eventName on $what into $subj")
           val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
-          println(s"subscribed to new event $eventName on $what into $subj with $subsNew")
+          println(s"subscribed to new event $eventName on $what into $subj with subscription ${subsNew.hashCode()}")
           (what, eventName) -> (subj, subsNew)
       })
     })
@@ -42,9 +42,9 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
     val subs = Observable.fromEvent(document.querySelector(what), eventName).map(ev => {
       println("selected event happened")
       ev
-    }).subscribe(subj.next(_))
+    }).subscribe(subj)
     selectedEvents += (what -> eventName) -> (subj, subs)
-    println(s"added event $eventName on $what into $subj")
+    println(s"added event $eventName on $what into $subj with subscription ${subs.hashCode()}")
     subj
   }
 
