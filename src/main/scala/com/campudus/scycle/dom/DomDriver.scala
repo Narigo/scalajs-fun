@@ -37,7 +37,7 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
             log(s"subscribe new event $eventName on $what into $subj")
             val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
             log(s"subscribed to new event $eventName on $what into $subj with subscriptions ${subsNew.hashCode()}")
-            (what, eventName) -> (subj, subsNew)
+            selectedEvents += (what, eventName) -> (subj, subsNew)
         })
       }
     })
