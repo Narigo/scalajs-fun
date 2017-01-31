@@ -28,25 +28,11 @@ object ScycleApp extends JSApp {
     val domDriver = sources("dom").asInstanceOf[DomDriver]
     val changeWeight$ = domDriver
       .selectEvent(".weight", "input")
-      .map(ev => {
-        org.scalajs.dom.window.console.log("hello weight?", ev)
-        val element = ev.target.asInstanceOf[Element]
-        org.scalajs.dom.window.console.log("element element", element)
-        val res = element.getAttribute("value")
-        org.scalajs.dom.window.console.log("element value", res)
-        res.toDouble
-      })
+      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toDouble)
       .startWith(70.0)
     val changeHeight$ = domDriver
       .selectEvent(".height", "input")
-      .map(ev => {
-        org.scalajs.dom.window.console.log("hello height?", ev)
-        val element = ev.target.asInstanceOf[Element]
-        org.scalajs.dom.window.console.log("element element", element)
-        val res = element.getAttribute("value")
-        org.scalajs.dom.window.console.log("element value", res)
-        res.toDouble
-      })
+      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toDouble)
       .startWith(170.0)
 
     val bmi$ = changeWeight$
