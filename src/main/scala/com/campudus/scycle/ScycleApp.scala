@@ -38,7 +38,6 @@ object ScycleApp extends JSApp {
     val bmi$ = changeWeight$
       .combineLatest(changeHeight$)
       .map((tuple, _) => {
-        println("hello bmi?")
         val (weight, height) = tuple
         val heightMeters = height * 0.01
         val bmi = Math.round(weight / (heightMeters * heightMeters))

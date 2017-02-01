@@ -13,7 +13,6 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
 
   import org.scalajs.dom.console._
 
-  // FIXME maybe use a subject and feed it new values whenever dom changes?
   private val selectedEvents: mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)] = mutable.Map.empty
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
@@ -32,11 +31,8 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
 
         selectedEvents.foreach({
           case ((what, eventName), (subj, subs)) =>
-            log(s"unsubscribe old event $eventName on $what into $subj with subscription ${subs.hashCode()}")
             subs.unsubscribe()
-            log(s"subscribe new event $eventName on $what into $subj")
             val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
-            log(s"subscribed to new event $eventName on $what into $subj with subscriptions ${subsNew.hashCode()}")
             selectedEvents += (what, eventName) -> (subj, subsNew)
         })
       }
@@ -45,12 +41,8 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
 
   def selectEvent(what: String, eventName: String): Observable[Event] = {
     val subj = Subject[Event]()
-    val subs = Observable.fromEvent(document.querySelector(what), eventName).map(ev => {
-      log("selected event happened")
-      ev
-    }).subscribe(subj)
+    val subs = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
     selectedEvents += (what -> eventName) -> (subj, subs)
-    log(s"added event $eventName on $what into $subj with subscription ${subs.hashCode()}")
     subj
   }
 
