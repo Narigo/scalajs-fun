@@ -4,7 +4,6 @@ import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
 import com.campudus.scycle.http.HttpDriver.makeHttpDriver
-import org.scalajs.dom.Element
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -48,7 +47,6 @@ object ScycleApp extends JSApp {
       "dom" -> {
         bmi$.map(tuple => {
           val (weight, height, bmi) = tuple
-          org.scalajs.dom.window.console.log("mapped bmi", s"$bmi")
           Div("app", children = List(
             Div(children = List(
               Label(children = List(Text(s"Weight: $weight kg"))),
