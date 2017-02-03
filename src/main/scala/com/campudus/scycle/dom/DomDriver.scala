@@ -11,8 +11,6 @@ import scala.collection.mutable
 
 class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
 
-  import org.scalajs.dom.console._
-
   private val selectedEvents: mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)] = mutable.Map.empty
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
@@ -21,7 +19,7 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
       if (hs != null) {
         val container = document.querySelector(domSelector)
         if (container == null) {
-          log("NO CONTAINER FOUND WITH", domSelector)
+          console.log("NO CONTAINER FOUND WITH", domSelector)
         }
         val diff = VirtualDom.diff(VirtualDom(container), hs)
         diff match {
