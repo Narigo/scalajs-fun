@@ -27,15 +27,13 @@ object ScycleApp extends JSApp {
     val domDriver = sources("dom").asInstanceOf[DomDriver]
     val changeWeight$ = domDriver
       .selectEvent(".weight", "input")
-      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toDouble)
-      .startWith(70.0)
+      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
     val changeHeight$ = domDriver
       .selectEvent(".height", "input")
-      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toDouble)
-      .startWith(170.0)
+      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
 
-    val bmi$ = changeWeight$
-      .combineLatest(changeHeight$)
+    val bmi$ = changeWeight$.startWith(70)
+      .combineLatest(changeHeight$.startWith(170))
       .map((tuple, _) => {
         val (weight, height) = tuple
         val heightMeters = height * 0.01
