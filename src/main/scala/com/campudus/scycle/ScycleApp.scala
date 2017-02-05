@@ -53,7 +53,7 @@ object ScycleApp extends JSApp {
               ))
             )),
             Div(children = List(
-              Label(children = List(Text(s"Height: $height kg"))),
+              Label(children = List(Text(s"Height: $height cm"))),
               Input(className = "height", options = List(
                 "type" -> "range", "min" -> "140", "max" -> "220", "value" -> s"$height"
               ))
