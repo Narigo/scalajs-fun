@@ -267,5 +267,13 @@ how using the API works now.
 As mentioned before, we start by creating a small template with sliders. While doing that, we can see an issue with the
 current virtual dom implementation. Input tags did not allow `min` and `max` attributes yet and therefore had to be 
 changed a bit in order to allow any kind of key/value pair. After fixing the tests, we can continue implementing 
-everything.  
+everything.
+
+One of the more hard to do things now was getting the DOM driver to be able to catch all events each time the DOM itself
+changes. In the current version, we simply unsubscribe and reattach all event listeners that were selected. So for the
+simple demo apps this may work, but at some point in the future, this could be optimized by having the selection of 
+events and the virtual dom implementation work together. It's also not possible to unsubscribe an event right now, which
+should definitely be possible in a real application.
+
+## Video 15 - Model-View-Intent pattern for separation of concerns 
 
