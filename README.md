@@ -277,3 +277,11 @@ should definitely be possible in a real application.
 
 ## Video 15 - Model-View-Intent pattern for separation of concerns 
 
+In this video, the main components were split up into three parts. The read effects, the state calculation and the write
+effects. There is not much to be done in the Scycle code, just the example application had to change according to the 
+video: In essence, it's just refactoring to get the main logic function smaller and split out the various calculations 
+and selectors into smaller functions. 
+
+## Video 16 - Our first component: a labeled slider
+
+
