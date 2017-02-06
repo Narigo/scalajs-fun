@@ -282,6 +282,22 @@ effects. There is not much to be done in the Scycle code, just the example appli
 video: In essence, it's just refactoring to get the main logic function smaller and split out the various calculations 
 and selectors into smaller functions. 
 
+---
+
+# Interlude
+
+There is a small thing that should be done before continuing. This thing here is developed in the open and at some point
+it should be available for others to consume. Right now you can only fork and build it yourself through sbt. It should 
+be possible for anybody to just readily use it. Thus, we're going to release it to public now.
+
+What does that mean and what do we have to do to achieve that?
+
+## Preparing sbt for packaging
+
+
+
+---
+
 ## Video 16 - Our first component: a labeled slider
 
 

@@ -1,5 +1,6 @@
-package com.campudus.scycle
+package com.campudus.scycle.examples
 
+import com.campudus.scycle._
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
