@@ -1,7 +1,7 @@
 import com.lihaoyi.workbench.Plugin.{bootSnippet, _}
 import sbt.Keys.libraryDependencies
 
-val commonSettings = workbenchSettings ++ Seq(
+val commonSettings = Seq(
   organization := "com.campudus",
   scalaVersion := "2.12.1",
   libraryDependencies ++= Seq(
@@ -9,12 +9,10 @@ val commonSettings = workbenchSettings ++ Seq(
     "com.github.lukajcb" %%% "rxscala-js" % "0.7.0",
     "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
   ),
-  bootSnippet := "tutorial.webapp.TutorialApp().main();",
   jsDependencies ++= Seq(
     "org.webjars.npm" % "rxjs" % "5.0.0-rc.1" / "bundles/Rx.min.js" commonJSName "Rx",
     RuntimeDOM
-  ),
-  updateBrowsers <<= updateBrowsers.triggeredBy(fastOptJS in Compile)
+  )
 )
 
 lazy val scycle = (project in file("."))
@@ -25,11 +23,14 @@ lazy val scycle = (project in file("."))
     version := "1.0.0"
   )
 
-lazy val scycleExamples = (project in file("examples"))
-  .dependsOn(scycle)
+lazy val scycleExamples = (project in file("."))
   .enablePlugins(ScalaJSPlugin)
-  .aggregate(scycle)
+  .dependsOn(scycle)
+  .settings(commonSettings: _*)
+  .settings(workbenchSettings: _*)
   .settings(
     name := "Scycle Examples",
-    version := "1.0.0"
+    version := "1.0.0",
+    updateBrowsers <<= updateBrowsers.triggeredBy(fastOptJS in Compile),
+    bootSnippet := "com.campudus.scycle.examples.ScycleApp().main();"
   )
