@@ -294,7 +294,17 @@ What does that mean and what do we have to do to achieve that?
 
 ## Preparing sbt for packaging
 
+First of all, we separate the examples from the core Scycle framework. Putting it into two directories helps a lot - 
+using different `src/main|examples|whatever` folders does not seem to work for me. It's either all sources in one or 
+trouble awaits.
 
+So after splitting it into two sub-directories (`scycle` and `scycle-examples`), we have separate `src/main/scala` 
+folders as well as `src/test/scala`. In each of our projects we will be able to have tests, dependence on other projects
+(examples depend on the Scycle core in our case here).
+
+## Uploading Scycle-core to Maven Central or similar
+
+TODO
 
 ---
 
