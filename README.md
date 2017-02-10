@@ -310,4 +310,5 @@ TODO
 
 ## Video 16 - Our first component: a labeled slider
 
-
+The video shows how to refactor a single slider into a component. It does it by putting a new kind of "driver" into the 
+sources object, which just returns the properties of the slider.
