@@ -3,7 +3,7 @@ package com.campudus.scycle
 import rxscalajs.subscription.AnonymousSubscription
 import rxscalajs.{Observable, Subject}
 
-class Driver[A] {
+trait Driver[A] {
 
   def createSubject(): Subject[A] = Subject()
 

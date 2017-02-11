@@ -20,13 +20,14 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: DriversDefinition = Map[String, Driver[_]](
-    "dom" -> makeDomDriver("#app")
+    "dom" -> makeDomDriver("#app"),
+    "props" -> makePropsDriver()
   )
 
   def logic(sources: Sources): Sinks = {
     val change$ = intent(sources("dom").asInstanceOf[DomDriver])
-    val value$ = model(change$)
-    val vtree$ = view(value$)
+    val state$ = model(change$, sources("props").asInstanceOf[PropsDriver].props)
+    val vtree$ = view(state$)
 
     Map(
       "dom" -> vtree$
@@ -41,16 +42,19 @@ object ScycleApp extends JSApp {
     change$
   }
 
-  def model(change$: Observable[Int]): Observable[Int] = {
-    change$.startWith(70)
+  def model(change$: Observable[Int], props$: Observable[Props]): Observable[Props] = {
+    change$.startWith(70).combineLatest(props$).map(tuple => {
+      val (newValue, props) = tuple
+      props.copy(value = newValue)
+    })
   }
 
-  def view(value$: Observable[Int]): Observable[Hyperscript] = {
-    value$.map(value => {
+  def view(value$: Observable[Props]): Observable[Hyperscript] = {
+    value$.map(props => {
       Div(id = "app", className = "labeled-slider", children = List(
-        Label(children = List(Text(s"Weight: $value kg"))),
+        Label(children = List(Text(s"${props.label}: ${props.value} ${props.unit}"))),
         Input(className = "slider", options = List(
-          "type" -> "range", "min" -> s"40", "max" -> s"170", "value" -> s"$value"
+          "type" -> "range", "min" -> s"${props.min}", "max" -> s"${props.max}", "value" -> s"${props.value}"
         ))
       ))
     })
@@ -58,4 +62,11 @@ object ScycleApp extends JSApp {
 
   case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
 
+  class PropsDriver extends Driver[Unit] {
+
+    def props: Observable[Props] = Observable.of(Props("Weight", "kg", 40, 170, 70))
+
+  }
+
+  def makePropsDriver(): PropsDriver = new PropsDriver
 }
