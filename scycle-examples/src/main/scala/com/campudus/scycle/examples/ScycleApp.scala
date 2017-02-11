@@ -1,10 +1,9 @@
 package com.campudus.scycle.examples
 
-import com.campudus.scycle._
 import com.campudus.scycle.Scycle._
+import com.campudus.scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
-import com.campudus.scycle.http.HttpDriver.makeHttpDriver
 import rxscalajs.Observable
 
 import scala.scalajs.js.JSApp
@@ -21,61 +20,42 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: DriversDefinition = Map[String, Driver[_]](
-    "dom" -> makeDomDriver("#app"),
-    "http" -> makeHttpDriver
+    "dom" -> makeDomDriver("#app")
   )
 
   def logic(sources: Sources): Sinks = {
-    val (changeWeight$, changeHeight$) = intent(sources("dom").asInstanceOf[DomDriver])
-    val state$ = model(changeWeight$, changeHeight$)
-    val vtree$ = view(state$)
+    val change$ = intent(sources("dom").asInstanceOf[DomDriver])
+    val value$ = model(change$)
+    val vtree$ = view(value$)
 
     Map(
       "dom" -> vtree$
     )
   }
 
-  def intent(domDriver: DomDriver): (Observable[Int], Observable[Int]) = {
-    val changeWeight$ = domDriver
-      .selectEvent(".weight", "input")
-      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
-    val changeHeight$ = domDriver
-      .selectEvent(".height", "input")
+  def intent(domDriver: DomDriver): Observable[Int] = {
+    val change$ = domDriver
+      .selectEvent(".slider", "input")
       .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
 
-    (changeWeight$, changeHeight$)
+    change$
   }
 
-  def model(changeWeight$: Observable[Int], changeHeight$: Observable[Int]): Observable[(Int, Int, Long)] = {
-    changeWeight$.startWith(70)
-      .combineLatest(changeHeight$.startWith(170))
-      .map((tuple, _) => {
-        val (weight, height) = tuple
-        val heightMeters = height * 0.01
-        val bmi = Math.round(weight / (heightMeters * heightMeters))
-        (weight, height, bmi)
-      })
+  def model(change$: Observable[Int]): Observable[Int] = {
+    change$.startWith(70)
   }
 
-  def view(state$: Observable[(Int, Int, Long)]): Observable[Hyperscript] = {
-    state$.map(triple => {
-      val (weight, height, bmi) = triple
-      Div("app", children = List(
-        Div(children = List(
-          Label(children = List(Text(s"Weight: $weight kg"))),
-          Input(className = "weight", options = List(
-            "type" -> "range", "min" -> "40", "max" -> "150", "value" -> s"$weight"
-          ))
-        )),
-        Div(children = List(
-          Label(children = List(Text(s"Height: $height cm"))),
-          Input(className = "height", options = List(
-            "type" -> "range", "min" -> "140", "max" -> "220", "value" -> s"$height"
-          ))
-        )),
-        H1(children = List(Text(s"BMI is $bmi")))
+  def view(value$: Observable[Int]): Observable[Hyperscript] = {
+    value$.map(value => {
+      Div(id = "app", className = "labeled-slider", children = List(
+        Label(children = List(Text(s"Weight: $value kg"))),
+        Input(className = "slider", options = List(
+          "type" -> "range", "min" -> s"40", "max" -> s"170", "value" -> s"$value"
+        ))
       ))
     })
   }
+
+  case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
 
 }
