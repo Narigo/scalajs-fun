@@ -21,12 +21,12 @@ object ScycleApp extends JSApp {
 
   val drivers: DriversDefinition = Map[String, Driver[_]](
     "dom" -> makeDomDriver("#app"),
-    "props" -> makePropsDriver()
+    "props" -> makeSliderPropsDriver()
   )
 
   def logic(sources: Sources): Sinks = {
     val change$ = intent(sources("dom").asInstanceOf[DomDriver])
-    val state$ = model(change$, sources("props").asInstanceOf[PropsDriver].props)
+    val state$ = model(change$, sources("props").asInstanceOf[SliderPropsDriver].props)
     val vtree$ = view(state$)
 
     Map(
@@ -62,11 +62,11 @@ object ScycleApp extends JSApp {
 
   case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
 
-  class PropsDriver extends Driver[Unit] {
+  class SliderPropsDriver extends Driver[Unit] {
 
     def props: Observable[Props] = Observable.of(Props("Weight", "kg", 40, 170, 70))
 
   }
 
-  def makePropsDriver(): PropsDriver = new PropsDriver
+  def makeSliderPropsDriver(): SliderPropsDriver = new SliderPropsDriver
 }
