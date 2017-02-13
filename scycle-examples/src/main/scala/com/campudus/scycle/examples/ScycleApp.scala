@@ -20,11 +20,14 @@ object ScycleApp extends JSApp {
   }
 
   val drivers: DriversDefinition = Map[String, Driver[_]](
-    "dom" -> makeDomDriver("#app"),
-    "props" -> makeSliderPropsDriver()
+    "dom" -> makeDomDriver("#app")
   )
 
   def logic(sources: Sources): Sinks = {
+    LabeledSlider(sources + ("props" -> makeSliderPropsDriver()))
+  }
+
+  def LabeledSlider(sources: Sources): Sinks = {
     val change$ = intent(sources("dom").asInstanceOf[DomDriver])
     val state$ = model(change$, sources("props").asInstanceOf[SliderPropsDriver].props)
     val vtree$ = view(state$)
