@@ -318,3 +318,7 @@ sources object, which just returns the properties of the slider.
 A simple change is done in this video. The main function gets renamed to `LabeledSlider` and then a new `main` is 
 written that uses this renamed function. In our case, the `logic` function is used for this as `main` is reserved for 
 the ScalaJS export.
+
+## Video 18 - Multiple independent instances of a component
+
+
