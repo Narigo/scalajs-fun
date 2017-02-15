@@ -24,8 +24,8 @@ object ScycleApp extends JSApp {
   )
 
   def logic(sources: Sources): Sinks = {
-    val heightSliderProps = Props("Height", "cm", 140, 220, 170)
-    val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
+    val heightSliderProps = Props("height-slider", "Height", "cm", 140, 220, 170)
+    val weightSliderProps = Props("weight-slider", "Weight", "kg", 40, 150, 70)
     val heightSinks = LabeledSlider(sources + ("props" -> makeSliderPropsDriver(heightSliderProps)))
     val weightSinks = LabeledSlider(sources + ("props" -> makeSliderPropsDriver(weightSliderProps)))
 
@@ -42,7 +42,7 @@ object ScycleApp extends JSApp {
     Map("dom" -> vtree$)
   }
 
-  case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
+  case class Props(id: String, label: String, unit: String, min: Int, max: Int, value: Int)
 
   class SliderPropsDriver(props: Props) extends Driver[Unit] {
 
