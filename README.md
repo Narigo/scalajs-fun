@@ -321,4 +321,6 @@ the ScalaJS export.
 
 ## Video 18 - Multiple independent instances of a component
 
+We moved `LabeledSlider` into its own class here, so the example `ScycleApp` uses it for a weight and height slider with
+different properties, using a simple `SliderPropsDriver` which provides a configuration for the sliders.
 
