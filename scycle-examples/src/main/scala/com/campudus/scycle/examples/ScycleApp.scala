@@ -29,15 +29,15 @@ object ScycleApp extends JSApp {
     val heightSinks = LabeledSlider(sources + ("props" -> makeSliderPropsDriver(heightSliderProps)))
     val weightSinks = LabeledSlider(sources + ("props" -> makeSliderPropsDriver(weightSliderProps)))
 
-    val vtree$ = weightSinks("dom")
-      .combineLatest(heightSinks("dom"))
-      .map(tuple => {
-        val (weightVTree$, heightVTree$) = tuple.asInstanceOf[(Hyperscript, Hyperscript)]
-        Div(id = "app", children = List(
-          weightVTree$,
-          heightVTree$
-        ))
-      })
+    val vtree$ = for {
+      weightVTree <- weightSinks("dom").asInstanceOf[Observable[Hyperscript]]
+      heightVTree <- heightSinks("dom").asInstanceOf[Observable[Hyperscript]]
+    } yield {
+      Div(id = "app", children = List(
+        weightVTree,
+        heightVTree
+      ))
+    }
 
     Map("dom" -> vtree$)
   }
