@@ -21,7 +21,8 @@ object LabeledSlider {
   def intent(domDriver: DomDriver, props$: Observable[Props]): Observable[Int] = {
     val change$ = props$.flatMap(props => {
       domDriver
-        .selectEvent(s"#${props.id}", "input")
+        .select(s"#${props.id}")
+        .events("input")
         .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
     })
 

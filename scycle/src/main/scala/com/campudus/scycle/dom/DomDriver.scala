@@ -37,11 +37,18 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
     })
   }
 
-  def selectEvent(what: String, eventName: String): Observable[Event] = {
-    val subj = Subject[Event]()
-    val subs = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
-    selectedEvents += (what -> eventName) -> (subj, subs)
-    subj
+  def select(what: String): DomSource = new DomSource(what)
+
+  class DomSource(source: String) {
+
+    def select(what: String): DomSource = new DomSource(s"$source $what")
+    def events(what: String): Observable[Event] = {
+      val subj = Subject[Event]()
+      val subs = Observable.fromEvent(document.querySelector(source), what).subscribe(subj)
+      selectedEvents += (source -> what) -> (subj, subs)
+      subj
+    }
+
   }
 
 }
