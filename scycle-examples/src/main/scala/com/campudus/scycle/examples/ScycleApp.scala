@@ -2,7 +2,7 @@ package com.campudus.scycle.examples
 
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle._
-import com.campudus.scycle.dom.DomDriver.makeDomDriver
+import com.campudus.scycle.dom.DomDriver.{DomSource, makeDomDriver}
 import com.campudus.scycle.dom._
 import rxscalajs.Observable
 
@@ -24,25 +24,27 @@ object ScycleApp extends JSApp {
   )
 
   def logic(sources: Sources): Sinks = {
-    val heightSliderProps = Props("height-slider", "Height", "cm", 140, 220, 170)
-    val weightSliderProps = Props("weight-slider", "Weight", "kg", 40, 150, 70)
-    val heightSinks = LabeledSlider(sources + ("props" -> makeSliderPropsDriver(heightSliderProps)))
-    val weightSinks = LabeledSlider(sources + ("props" -> makeSliderPropsDriver(weightSliderProps)))
+    val heightSliderProps = Props("Height", "cm", 140, 220, 170)
+    val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
+    val heightSources = sources("dom").asInstanceOf[Observable[DomSource]]
+    val weightSources = sources("dom").asInstanceOf[Observable[DomSource]]
+    val heightSinks = LabeledSlider(Map("dom" -> heightSources, "props" -> makeSliderPropsDriver(heightSliderProps)))
+    val weightSinks = LabeledSlider(Map("dom" -> weightSources, "props" -> makeSliderPropsDriver(weightSliderProps)))
 
     val vtree$ = for {
       weightVTree <- weightSinks("dom").asInstanceOf[Observable[Hyperscript]]
       heightVTree <- heightSinks("dom").asInstanceOf[Observable[Hyperscript]]
     } yield {
       Div(id = "app", children = List(
-        weightVTree,
-        heightVTree
+        Div(id = "weight-slider", children = List(weightVTree)),
+        Div(id = "height-slider", children = List(heightVTree))
       ))
     }
 
     Map("dom" -> vtree$)
   }
 
-  case class Props(id: String, label: String, unit: String, min: Int, max: Int, value: Int)
+  case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
 
   class SliderPropsDriver(props: Props) extends Driver[Unit] {
 
