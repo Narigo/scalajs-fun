@@ -2,7 +2,7 @@ package com.campudus.scycle.examples
 
 import com.campudus.scycle.Scycle._
 import com.campudus.scycle._
-import com.campudus.scycle.dom.DomDriver.{DomSource, makeDomDriver}
+import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
 import rxscalajs.Observable
 
@@ -26,8 +26,8 @@ object ScycleApp extends JSApp {
   def logic(sources: Sources): Sinks = {
     val heightSliderProps = Props("Height", "cm", 140, 220, 170)
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
-    val heightSources = sources("dom").asInstanceOf[Observable[DomSource]]
-    val weightSources = sources("dom").asInstanceOf[Observable[DomSource]]
+    val heightSources = sources("dom").asInstanceOf[DomDriver]
+    val weightSources = sources("dom").asInstanceOf[DomDriver]
     val heightSinks = LabeledSlider(Map("dom" -> heightSources, "props" -> makeSliderPropsDriver(heightSliderProps)))
     val weightSinks = LabeledSlider(Map("dom" -> weightSources, "props" -> makeSliderPropsDriver(weightSliderProps)))
 

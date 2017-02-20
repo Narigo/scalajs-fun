@@ -1,7 +1,7 @@
 package com.campudus.scycle.examples
 
 import com.campudus.scycle.Scycle.{Sinks, Sources}
-import com.campudus.scycle.dom.DomDriver.DomSource
+import com.campudus.scycle.dom.DomDriver
 import com.campudus.scycle.dom._
 import com.campudus.scycle.examples.ScycleApp.{Props, SliderPropsDriver}
 import rxscalajs.Observable
@@ -10,7 +10,7 @@ object LabeledSlider {
 
   def apply(sources: Sources): Sinks = {
     val props$ = sources("props").asInstanceOf[SliderPropsDriver].sliderProps
-    val change$ = intent(sources("dom").asInstanceOf[DomSource])
+    val change$ = intent(sources("dom").asInstanceOf[DomDriver])
     val state$ = model(change$, props$)
     val vtree$ = view(state$)
 
@@ -19,7 +19,7 @@ object LabeledSlider {
     )
   }
 
-  def intent(domDriver: DomSource): Observable[Int] = {
+  def intent(domDriver: DomDriver): Observable[Int] = {
     domDriver
       .select(".labeled-slider")
       .events("input")

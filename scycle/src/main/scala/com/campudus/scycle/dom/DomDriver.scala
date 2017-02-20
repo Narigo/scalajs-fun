@@ -1,7 +1,7 @@
 package com.campudus.scycle.dom
 
 import com.campudus.scycle.Driver
-import com.campudus.scycle.dom.DomDriver.{DomSource, SelectedEvents}
+import com.campudus.scycle.dom.DomDriver.SelectedEvents
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
 import org.scalajs.dom._
@@ -38,11 +38,18 @@ class DomDriver private(domSelector: String) extends Driver[Hyperscript] {
     })
   }
 
-  def select(what: String): DomSource = {
-    new DomSource {
+  def select(what: String): DomDriver = {
+    new DomDriver(s"$domSelector $what") {
       protected val source: String = what
       protected val selectedEvents: SelectedEvents = DomDriver.this.selectedEvents
     }
+  }
+
+  def events(what: String): Observable[Event] = {
+    val subj = Subject[Event]()
+    val subs = Observable.fromEvent(document.querySelector(domSelector), what).subscribe(subj)
+    selectedEvents += (domSelector -> what) -> (subj, subs)
+    subj
   }
 
 }
@@ -52,26 +59,5 @@ object DomDriver {
   def makeDomDriver(domSelector: String) = new DomDriver(domSelector)
 
   type SelectedEvents = mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)]
-
-  trait DomSource {
-
-    protected val source: String
-    protected val selectedEvents: SelectedEvents
-
-    def select(what: String): DomSource = {
-      new DomSource {
-        protected val source = s"${DomSource.this.source} $what"
-        protected val selectedEvents = DomSource.this.selectedEvents
-      }
-    }
-
-    def events(what: String): Observable[Event] = {
-      val subj = Subject[Event]()
-      val subs = Observable.fromEvent(document.querySelector(source), what).subscribe(subj)
-      selectedEvents += (source -> what) -> (subj, subs)
-      subj
-    }
-
-  }
 
 }
