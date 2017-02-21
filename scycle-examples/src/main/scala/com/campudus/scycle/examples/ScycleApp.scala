@@ -26,8 +26,8 @@ object ScycleApp extends JSApp {
   def logic(sources: Sources): Sinks = {
     val heightSliderProps = Props("Height", "cm", 140, 220, 170)
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
-    val heightSources = sources("dom").asInstanceOf[DomDriver]
-    val weightSources = sources("dom").asInstanceOf[DomDriver]
+    val heightSources = sources("dom").asInstanceOf[DomDriver].select("#height-slider")
+    val weightSources = sources("dom").asInstanceOf[DomDriver].select("#weight-slider")
     val heightSinks = LabeledSlider(Map("dom" -> heightSources, "props" -> makeSliderPropsDriver(heightSliderProps)))
     val weightSinks = LabeledSlider(Map("dom" -> weightSources, "props" -> makeSliderPropsDriver(weightSliderProps)))
 
