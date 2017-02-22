@@ -21,14 +21,10 @@ object LabeledSlider {
   }
 
   def intent(domDriver: DomDriver): Observable[Int] = {
-    dom.console.log(s"domdriver=$domDriver")
     domDriver
       .select(".labeled-slider")
       .events("input")
-      .map(event => {
-        dom.console.log("test event", event)
-        event.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt
-      })
+      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
   }
 
   def model(change$: Observable[Int], props$: Observable[Props]): Observable[Props] = {

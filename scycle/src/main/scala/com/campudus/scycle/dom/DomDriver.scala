@@ -13,7 +13,6 @@ import scala.collection.mutable
 class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty) extends Driver[Hyperscript] {
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
-    console.log(s"inputs=$inputs")
     inputs.subscribe(hs => {
       // FIXME how to get rid of this null check caused by Scycle -> sinkProxies(name).next(null)
       if (hs != null) {

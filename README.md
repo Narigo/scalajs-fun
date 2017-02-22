@@ -322,5 +322,13 @@ the ScalaJS export.
 ## Video 18 - Multiple independent instances of a component
 
 We moved `LabeledSlider` into its own class here, so the example `ScycleApp` uses it for a weight and height slider with
-different properties, using a simple `SliderPropsDriver` which provides a configuration for the sliders.
+different properties, using a simple `SliderPropsDriver` which provides a configuration for the sliders. To be in sync
+with the current implementation of the `DomDriver`, we had to change the `select` event. It is now returning another 
+`DomDriver` instance which uses the same mutable Map for `selectedEvents` in order to synchronize all captured events.
+
+The example app is now able to pass a preselected `DomDriver` to the two `LabeledSlider` instances.
+
+## Video 19 - Isolating component instances
+
+
 
