@@ -1,10 +1,8 @@
 package com.campudus.scycle.examples
 
 import com.campudus.scycle.Scycle.{Sinks, Sources}
-import com.campudus.scycle.dom.DomDriver
-import com.campudus.scycle.dom._
+import com.campudus.scycle.dom.{DomDriver, _}
 import com.campudus.scycle.examples.ScycleApp.{Props, SliderPropsDriver}
-import org.scalajs.dom
 import rxscalajs.Observable
 
 object LabeledSlider {
