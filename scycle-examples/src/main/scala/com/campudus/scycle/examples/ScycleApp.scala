@@ -1,6 +1,6 @@
 package com.campudus.scycle.examples
 
-import com.campudus.scycle.Scycle._
+import com.campudus.scycle.Scycle.{Sinks, _}
 import com.campudus.scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
@@ -26,22 +26,35 @@ object ScycleApp extends JSApp {
   def logic(sources: Sources): Sinks = {
     val heightSliderProps = Props("Height", "cm", 140, 220, 170)
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
-    val heightSources = sources("dom").asInstanceOf[DomDriver].select("#height-slider")
-    val weightSources = sources("dom").asInstanceOf[DomDriver].select("#weight-slider")
-    val heightSinks = LabeledSlider(Map("dom" -> heightSources, "props" -> makeSliderPropsDriver(heightSliderProps)))
-    val weightSinks = LabeledSlider(Map("dom" -> weightSources, "props" -> makeSliderPropsDriver(weightSliderProps)))
+
+    val WeightSlider = isolate(LabeledSlider.apply)("weight-slider")
+    val HeightSlider = isolate(LabeledSlider.apply)("height-slider")
 
     val vtree$ = for {
-      weightVTree <- weightSinks("dom").asInstanceOf[Observable[Hyperscript]]
-      heightVTree <- heightSinks("dom").asInstanceOf[Observable[Hyperscript]]
+      weightVTree <- WeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(weightSliderProps)))("dom").asInstanceOf[Observable[Hyperscript]]
+      heightVTree <- HeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(heightSliderProps)))("dom").asInstanceOf[Observable[Hyperscript]]
     } yield {
       Div(id = "app", children = List(
-        Div(id = "weight-slider", children = List(weightVTree)),
-        Div(id = "height-slider", children = List(heightVTree))
+        weightVTree,
+        heightVTree
       ))
     }
 
     Map("dom" -> vtree$)
+  }
+
+  def isolate(apply: Sources => Sinks)(namespace: String): Sources => Sinks = {
+    (sources: Sources) => {
+      val isolatedSources: Sources = sources + ("dom" -> sources("dom").asInstanceOf[DomDriver].select(s"#$namespace"))
+      val sinks: Sinks = apply(isolatedSources)
+      val newDomSink = for {
+        hs <- sinks("dom").asInstanceOf[Observable[Hyperscript]]
+      } yield {
+        Div(id = namespace, children = List(hs))
+      }
+
+      sinks + ("dom" -> newDomSink)
+    }
   }
 
   case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
