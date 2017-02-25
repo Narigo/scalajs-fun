@@ -31,8 +31,10 @@ object ScycleApp extends JSApp {
     val HeightSlider = isolate(LabeledSlider.apply)("height-slider")
 
     val vtree$ = for {
-      weightVTree <- WeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(weightSliderProps)))("dom").asInstanceOf[Observable[Hyperscript]]
-      heightVTree <- HeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(heightSliderProps)))("dom").asInstanceOf[Observable[Hyperscript]]
+      weightVTree <- WeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(weightSliderProps)))(
+        "dom").asInstanceOf[Observable[Hyperscript]]
+      heightVTree <- HeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(heightSliderProps)))(
+        "dom").asInstanceOf[Observable[Hyperscript]]
     } yield {
       Div(id = "app", children = List(
         weightVTree,
