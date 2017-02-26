@@ -16,8 +16,8 @@ object Scycle {
 
   }
 
-  type DriversDefinition = Map[String, Driver[_]]
-  type Sources = Map[String, Driver[_]]
+  type DriversDefinition = DriverMap
+  type Sources = DriverMap
   type Sinks = Map[String, Observable[_]]
 
   def run(mainFn: Sources => Sinks, drivers: DriversDefinition): () => Unit = {

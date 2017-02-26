@@ -1,6 +1,6 @@
 package com.campudus.scycle.dom
 
-import com.campudus.scycle.Driver
+import com.campudus.scycle.{Driver, DriverType, DriverTypes}
 import com.campudus.scycle.dom.DomDriver.SelectedEvents
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
@@ -49,10 +49,14 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
 
 }
 
+object DomDriverType extends DriverKey
+
 object DomDriver {
 
   def makeDomDriver(domSelector: String) = new DomDriver(domSelector)
 
   type SelectedEvents = mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)]
+
+  implicit val domDriver: DriverType[DomDriver, Hyperscript] = new DriverType[DomDriverType, DomDriver]
 
 }
