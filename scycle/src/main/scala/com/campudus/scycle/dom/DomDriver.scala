@@ -1,16 +1,17 @@
 package com.campudus.scycle.dom
 
-import com.campudus.scycle.{Driver, DriverType, DriverTypes}
-import com.campudus.scycle.dom.DomDriver.SelectedEvents
+import com.campudus.scycle.dom.DomDrivers._
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
+import com.campudus.scycle.{Driver, DriverKey, DriverType}
 import org.scalajs.dom._
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
 
 import scala.collection.mutable
 
-class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty) extends Driver[Hyperscript] {
+class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty)
+  extends Driver[Hyperscript] {
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
@@ -49,14 +50,14 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
 
 }
 
-object DomDriverType extends DriverKey
-
-object DomDriver {
+object DomDrivers {
 
   def makeDomDriver(domSelector: String) = new DomDriver(domSelector)
 
   type SelectedEvents = mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)]
 
-  implicit val domDriver: DriverType[DomDriver, Hyperscript] = new DriverType[DomDriverType, DomDriver]
+  object DomDriverKey extends DriverKey[Hyperscript]
+
+  implicit val DomDriverType = new DriverType[DriverKey[Hyperscript], DomDriver]
 
 }

@@ -11,11 +11,11 @@ trait Driver[A] {
 
 }
 
-trait DriverKey
+class DriverKey[V]
 
-class DriverType[K <: DriverKey, V <: Driver[_]]
+class DriverType[K, V: Driver]
 
-class DriverMap(underlying: Map[Any, Any] = Map.empty) {
+class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
 
   def +[K, V](kv: (K, V))(implicit ev: DriverType[K, V]): DriverMap = new DriverMap(underlying + kv)
 
@@ -25,6 +25,8 @@ class DriverMap(underlying: Map[Any, Any] = Map.empty) {
 
   def isEmpty: Boolean = underlying.isEmpty
 
-  def foldLeft = underlying.foldLeft _
+  def keys[K: DriverKey]: Iterable[K] = {
+    underlying.keys.map(k => k.asInstanceOf[K])
+  }
 
 }
