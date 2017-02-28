@@ -1,10 +1,16 @@
 import com.lihaoyi.workbench.Plugin.{bootSnippet, _}
 import sbt.Keys.libraryDependencies
 
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
+
 val commonSettings = Seq(
   organization := "com.campudus",
   scalaVersion := "2.12.1",
   libraryDependencies ++= Seq(
+    "com.chuusai" %% "shapeless" % "2.3.2",
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.github.lukajcb" %%% "rxscala-js" % "0.7.0",
     "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
