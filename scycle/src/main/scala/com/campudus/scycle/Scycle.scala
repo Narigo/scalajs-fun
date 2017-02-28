@@ -18,7 +18,7 @@ object Scycle {
 
   type DriversDefinition = DriverMap
   type Sources = DriverMap
-  type Sinks = Map[DriverKey[_], Observable[_]]
+  type Sinks = Map[DriverKey, Observable[_]]
 
   def run(mainFn: Sources => Sinks, drivers: DriversDefinition): () => Unit = {
 
@@ -46,7 +46,7 @@ object Scycle {
     }
   }
 
-  private def replicateMany(sinks: Sinks, sinkProxies: Map[DriverKey[_], Subject[_]]): () => Unit = {
+  private def replicateMany(sinks: Sinks, sinkProxies: Map[DriverKey, Subject[_]]): () => Unit = {
 
     type X = Any
 
@@ -68,20 +68,20 @@ object Scycle {
     println(error)
   }
 
-  private def disposeSubscriptions(subscriptions: Map[DriverKey[_], AnonymousSubscription]): Unit = {
+  private def disposeSubscriptions(subscriptions: Map[DriverKey, AnonymousSubscription]): Unit = {
     subscriptions.foreach(_._2.unsubscribe())
   }
 
   private def callDrivers(
     drivers: DriversDefinition,
-    sinkProxies: Map[DriverKey[_], Subject[_]]
-  ): Map[DriverKey[_], AnonymousSubscription] = {
+    sinkProxies: Map[DriverKey, Subject[_]]
+  ): Map[DriverKey, AnonymousSubscription] = {
 
     type X = Nothing
 
-    drivers.underlying.foldLeft(Map[DriverKey[_], AnonymousSubscription]())({
+    drivers.underlying.foldLeft(Map[DriverKey, AnonymousSubscription]())({
       case (m, (name, value)) =>
-        val key = name.asInstanceOf[DriverKey[_]]
+        val key = name.asInstanceOf[DriverKey]
         val driver = value.asInstanceOf[Driver[_]]
         val proxyObservable = sinkProxies(key).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
@@ -89,10 +89,10 @@ object Scycle {
     })
   }
 
-  private def makeSinkProxies(drivers: DriversDefinition): Map[DriverKey[_], Subject[_]] = {
-    drivers.underlying.foldLeft(Map[DriverKey[_], Subject[_]]())({
+  private def makeSinkProxies(drivers: DriversDefinition): Map[DriverKey, Subject[_]] = {
+    drivers.underlying.foldLeft(Map[DriverKey, Subject[_]]())({
       case (m, (name, value)) =>
-        val key = name.asInstanceOf[DriverKey[_]]
+        val key = name.asInstanceOf[DriverKey]
         val driver = value.asInstanceOf[Driver[_]]
         m + (key -> driver.createSubject())
     })

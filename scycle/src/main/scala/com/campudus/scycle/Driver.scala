@@ -11,21 +11,26 @@ trait Driver[A] {
 
 }
 
-class DriverKey[V]
+class DriverKey
 
-class DriverType[K, V: Driver]
+class DriverType[K <: DriverKey, V <: Driver[_]]
 
 class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
 
-  def +[K, V](kv: (K, V))(implicit ev: DriverType[K, V]): DriverMap = new DriverMap(underlying + kv)
+  def +[K <: DriverKey, V <: Driver[_]](kv: (K, V))
+    (implicit ev: DriverType[K, V]): DriverMap = {
+    new DriverMap(underlying + kv)
+  }
 
   def -[K](k: K): DriverMap = new DriverMap(underlying - k)
 
-  def get[K, V](k: K)(implicit ev: DriverType[K, V]): Option[V] = underlying.get(k).asInstanceOf[Option[V]]
+  def get[K <: DriverKey, V <: Driver[_]](k: K)(implicit ev: DriverType[K, V]): Option[V] = {
+    underlying.get(k).asInstanceOf[Option[V]]
+  }
 
   def isEmpty: Boolean = underlying.isEmpty
 
-  def keys[K: DriverKey]: Iterable[K] = {
+  def keys[K <: DriverKey](implicit ev: DriverType[K, _]): Iterable[K] = {
     underlying.keys.map(k => k.asInstanceOf[K])
   }
 
