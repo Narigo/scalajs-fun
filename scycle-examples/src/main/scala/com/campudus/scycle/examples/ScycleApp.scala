@@ -25,9 +25,11 @@ object ScycleApp extends JSApp {
   def logic(sources: Sources): Sinks = {
     val heightSliderProps = Props("Height", "cm", 140, 220, 170)
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
+    println("test1")
 
     val WeightSlider = isolate(LabeledSlider.apply)("weight-slider")
     val HeightSlider = isolate(LabeledSlider.apply)("height-slider")
+    println("test2")
 
     val vtree$ = for {
       weightVTree <- WeightSlider(new DriverMap +
@@ -39,6 +41,7 @@ object ScycleApp extends JSApp {
         (SliderPropsDriverKey -> makeSliderPropsDriver(heightSliderProps))
       ).get(DomDriverKey).get
     } yield {
+      println("test3")
       Div(id = "app", children = List(
         weightVTree.asInstanceOf[Hyperscript],
         heightVTree.asInstanceOf[Hyperscript]
