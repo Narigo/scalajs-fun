@@ -32,11 +32,11 @@ object ScycleApp extends JSApp {
     println("test2")
 
     val vtree$ = for {
-      weightVTree <- WeightSlider(new DriverMap +
+      weightVTree <- WeightSlider(new DriverMap() +
         (DomDriverKey -> sources.get(DomDriverKey).get) +
         (SliderPropsDriverKey -> makeSliderPropsDriver(weightSliderProps))
       ).get(DomDriverKey).get
-      heightVTree <- HeightSlider(new DriverMap +
+      heightVTree <- HeightSlider(new DriverMap() +
         (DomDriverKey -> sources.get(DomDriverKey).get) +
         (SliderPropsDriverKey -> makeSliderPropsDriver(heightSliderProps))
       ).get(DomDriverKey).get

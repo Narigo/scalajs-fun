@@ -25,6 +25,7 @@ class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
   def -[K](k: K): DriverMap = new DriverMap(underlying - k)
 
   def get[K <: DriverKey, V <: Driver[_]](k: K)(implicit ev: DriverType[K, V]): Option[V] = {
+    println(s"test DriverMap $k")
     underlying.get(k).asInstanceOf[Option[V]]
   }
 
