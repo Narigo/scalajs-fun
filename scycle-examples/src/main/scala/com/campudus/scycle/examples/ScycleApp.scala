@@ -35,13 +35,13 @@ object ScycleApp extends JSApp {
       weightVTree <- WeightSlider(new DriverMap() +
         (DomDriverKey -> sources.get(DomDriverKey).get) +
         (SliderPropsDriverKey -> makeSliderPropsDriver(weightSliderProps))
-      ).get(DomDriverKey).get
+      )(DomDriverKey)
+      _ = println("test3")
       heightVTree <- HeightSlider(new DriverMap() +
         (DomDriverKey -> sources.get(DomDriverKey).get) +
         (SliderPropsDriverKey -> makeSliderPropsDriver(heightSliderProps))
-      ).get(DomDriverKey).get
+      )(DomDriverKey)
     } yield {
-      println("test3")
       Div(id = "app", children = List(
         weightVTree.asInstanceOf[Hyperscript],
         heightVTree.asInstanceOf[Hyperscript]
@@ -55,12 +55,14 @@ object ScycleApp extends JSApp {
     (sources: Sources) => {
       val isolatedSources: Sources = sources + (DomDriverKey -> sources.get(DomDriverKey).get.select(s"#$namespace"))
       val sinks: Sinks = apply(isolatedSources)
+      println("App.isolate")
       val newDomSink = for {
-        hs <- sinks.get(DomDriverKey).asInstanceOf[Observable[Hyperscript]]
+        hs <- sinks(DomDriverKey).asInstanceOf[Observable[Hyperscript]]
       } yield {
         Div(id = namespace, children = List(hs))
       }
 
+      println("App.isolate returning")
       sinks + (DomDriverKey -> newDomSink)
     }
   }

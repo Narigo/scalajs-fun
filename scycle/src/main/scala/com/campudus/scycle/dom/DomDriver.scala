@@ -3,7 +3,7 @@ package com.campudus.scycle.dom
 import com.campudus.scycle.dom.DomDriver._
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
-import com.campudus.scycle.{Driver, DriverKey, DriverType}
+import com.campudus.scycle.{Driver, DriverKey, DriverType, SinksType}
 import org.scalajs.dom._
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
@@ -59,5 +59,7 @@ object DomDriver {
   object DomDriverKey extends DriverKey
 
   implicit val DomDriverType = new DriverType[DomDriverKey.type, DomDriver]
+
+  implicit val DomDriverValue = new SinksType[DomDriverKey.type, Observable[Hyperscript]]
 
 }
