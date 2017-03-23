@@ -57,7 +57,7 @@ object ScycleApp extends JSApp {
       val sinks: Sinks = apply(isolatedSources)
       println("App.isolate")
       val newDomSink = for {
-        hs <- sinks(DomDriverKey).asInstanceOf[Observable[Hyperscript]]
+        hs <- sinks(DomDriverKey)
       } yield {
         Div(id = namespace, children = List(hs))
       }

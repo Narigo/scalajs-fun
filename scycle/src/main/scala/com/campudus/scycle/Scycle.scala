@@ -54,10 +54,10 @@ object Scycle {
       .filter(name => {
         sinkProxies.exists(_._1 == name)
       })
-      .map(name => {
-        val subs = sinks(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
+      .map(driverKey => {
+        val subs = sinks(driverKey).subscribe(sinkProxies(driverKey).asInstanceOf[Observer[X]])
         val dispose = subs.unsubscribe _
-        sinkProxies(name).asInstanceOf[Observer[X]].next(null)
+        sinkProxies(driverKey).asInstanceOf[Observer[X]].next(null)
         dispose
       })
 

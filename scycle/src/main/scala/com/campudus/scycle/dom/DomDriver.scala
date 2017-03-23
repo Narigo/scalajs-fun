@@ -3,7 +3,7 @@ package com.campudus.scycle.dom
 import com.campudus.scycle.dom.DomDriver._
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
-import com.campudus.scycle.{Driver, DriverKey, DriverType, SinksType}
+import com.campudus.scycle.{Driver, DriverKey, DriverType}
 import org.scalajs.dom._
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
@@ -56,10 +56,8 @@ object DomDriver {
 
   type SelectedEvents = mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)]
 
-  object DomDriverKey extends DriverKey
+  implicit val DomDriverType = new DriverType[DomDriverKey.type, DomDriver, Observable[Hyperscript]]
 
-  implicit val DomDriverType = new DriverType[DomDriverKey.type, DomDriver]
-
-  implicit val DomDriverValue = new SinksType[DomDriverKey.type, Observable[Hyperscript]]
+  object DomDriverKey extends DriverKey(DomDriverType)
 
 }
