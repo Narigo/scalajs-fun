@@ -11,7 +11,7 @@ trait Driver[A] {
 
 }
 
-class DriverKey(val key: DriverType[_, _, _])
+class DriverKey[D, V](val key: DriverType[this.type, D, V])
 
 class DriverType[K <: DriverKey, D <: Driver[_], V <: Observable[_]]
 
@@ -42,8 +42,8 @@ class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
 class SinksMap(val underlying: Map[Any, Any] = Map.empty) {
 
   def +[K <: DriverKey, V <: Observable[_]](kv: (K, V))
-    (implicit ev: DriverType[K, _, V]): DriverMap = {
-    new DriverMap(underlying + kv)
+    (implicit ev: DriverType[K, _, V]): SinksMap = {
+    new SinksMap(underlying + kv)
   }
 
   def -[K](k: K): SinksMap = new SinksMap(underlying - k)
@@ -51,6 +51,30 @@ class SinksMap(val underlying: Map[Any, Any] = Map.empty) {
   def apply[K <: DriverKey, _, V <: Observable[_]](k: K)(implicit ev: DriverType[K, _, V]): V = get(k).get
 
   def get[K <: DriverKey, _, V <: Observable[_]](k: K)(implicit ev: DriverType[K, _, V]): Option[V] = {
+    println(s"SinksMap.get($k)")
+    underlying.get(k).asInstanceOf[Option[V]]
+  }
+
+  def isEmpty: Boolean = underlying.isEmpty
+
+  def keys: Iterable[DriverKey] = {
+    underlying.keys.map(k => k.asInstanceOf[DriverKey])
+  }
+
+}
+
+class SinkProxiesMap(val underlying: Map[Any, Any] = Map.empty) {
+
+  def +[K <: DriverKey, V <: Subject[_]](kv: (K, V))
+    (implicit ev: DriverType[K, _, V]): SinkProxiesMap = {
+    new SinkProxiesMap(underlying + kv)
+  }
+
+  def -[K](k: K): SinkProxiesMap = new SinkProxiesMap(underlying - k)
+
+  def apply[K <: DriverKey, _, V <: Subject[_]](k: K)(implicit ev: DriverType[K, _, V]): V = get(k).get
+
+  def get[K <: DriverKey, _, V <: Subject[_]](k: K)(implicit ev: DriverType[K, _, V]): Option[V] = {
     println(s"SinksMap.get($k)")
     underlying.get(k).asInstanceOf[Option[V]]
   }

@@ -46,16 +46,17 @@ object Scycle {
     }
   }
 
-  private def replicateMany(sinks: Sinks, sinkProxies: Map[DriverKey, Subject[_]]): () => Unit = {
+  private def replicateMany(sinks: Sinks, sinkProxies: SinkProxiesMap): () => Unit = {
 
     type X = Any
 
     val disposeFunctions = sinks.keys
       .filter(name => {
-        sinkProxies.exists(_._1 == name)
+        sinkProxies.underlying.exists(_._1 == name)
       })
       .map(driverKey => {
-        val subs = sinks(driverKey).subscribe(sinkProxies(driverKey).asInstanceOf[Observer[X]])
+        implicit val driverType = driverKey.key
+        val subs = sinks(driverKey).subscribe(sinkProxies(driverKey))
         val dispose = subs.unsubscribe _
         sinkProxies(driverKey).asInstanceOf[Observer[X]].next(null)
         dispose
@@ -74,7 +75,7 @@ object Scycle {
 
   private def callDrivers(
     drivers: DriversDefinition,
-    sinkProxies: Map[DriverKey, Subject[_]]
+    sinkProxies: SinkProxiesMap
   ): Map[DriverKey, AnonymousSubscription] = {
 
     type X = Nothing
@@ -89,8 +90,8 @@ object Scycle {
     })
   }
 
-  private def makeSinkProxies(drivers: DriversDefinition): Map[DriverKey, Subject[_]] = {
-    drivers.underlying.foldLeft(Map[DriverKey, Subject[_]]())({
+  private def makeSinkProxies(drivers: DriversDefinition): SinkProxiesMap = {
+    drivers.underlying.foldLeft(new SinkProxiesMap())({
       case (m, (name, value)) =>
         val key = name.asInstanceOf[DriverKey]
         val driver = value.asInstanceOf[Driver[_]]

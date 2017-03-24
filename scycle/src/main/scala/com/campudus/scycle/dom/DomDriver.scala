@@ -58,6 +58,6 @@ object DomDriver {
 
   implicit val DomDriverType = new DriverType[DomDriverKey.type, DomDriver, Observable[Hyperscript]]
 
-  object DomDriverKey extends DriverKey(DomDriverType)
+  object DomDriverKey extends DriverKey[DomDriver, Hyperscript](DomDriverType)
 
 }
