@@ -1,7 +1,7 @@
 package com.campudus.scycle
 
 import rxscalajs.subscription.AnonymousSubscription
-import rxscalajs.{Observable, Observer, _}
+import rxscalajs.{Observable, Observer}
 
 object Scycle {
 
@@ -69,20 +69,20 @@ object Scycle {
     println(error)
   }
 
-  private def disposeSubscriptions(subscriptions: Map[DriverKey, AnonymousSubscription]): Unit = {
+  private def disposeSubscriptions(subscriptions: Map[DriverKey[_, _], AnonymousSubscription]): Unit = {
     subscriptions.foreach(_._2.unsubscribe())
   }
 
   private def callDrivers(
     drivers: DriversDefinition,
     sinkProxies: SinkProxiesMap
-  ): Map[DriverKey, AnonymousSubscription] = {
+  ): Map[DriverKey[_, _], AnonymousSubscription] = {
 
     type X = Nothing
 
-    drivers.underlying.foldLeft(Map[DriverKey, AnonymousSubscription]())({
+    drivers.underlying.foldLeft(Map[DriverKey[_, _], AnonymousSubscription]())({
       case (m, (name, value)) =>
-        val key = name.asInstanceOf[DriverKey]
+        val key = name.asInstanceOf[DriverKey[_, _]]
         val driver = value.asInstanceOf[Driver[_]]
         val proxyObservable = sinkProxies(key).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
@@ -93,7 +93,7 @@ object Scycle {
   private def makeSinkProxies(drivers: DriversDefinition): SinkProxiesMap = {
     drivers.underlying.foldLeft(new SinkProxiesMap())({
       case (m, (name, value)) =>
-        val key = name.asInstanceOf[DriverKey]
+        val key = name.asInstanceOf[DriverKey[_, _]]
         val driver = value.asInstanceOf[Driver[_]]
         m + (key -> driver.createSubject())
     })
