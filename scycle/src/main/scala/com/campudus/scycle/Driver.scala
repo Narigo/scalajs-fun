@@ -11,78 +11,88 @@ trait Driver[A] {
 
 }
 
-class DriverKey[K, A](val key: DriverType[K, A])
-
-class DriverType[K <: DriverKey[K, A], A <: Driver[A]]
+class DriverKey[Key, Value, DriverType <: Driver[Value]]
 
 class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
 
-  def +[K <: DriverKey[K, A], A](kv: (K, Driver[A]))
-    (implicit ev: DriverType[K, A]): DriverMap = {
+  def +[Key, DriverType](kv: (Key, DriverType))
+    (implicit ev: DriverKey[Key, _, DriverType]): DriverMap = {
     new DriverMap(underlying + kv)
   }
 
-  def -[K](k: K): DriverMap = new DriverMap(underlying - k)
+  def -[Key](k: Key): DriverMap = new DriverMap(underlying - k)
 
-  def apply[A <: Driver[A], K <: DriverKey[K, A]](k: K)(implicit ev: DriverType[K, A]): Driver[A] = get(k).get
+  def apply[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
+    (implicit ev: DriverKey[Key, Value, DriverType]): DriverType = {
+    get(k).get
+  }
 
-  def get[K <: DriverKey[K, A], A](k: K)(implicit ev: DriverType[K, A]): Option[A] = {
+  def get[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
+    (implicit ev: DriverKey[Key, Value, DriverType]): Option[DriverType] = {
     println(s"DriverMap.get($k)")
-    underlying.get(k).asInstanceOf[Option[A]]
+    underlying.get(k).asInstanceOf[Option[DriverType]]
   }
 
   def isEmpty: Boolean = underlying.isEmpty
 
-  def keys: Iterable[DriverKey[_, _]] = {
-    underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _]])
+  def keys: Iterable[DriverKey[_, _, _]] = {
+    underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _, _]])
   }
 
 }
 
 class SinksMap(val underlying: Map[Any, Any] = Map.empty) {
 
-  def +[K <: DriverKey[K, _], A](kv: (K, Observable[A]))
-    (implicit ev: DriverType[K, A]): SinksMap = {
+  def +[Key, Value](kv: (Key, Observable[Value]))
+    (implicit ev: DriverKey[Key, Value, _]): SinksMap = {
     new SinksMap(underlying + kv)
   }
 
-  def -[K](k: K): SinksMap = new SinksMap(underlying - k)
+  def -[Key](k: Key): SinksMap = new SinksMap(underlying - k)
 
-  def apply[K <: DriverKey[K, _], A](k: K)(implicit ev: DriverType[K, A]): Observable[A] = get(k).get
+  def apply[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
+    (implicit ev: DriverKey[Key, Value, DriverType]): Observable[Value] = {
+    get(k).get
+  }
 
-  def get[K <: DriverKey[K, _], A](k: K)(implicit ev: DriverType[K, A]): Option[A] = {
+  def get[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
+    (implicit ev: DriverKey[Key, Value, DriverType]): Option[Observable[Value]] = {
     println(s"SinksMap.get($k)")
-    underlying.get(k).asInstanceOf[Option[A]]
+    underlying.get(k).asInstanceOf[Option[Observable[Value]]]
   }
 
   def isEmpty: Boolean = underlying.isEmpty
 
-  def keys: Iterable[DriverKey[_, _]] = {
-    underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _]])
+  def keys[Key <: DriverKey[_, _, _]]: Iterable[Key] = {
+    underlying.keys.map(k => k.asInstanceOf[Key])
   }
 
 }
 
 class SinkProxiesMap(val underlying: Map[Any, Any] = Map.empty) {
 
-  def +[K <: DriverKey[K, _], A](kv: (K, Subject[A]))
-    (implicit ev: DriverType[K, A]): SinkProxiesMap = {
+  def +[Key, Value](kv: (Key, Subject[Value]))
+    (implicit ev: DriverKey[Key, Value, _]): SinkProxiesMap = {
     new SinkProxiesMap(underlying + kv)
   }
 
-  def -[K](k: K): SinkProxiesMap = new SinkProxiesMap(underlying - k)
+  def -[Key](k: Key): SinkProxiesMap = new SinkProxiesMap(underlying - k)
 
-  def apply[K <: DriverKey[K, _], A](k: K)(implicit ev: DriverType[K, A]): Subject[A] = get(k).get
+  def apply[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
+    (implicit ev: DriverKey[Key, Value, DriverType]): Subject[Value] = {
+    get(k).get
+  }
 
-  def get[K <: DriverKey[K, _], A](k: K)(implicit ev: DriverType[K, A]): Option[A] = {
-    println(s"SinksMap.get($k)")
-    underlying.get(k).asInstanceOf[Option[A]]
+  def get[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
+    (implicit ev: DriverKey[Key, Value, DriverType]): Option[Subject[Value]] = {
+    println(s"SinkProxiesMap.get($k)")
+    underlying.get(k).asInstanceOf[Option[Subject[Value]]]
   }
 
   def isEmpty: Boolean = underlying.isEmpty
 
-  def keys: Iterable[DriverKey[_, _]] = {
-    underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _]])
+  def keys: Iterable[DriverKey[_, _, _]] = {
+    underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _, _]])
   }
 
 }
