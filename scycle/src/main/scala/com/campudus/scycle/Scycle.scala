@@ -48,7 +48,10 @@ object Scycle {
 
   private def replicateMany(sinks: Sinks, sinkProxies: SinkProxiesMap): () => Unit = {
 
-    def replicateManyHelper[Key, Value, DriverType](driverKey: DriverKey[Key, Value, DriverType]): () => Unit = {
+    def replicateManyHelper[Key, Value, DriverType](
+      driverKey: DriverKey[Key, Value, DriverType],
+      sink: Value
+    ): () => Unit = {
       val sink = sinks(driverKey)
       val subs = sink.subscribe(sinkProxies(driverKey))
       val dispose = subs.unsubscribe _
@@ -58,11 +61,13 @@ object Scycle {
 
     type X = Any
 
-    val disposeFunctions = sinks.keys
-      .filter(name => {
-        sinkProxies.underlying.exists(_._1 == name)
-      })
-      .map(replicateManyHelper _)
+    val sinksToBeMapped = sinks.filter({
+      case (key, value) => sinkProxies.get(key).isDefined
+    })
+
+    val disposeFunctions = sinksToBeMapped.map({
+      case (key, value) => replicateManyHelper(key, value)
+    })
 
     () => disposeFunctions.foreach(_.apply())
   }

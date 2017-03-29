@@ -39,6 +39,12 @@ class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
     underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _, _]])
   }
 
+  def filter[Key <: DriverKey[_, _, _]](predicate: (Key, Any) => Boolean): DriverMap = {
+    new DriverMap(underlying.filter({
+      case (key, value) => predicate(key.asInstanceOf[Key], value)
+    }))
+  }
+
 }
 
 class SinksMap(val underlying: Map[Any, Any] = Map.empty) {
@@ -67,6 +73,12 @@ class SinksMap(val underlying: Map[Any, Any] = Map.empty) {
     underlying.keys.map(k => k.asInstanceOf[Key])
   }
 
+  def filter[Key <: DriverKey[_, _, _]](predicate: (Key, Any) => Boolean): SinksMap = {
+    new SinksMap(underlying.filter({
+      case (key, value) => predicate(key.asInstanceOf[Key], value)
+    }))
+  }
+
 }
 
 class SinkProxiesMap(val underlying: Map[Any, Any] = Map.empty) {
@@ -93,6 +105,12 @@ class SinkProxiesMap(val underlying: Map[Any, Any] = Map.empty) {
 
   def keys: Iterable[DriverKey[_, _, _]] = {
     underlying.keys.map(k => k.asInstanceOf[DriverKey[_, _, _]])
+  }
+
+  def filter[Key <: DriverKey[_, _, _]](predicate: (Key, Any) => Boolean): SinkProxiesMap = {
+    new SinkProxiesMap(underlying.filter({
+      case (key, value) => predicate(key.asInstanceOf[Key], value)
+    }))
   }
 
 }
