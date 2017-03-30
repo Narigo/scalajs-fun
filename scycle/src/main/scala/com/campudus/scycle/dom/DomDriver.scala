@@ -56,6 +56,7 @@ object DomDriver {
 
   type SelectedEvents = mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)]
 
-  implicit object DomDriverKey extends DriverKey[DomDriverKey.type, Hyperscript, DomDriver]
+  class DomDriverKey extends DriverKey[DomDriverKey, Hyperscript, DomDriver]
+  implicit val domDriverKey = new DomDriverKey
 
 }
