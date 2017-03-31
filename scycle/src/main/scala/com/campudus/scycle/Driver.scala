@@ -11,7 +11,7 @@ trait Driver[A] {
 
 }
 
-class DriverKey[Key, Value, DriverType <: Driver[Value]]
+class DriverKey[Key <: DriverKey[Key, Value, DriverType], Value, DriverType <: Driver[Value]]
 
 class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
 
@@ -23,12 +23,12 @@ class DriverMap(val underlying: Map[Any, Any] = Map.empty) {
   def -[Key](k: Key): DriverMap = new DriverMap(underlying - k)
 
   def apply[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
-    (implicit ev: DriverKey[Key, Value, DriverType]): DriverType = {
+    (implicit ev: Key): DriverType = {
     get(k).get
   }
 
   def get[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
-    (implicit ev: DriverKey[Key, Value, DriverType]): Option[DriverType] = {
+    (implicit ev: Key): Option[DriverType] = {
     println(s"DriverMap.get($k)")
     underlying.get(k).asInstanceOf[Option[DriverType]]
   }
@@ -57,12 +57,12 @@ class SinksMap(val underlying: Map[Any, Any] = Map.empty) {
   def -[Key](k: Key): SinksMap = new SinksMap(underlying - k)
 
   def apply[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
-    (implicit ev: DriverKey[Key, Value, DriverType]): Observable[Value] = {
+    (implicit ev: Key): Observable[Value] = {
     get(k).get
   }
 
   def get[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
-    (implicit ev: DriverKey[Key, Value, DriverType]): Option[Observable[Value]] = {
+    (implicit ev: Key): Option[Observable[Value]] = {
     println(s"SinksMap.get($k)")
     underlying.get(k).asInstanceOf[Option[Observable[Value]]]
   }
@@ -91,12 +91,12 @@ class SinkProxiesMap(val underlying: Map[Any, Any] = Map.empty) {
   def -[Key](k: Key): SinkProxiesMap = new SinkProxiesMap(underlying - k)
 
   def apply[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
-    (implicit ev: DriverKey[Key, Value, DriverType]): Subject[Value] = {
+    (implicit ev: Key): Subject[Value] = {
     get(k).get
   }
 
   def get[Key <: DriverKey[Key, Value, DriverType], Value, DriverType](k: Key)
-    (implicit ev: DriverKey[Key, Value, DriverType]): Option[Subject[Value]] = {
+    (implicit ev: Key): Option[Subject[Value]] = {
     println(s"SinkProxiesMap.get($k)")
     underlying.get(k).asInstanceOf[Option[Subject[Value]]]
   }
