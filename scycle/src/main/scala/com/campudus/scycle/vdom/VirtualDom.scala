@@ -51,7 +51,7 @@ object VirtualDom {
       case Insertion(path, node) =>
         if (path.nonEmpty) {
           val lastPath = path.last
-          val parent = path.dropRight(1).foldLeft(container) {
+          val parent = path.dropRight(1).foldLeft(container){
             (subNode, childIdx) => subNode.childNodes(childIdx)
           }
           if (lastPath < parent.childNodes.length) {
@@ -63,7 +63,7 @@ object VirtualDom {
         } else {
           container.appendChild(node.toNode)
         }
-      case Remove(path, oldNode) =>
+      case Remove(path) =>
         val toRemove = path.foldLeft(container)((subNode, childIdx) => {
           subNode.childNodes(childIdx)
         })
@@ -106,11 +106,9 @@ object VirtualDom {
   def firstReplacementsCanBeInsertions[T <: Diff](a: Hyperscript, list: ListBuffer[T]): Boolean = {
     if (list.exists(_.isInstanceOf[Insertion])) {
       val aElem = a.asInstanceOf[HyperscriptElement]
-      val lastElements = aElem.subElements.reverse.zip(list.reverse).takeWhile(
-        {
-          case (aChild, Diff(_, node)) => aChild == node
-        }
-      )
+      val lastElements = aElem.subElements.reverse.zip(list.reverse).takeWhile({
+        case (aChild, DiffWithNode(_, node)) => aChild == node
+      })
       lastElements.nonEmpty || firstReplacementsCanBeInsertions(a, list.dropRight(1))
     } else {
       false
@@ -136,26 +134,20 @@ object VirtualDom {
         case (aElem: HyperscriptElement, bElem: HyperscriptElement) =>
           if (aElem.attrs.equals(bElem.attrs)) {
             val aChildrenPlusIdx = aElem.subElements.zipWithIndex
-            val first = aChildrenPlusIdx.takeWhile(_._2 < bElem.subElements.length).flatMap(
-              {
-                case (elem, idx) =>
-                  naiveDiff(elem, bElem.subElements(idx), currentPath :+ idx)
-              }
-            )
+            val first = aChildrenPlusIdx.takeWhile(_._2 < bElem.subElements.length).flatMap({
+              case (elem, idx) =>
+                naiveDiff(elem, bElem.subElements(idx), currentPath :+ idx)
+            })
             val added: Seq[Insertion] = if (aElem.subElements.length < bElem.subElements.length) {
-              bElem.subElements.zipWithIndex.dropWhile(_._2 < aElem.subElements.length).map(
-                {
-                  case (newNode, idx) => Insertion(currentPath :+ idx, newNode)
-                }
-              )
+              bElem.subElements.zipWithIndex.dropWhile(_._2 < aElem.subElements.length).map({
+                case (newNode, idx) => Insertion(currentPath :+ idx, newNode)
+              })
             } else {
               Nil
             }
-            val removed: Seq[Remove] = aChildrenPlusIdx.dropWhile(_._2 < bElem.subElements.length).map(
-              {
-                case (nodeToRemove, idx) => Remove(currentPath :+ idx, nodeToRemove)
-              }
-            )
+            val removed: Seq[Remove] = aChildrenPlusIdx.dropWhile(_._2 < bElem.subElements.length).map({
+              case (_, idx) => Remove(currentPath :+ idx)
+            })
             first ++: ListBuffer(added: _*) ++: ListBuffer(removed: _*)
           } else {
             ListBuffer(Replacement(currentPath, bElem))
@@ -172,23 +164,38 @@ object VirtualDom {
   sealed trait Diff {
 
     val path: Path
+
+  }
+
+  sealed trait DiffWithNode extends Diff {
+
     val node: Hyperscript
 
   }
 
-  case class Replacement(path: Path, node: Hyperscript) extends Diff
+  case class Replacement(path: Path, node: Hyperscript) extends DiffWithNode
 
-  case class Insertion(path: Path, node: Hyperscript) extends Diff
+  case class Insertion(path: Path, node: Hyperscript) extends DiffWithNode
 
-  case class Remove(path: Path, node: Hyperscript) extends Diff
+  case class Remove(path: Path) extends Diff
 
   object Diff {
 
-    def unapply[T <: Diff](e: T): Option[(Path, Hyperscript)] = {
+    def unapply[T <: Diff](e: T): Option[Path] = {
+      e match {
+        case Remove(p) => Some(p)
+        case _ => None
+      }
+    }
+
+  }
+
+  object DiffWithNode {
+
+    def unapply[T <: DiffWithNode](e: T): Option[(Path, Hyperscript)] = {
       e match {
         case Replacement(p, n) => Some(p, n)
         case Insertion(p, n) => Some(p, n)
-        case Remove(p, n) => Some(p, n)
         case _ => None
       }
     }
@@ -197,7 +204,7 @@ object VirtualDom {
 
   object Path {
 
-    def apply(indizes: Int*): Path = ListBuffer(indizes: _*)
+    def apply(indices: Int*): Path = ListBuffer(indices: _*)
 
   }
 
