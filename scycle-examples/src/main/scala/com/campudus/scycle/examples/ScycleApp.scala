@@ -52,6 +52,7 @@ object ScycleApp extends JSApp {
       val newDomSink = for {
         hs <- sinks("dom").asInstanceOf[Observable[Hyperscript]]
       } yield {
+        org.scalajs.dom.console.log("isolate", namespace, hs.toString())
         Div(id = namespace, children = List(hs))
       }
 
