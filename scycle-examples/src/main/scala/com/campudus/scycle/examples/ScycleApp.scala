@@ -24,21 +24,28 @@ object ScycleApp extends JSApp {
   )
 
   def logic(sources: Sources): Sinks = {
-    val heightSliderProps = Props("Height", "cm", 140, 220, 170)
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
+    val heightSliderProps = Props("Height", "cm", 140, 220, 170)
 
-    val WeightSlider = isolate(LabeledSlider.apply)("weight-slider")
-    val HeightSlider = isolate(LabeledSlider.apply)("height-slider")
+    val weightSources = Map(
+      "dom" -> sources("dom").asInstanceOf[DomDriver].select("#weight"),
+      "props" -> makeSliderPropsDriver(weightSliderProps)
+    )
+    val heightSources = Map(
+      "dom" -> sources("dom").asInstanceOf[DomDriver].select("#height"),
+      "props" -> makeSliderPropsDriver(heightSliderProps)
+    )
+
+    val WeightSlider = LabeledSlider(weightSources)
+    val HeightSlider = LabeledSlider(heightSources)
 
     val vtree$ = for {
-      weightVTree <- WeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(weightSliderProps)))(
-        "dom").asInstanceOf[Observable[Hyperscript]]
-      heightVTree <- HeightSlider(Map("dom" -> sources("dom"), "props" -> makeSliderPropsDriver(heightSliderProps)))(
-        "dom").asInstanceOf[Observable[Hyperscript]]
+      weightVTree <- WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
+      heightVTree <- HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
     } yield {
       Div(id = "app", children = List(
-        weightVTree,
-        heightVTree
+        Div(id = "weight", children = List(weightVTree)),
+        Div(id = "height", children = List(heightVTree))
       ))
     }
 
