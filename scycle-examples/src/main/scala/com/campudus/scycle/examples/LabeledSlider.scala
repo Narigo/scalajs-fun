@@ -3,6 +3,7 @@ package com.campudus.scycle.examples
 import com.campudus.scycle.Scycle.{Sinks, Sources}
 import com.campudus.scycle.dom.{DomDriver, _}
 import com.campudus.scycle.examples.ScycleApp.{Props, SliderPropsDriver}
+import org.scalajs.dom
 import rxscalajs.Observable
 
 object LabeledSlider {
@@ -36,6 +37,7 @@ object LabeledSlider {
 
   def view(value$: Observable[Props]): Observable[Hyperscript] = {
     value$.map(props => {
+      dom.console.log("values changed", props.toString)
       Div(className = "labeled-slider", children = List(
         Label(children = List(Text(s"${props.label}: ${props.value} ${props.unit}"))),
         Input(className = "slider", options = List(

@@ -10,7 +10,8 @@ import rxscalajs.subscription.AnonymousSubscription
 
 import scala.collection.mutable
 
-class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty) extends Driver[Hyperscript] {
+class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty)
+  extends Driver[Hyperscript] {
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
@@ -29,7 +30,11 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
         selectedEvents.foreach({
           case ((what, eventName), (subj, subs)) =>
             subs.unsubscribe()
+            subs.unsubscribe()
             val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
+            org.scalajs.dom.console.log("subscribing to", what, eventName, "into", subj.toString, "again")
+            selectedEvents.remove(what, eventName)
+            org.scalajs.dom.console.log("selectedEvents got", selectedEvents.size)
             selectedEvents += (what, eventName) -> (subj, subsNew)
         })
       }
@@ -43,6 +48,7 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
   def events(what: String): Observable[Event] = {
     val subj = Subject[Event]()
     val subs = Observable.fromEvent(document.querySelector(domSelector), what).subscribe(subj)
+    org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
     selectedEvents += (domSelector -> what) -> (subj, subs)
     subj
   }
