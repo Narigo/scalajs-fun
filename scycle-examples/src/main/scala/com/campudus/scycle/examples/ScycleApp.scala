@@ -4,6 +4,7 @@ import com.campudus.scycle.Scycle.{Sinks, _}
 import com.campudus.scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
+import org.scalajs.dom
 import rxscalajs.Observable
 
 import scala.scalajs.js.JSApp
@@ -43,6 +44,8 @@ object ScycleApp extends JSApp {
       weightVTree <- WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
       heightVTree <- HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
     } yield {
+      dom.console.log("weightVTree", weightVTree.toString)
+      dom.console.log("heightVTree", heightVTree.toString)
       Div(id = "app", children = List(
         Div(id = "weight", children = List(weightVTree)),
         Div(id = "height", children = List(heightVTree))
