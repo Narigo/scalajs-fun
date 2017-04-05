@@ -6,11 +6,11 @@ val commonSettings = Seq(
   scalaVersion := "2.12.1",
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-    "com.github.lukajcb" %%% "rxscala-js" % "0.7.0",
+    "com.github.lukajcb" %%% "rxscala-js" % "0.13.6",
     "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
   ),
   jsDependencies ++= Seq(
-    "org.webjars.npm" % "rxjs" % "5.0.0-rc.1" / "bundles/Rx.min.js" commonJSName "Rx",
+    "org.webjars.npm" % "rxjs" % "5.2.0" % "test" / "bundles/Rx.min.js" commonJSName "Rx",
     RuntimeDOM
   )
 )
