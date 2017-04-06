@@ -1,7 +1,7 @@
 import com.lihaoyi.workbench.Plugin.{bootSnippet, _}
 import sbt.Keys.libraryDependencies
 
-val commonSettings = Seq(
+lazy val commonSettings = Seq(
   organization := "com.campudus",
   scalaVersion := "2.12.1",
   libraryDependencies ++= Seq(
@@ -10,8 +10,8 @@ val commonSettings = Seq(
     "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
   ),
   jsDependencies ++= Seq(
-    "org.webjars.npm" % "rxjs" % "5.2.0" % "test" / "bundles/Rx.min.js" commonJSName "Rx",
-    RuntimeDOM
+    RuntimeDOM,
+    "org.webjars.npm" % "rxjs" % "5.2.0" % "test" / "bundles/Rx.min.js" commonJSName "Rx"
   )
 )
 

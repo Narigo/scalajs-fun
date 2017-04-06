@@ -88,8 +88,10 @@ object Scycle {
   }
 
   private def makeSinkProxies(drivers: DriversDefinition): Map[String, Subject[_]] = {
+    org.scalajs.dom.console.log("test before makeSinkProxies.foldLeft")
     drivers.foldLeft(Map[String, Subject[_]]()){
       case (m, (name, driver)) =>
+        org.scalajs.dom.console.log("test in makeSinkProxies.foldLeft")
         m + (name -> driver.createSubject())
     }
   }
