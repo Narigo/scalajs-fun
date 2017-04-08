@@ -5,7 +5,7 @@ import com.campudus.scycle._
 import com.campudus.scycle.dom.DomDriver.makeDomDriver
 import com.campudus.scycle.dom._
 import org.scalajs.dom
-import rxscalajs.Observable
+import rxscalajs.{Observable, Subject}
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -17,7 +17,14 @@ object ScycleApp extends JSApp {
   def main(): Unit = {
     println("main export")
 
-    Scycle.run(logic, drivers)
+    val subject = Subject[Int]()
+    subject.subscribe(i => {
+      println(s"got i=$i")
+    })
+    subject.next(123)
+    subject.next(456)
+
+    //    Scycle.run(logic, drivers)
   }
 
   val drivers: DriversDefinition = Map[String, Driver[_]](
