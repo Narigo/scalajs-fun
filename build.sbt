@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   ),
   jsDependencies ++= Seq(
     RuntimeDOM,
-    "org.webjars.npm" % "rxjs" % "5.2.0" % "test" / "bundles/Rx.min.js" commonJSName "Rx"
+    "org.webjars.npm" % "rxjs" % "5.2.0" / "bundles/Rx.min.js" commonJSName "Rx"
   )
 )
 
