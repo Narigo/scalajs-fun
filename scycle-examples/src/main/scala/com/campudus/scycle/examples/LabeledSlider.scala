@@ -20,6 +20,7 @@ object LabeledSlider {
   }
 
   def intent(domDriver: DomDriver): Observable[Int] = {
+    dom.console.log("intent of LabeledSlider")
     domDriver
       .select(".labeled-slider")
       .events("input")

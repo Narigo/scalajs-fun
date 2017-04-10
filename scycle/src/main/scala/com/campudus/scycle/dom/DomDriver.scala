@@ -47,10 +47,16 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
 
   def events(what: String): Observable[Event] = {
     val subj = Subject[Event]()
-    val subs = Observable.fromEvent(document.querySelector(domSelector), what).subscribe(subj)
-    org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
-    selectedEvents += (domSelector -> what) -> (subj, subs)
-    subj
+    val selected = document.querySelector(domSelector)
+    console.log("selecting", domSelector, selected)
+    if (selected != null) {
+      val subs = Observable.fromEvent(selected, what).subscribe(subj)
+      org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
+      selectedEvents += (domSelector -> what) -> (subj, subs)
+      subj
+    } else {
+      Observable.just()
+    }
   }
 
 }
