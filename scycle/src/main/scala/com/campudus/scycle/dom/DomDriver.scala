@@ -29,8 +29,10 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
 
         selectedEvents.foreach({
           case ((what, eventName), (subj, subs)) =>
+            org.scalajs.dom.console.log("unsubscribing", what, eventName, "of", subj.toString)
+            org.scalajs.dom.console.log("unsubscribing", what, eventName, "of", subs)
             subs.unsubscribe()
-            subs.unsubscribe()
+//            subj.unsubscribe()
             val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
             org.scalajs.dom.console.log("subscribing to", what, eventName, "into", subj.toString, "again")
             selectedEvents.remove(what, eventName)
@@ -49,14 +51,14 @@ class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mu
     val subj = Subject[Event]()
     val selected = document.querySelector(domSelector)
     console.log("selecting", domSelector, selected)
-    if (selected != null) {
-      val subs = Observable.fromEvent(selected, what).subscribe(subj)
-      org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
-      selectedEvents += (domSelector -> what) -> (subj, subs)
-      subj
+    val subs = if (selected != null) {
+      Observable.fromEvent(selected, what).subscribe(subj)
     } else {
-      Observable.just()
+      Observable.fromEvent(document.querySelector("#app"), what).subscribe(subj)
     }
+    org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
+    selectedEvents += (domSelector -> what) -> (subj, subs)
+    subj
   }
 
 }
