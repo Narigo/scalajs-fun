@@ -20,7 +20,7 @@ object LabeledSlider {
   }
 
   def intent(domDriver: DomDriver): Observable[Int] = {
-    dom.console.log("intent of LabeledSlider")
+    dom.console.log("intent of LabeledSlider, domSelector=", domDriver.domSelector)
     domDriver
       .select(".labeled-slider")
       .events("input")
@@ -32,6 +32,7 @@ object LabeledSlider {
       props <- props$
       newValue <- change$.startWith(props.value)
     } yield {
+      dom.console.log("in model, changing", props.value, "to", newValue)
       props.copy(value = newValue)
     }
   }

@@ -10,7 +10,7 @@ import rxscalajs.subscription.AnonymousSubscription
 
 import scala.collection.mutable
 
-class DomDriver private(domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty)
+class DomDriver private(val domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty)
   extends Driver[Hyperscript] {
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {

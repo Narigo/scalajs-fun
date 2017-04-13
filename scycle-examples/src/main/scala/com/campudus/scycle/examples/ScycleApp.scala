@@ -55,7 +55,7 @@ object ScycleApp extends JSApp {
     Map("dom" -> vtree$)
   }
 
-  def isolate(apply: Sources => Sinks)(namespace: String): Sources => Sinks = {
+  private def isolate(apply: Sources => Sinks)(namespace: String): Sources => Sinks = {
     (sources: Sources) => {
       val isolatedSources: Sources = sources + ("dom" -> sources("dom").asInstanceOf[DomDriver].select(s"#$namespace"))
       val sinks: Sinks = apply(isolatedSources)
