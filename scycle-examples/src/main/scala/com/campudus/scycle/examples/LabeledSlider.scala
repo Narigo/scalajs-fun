@@ -10,16 +10,20 @@ object LabeledSlider {
 
   def apply(sources: Sources): Sinks = {
     val props$ = sources("props").asInstanceOf[SliderPropsDriver].sliderProps
-    val change$ = intent(sources("dom").asInstanceOf[DomDriver])
-    val state$ = model(change$, props$)
-    val vtree$ = view(state$)
+    val slider = new LabeledSlider(sources("dom").asInstanceOf[DomDriver])
+    val change$ = slider.intent()
+    val state$ = slider.model(change$, props$)
+    val vtree$ = slider.view(state$)
 
     Map(
       "dom" -> vtree$
     )
   }
+}
 
-  def intent(domDriver: DomDriver): Observable[Int] = {
+class LabeledSlider(domDriver: DomDriver) {
+
+  def intent(): Observable[Int] = {
     dom.console.log("intent of LabeledSlider, domSelector=", domDriver.domSelector)
     domDriver
       .select(".labeled-slider")

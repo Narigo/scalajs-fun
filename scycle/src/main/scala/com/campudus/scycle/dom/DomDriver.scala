@@ -59,7 +59,10 @@ class DomDriver private(val domSelector: String, selectedEvents: SelectedEvents 
     }
     org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
     selectedEvents += (domSelector -> what) -> (subj, subs)
-    subj
+    subj.map(event => {
+      console.log("there was an event in", domSelector, "->", what, "resulting in", event)
+      event
+    })
   }
 
 }
