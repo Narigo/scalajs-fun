@@ -9,48 +9,42 @@ import rxscalajs.Observable
 object LabeledSlider {
 
   def apply(sources: Sources): Sinks = {
-    val props$ = sources("props").asInstanceOf[SliderPropsDriver].sliderProps
-    val slider = new LabeledSlider(sources("dom").asInstanceOf[DomDriver])
-    val change$ = slider.intent()
-    val state$ = slider.model(change$, props$)
-    val vtree$ = slider.view(state$)
+    val sliderProps = sources("props").asInstanceOf[SliderPropsDriver].sliderProps
+    val domDriver = sources("dom").asInstanceOf[DomDriver]
+    val slider = new LabeledSlider(sliderProps, domDriver)
 
     Map(
-      "dom" -> vtree$
+      "dom" -> slider.view
     )
   }
 }
 
-class LabeledSlider(domDriver: DomDriver) {
+class LabeledSlider(props$: Observable[Props], domDriver: DomDriver) {
 
-  def intent(): Observable[Int] = {
-    dom.console.log("intent of LabeledSlider, domSelector=", domDriver.domSelector)
-    domDriver
-      .select(".labeled-slider")
-      .events("input")
-      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
-  }
+  dom.console.log("intent of LabeledSlider, domSelector=", domDriver.domSelector)
+  private val intent$ = domDriver
+    .select(".labeled-slider")
+    .events("input")
+    .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
 
-  def model(change$: Observable[Int], props$: Observable[Props]): Observable[Props] = {
+  private val model$ = {
     for {
       props <- props$
-      newValue <- change$.startWith(props.value)
+      newValue <- intent$.startWith(props.value)
     } yield {
       dom.console.log("in model, changing", props.value, "to", newValue)
       props.copy(value = newValue)
     }
   }
 
-  def view(value$: Observable[Props]): Observable[Hyperscript] = {
-    value$.map(props => {
-      dom.console.log("values changed", props.toString)
-      Div(className = "labeled-slider", children = List(
-        Label(children = List(Text(s"${props.label}: ${props.value} ${props.unit}"))),
-        Input(className = "slider", options = List(
-          "type" -> "range", "min" -> s"${props.min}", "max" -> s"${props.max}", "value" -> s"${props.value}"
-        ))
+  val view: Observable[Hyperscript] = model$.map(props => {
+    dom.console.log("values changed", props.toString)
+    Div(className = "labeled-slider", children = List(
+      Label(children = List(Text(s"${props.label}: ${props.value} ${props.unit}"))),
+      Input(className = "slider", options = List(
+        "type" -> "range", "min" -> s"${props.min}", "max" -> s"${props.max}", "value" -> s"${props.value}"
       ))
-    })
-  }
+    ))
+  })
 
 }
