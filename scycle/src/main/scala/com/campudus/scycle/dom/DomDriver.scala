@@ -10,24 +10,8 @@ import rxscalajs.subscription.AnonymousSubscription
 
 import scala.collection.mutable
 
-class DomDriver private(val domSelector: String, parent: Option[DomDriver] = None)
+class DomDriver private(val domSelector: String, selectedEvents: SelectedEvents = mutable.Map.empty)
   extends Driver[Hyperscript] {
-
-  lazy val allSelectedEvents: SelectedEvents = {
-    if (parent.isEmpty) {
-      console.log("######################## Creating a new Map for events")
-      mutable.Map.empty
-    } else {
-      parent.get.selectedEvents
-    }
-  }
-
-  def selectedEvents: SelectedEvents = {
-    parent match {
-      case None => allSelectedEvents
-      case Some(p) => p.selectedEvents
-    }
-  }
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
@@ -61,7 +45,7 @@ class DomDriver private(val domSelector: String, parent: Option[DomDriver] = Non
   }
 
   def select(what: String): DomDriver = {
-    new DomDriver(s"$domSelector $what", Some(this))
+    new DomDriver(s"$domSelector $what", DomDriver.this.selectedEvents)
   }
 
   def events(what: String): Observable[Event] = {
@@ -75,10 +59,7 @@ class DomDriver private(val domSelector: String, parent: Option[DomDriver] = Non
     }
     org.scalajs.dom.console.log("subscribing to", domSelector, what, subs)
     selectedEvents += (domSelector -> what) -> (subj, subs)
-    subj.map(event => {
-      console.log("there was an event in", domSelector, "->", what, "resulting in", event)
-      event
-    })
+    subj
   }
 
 }
