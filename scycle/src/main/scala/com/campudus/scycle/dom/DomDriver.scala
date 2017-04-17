@@ -14,8 +14,12 @@ class DomDriver private(val domSelector: String, parent: Option[DomDriver] = Non
   extends Driver[Hyperscript] {
 
   lazy val allSelectedEvents: SelectedEvents = {
-    if (parent.isEmpty) mutable.Map.empty
-    else parent.get.selectedEvents
+    if (parent.isEmpty) {
+      console.log("######################## Creating a new Map for events")
+      mutable.Map.empty
+    } else {
+      parent.get.selectedEvents
+    }
   }
 
   def selectedEvents: SelectedEvents = {

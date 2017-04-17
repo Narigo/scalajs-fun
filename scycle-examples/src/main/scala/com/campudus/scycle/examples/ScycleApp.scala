@@ -40,16 +40,18 @@ object ScycleApp extends JSApp {
     val WeightSlider = LabeledSlider(weightSources)
     val HeightSlider = LabeledSlider(heightSources)
 
-    val vtree$ = for {
-      weightVTree <- WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
-      heightVTree <- HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
-    } yield {
-      dom.console.log("weightVTree", weightVTree.toString)
-      dom.console.log("heightVTree", heightVTree.toString)
-      Div(id = "app", children = List(
-        Div(id = "weight", children = List(weightVTree)),
-        Div(id = "height", children = List(heightVTree))
-      ))
+    val weightVTree$ = WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
+    val heightVTree$ = HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
+
+    val vtree$ = weightVTree$.combineLatestWith(heightVTree$){
+      (weightVTree, heightVTree) => {
+        dom.console.log("weightVTree", weightVTree.toString)
+        dom.console.log("heightVTree", heightVTree.toString)
+        Div(id = "app", children = List(
+          Div(id = "weight", children = List(weightVTree)),
+          Div(id = "height", children = List(heightVTree))
+        ))
+      }
     }
 
     Map("dom" -> vtree$)
