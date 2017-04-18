@@ -15,32 +15,29 @@ class DomDriver private(val domSelector: String, selectedEvents: SelectedEvents 
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
-      // FIXME how to get rid of this null check caused by Scycle -> sinkProxies(name).next(null)
-      if (hs != null) {
-        val container = document.querySelector(domSelector)
-        if (container == null) {
-          console.log("NO CONTAINER FOUND WITH", domSelector)
-        }
-        val diff = VirtualDom.diff(VirtualDom(container), hs)
-        diff match {
-          case List(Replacement(_, null)) =>
-          case diffs => VirtualDom.update(container, diffs)
-        }
-
-        selectedEvents.foreach({
-          case ((what, eventName), (subj, subs)) =>
-            org.scalajs.dom.console.log("unsubscribing", what, eventName, "of", subj.toString)
-            subs.unsubscribe()
-            org.scalajs.dom.console.log("unsubscribing", what, eventName, "of", subs)
-            if (selectedEvents.isDefinedAt(what, eventName)) {
-              console.log(s"currently selectedEvents($what, $eventName) =", selectedEvents(what, eventName).toString)
-            }
-            val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
-            org.scalajs.dom.console.log("subscribing to", what, eventName, "into", subj.toString, "again")
-            org.scalajs.dom.console.log("selectedEvents got", selectedEvents.size)
-            selectedEvents += (what, eventName) -> (subj, subsNew)
-        })
+      val container = document.querySelector(domSelector)
+      if (container == null) {
+        console.log("NO CONTAINER FOUND WITH", domSelector)
       }
+      val diff = VirtualDom.diff(VirtualDom(container), hs)
+      diff match {
+        case List(Replacement(_, null)) =>
+        case diffs => VirtualDom.update(container, diffs)
+      }
+
+      selectedEvents.foreach({
+        case ((what, eventName), (subj, subs)) =>
+          org.scalajs.dom.console.log("unsubscribing", what, eventName, "of", subj.toString)
+          subs.unsubscribe()
+          org.scalajs.dom.console.log("unsubscribing", what, eventName, "of", subs)
+          if (selectedEvents.isDefinedAt(what, eventName)) {
+            console.log(s"currently selectedEvents($what, $eventName) =", selectedEvents(what, eventName).toString)
+          }
+          val subsNew = Observable.fromEvent(document.querySelector(what), eventName).subscribe(subj)
+          org.scalajs.dom.console.log("subscribing to", what, eventName, "into", subj.toString, "again")
+          org.scalajs.dom.console.log("selectedEvents got", selectedEvents.size)
+          selectedEvents += (what, eventName) -> (subj, subsNew)
+      })
     })
   }
 

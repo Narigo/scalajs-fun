@@ -56,8 +56,11 @@ object Scycle {
       })
       .map(name => {
         val subs = sinks(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
+        val latest$ = sinks(name).lastOrElse(null)
         val dispose = subs.unsubscribe _
-        sinkProxies(name).asInstanceOf[Observer[X]].next(null)
+        latest$.map(x => {
+          sinkProxies(name).asInstanceOf[Observer[X]].next(x)
+        })
         dispose
       })
 
