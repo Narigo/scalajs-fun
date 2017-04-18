@@ -27,7 +27,9 @@ class LabeledSlider(props$: Observable[Props], domDriver: DomDriver) {
     .events("input")
     .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
 
+  dom.console.log("model of LabeledSlider using intent$=", intent$.toString)
   private val model$ = {
+    // FIXME props.value is always start value instead of older value -> combineLatest ?
     for {
       props <- props$
       newValue <- intent$.startWith(props.value)
