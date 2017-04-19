@@ -29,14 +29,20 @@ class LabeledSlider(props$: Observable[Props], domDriver: DomDriver) {
 
   dom.console.log("model of LabeledSlider using intent$=", intent$.toString)
   private val model$ = {
-    // FIXME props.value is always start value instead of older value -> combineLatest ?
-    for {
-      props <- props$
-      newValue <- intent$.startWith(props.value)
-    } yield {
-      dom.console.log("in model, changing", props.value, "to", newValue)
-      props.copy(value = newValue)
+    props$.combineLatestWith(intent$) {
+      (props, newValue) => {
+        dom.console.log("in model, changing", props.value, "to", newValue)
+        props.copy(value = newValue)
+      }
     }
+//    // FIXME props.value is always start value instead of older value -> combineLatest ?
+//    for {
+//      props <- props$
+//      newValue <- intent$.startWith(props.value)
+//    } yield {
+//      dom.console.log("in model, changing", props.value, "to", newValue)
+//      props.copy(value = newValue)
+//    }
   }
 
   val view: Observable[Hyperscript] = model$.map(props => {
