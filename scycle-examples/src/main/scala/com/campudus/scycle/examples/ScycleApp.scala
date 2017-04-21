@@ -74,11 +74,7 @@ object ScycleApp extends JSApp {
 
   case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
 
-  class SliderPropsDriver(props: Props) extends Driver[Unit] {
-
-    def sliderProps: Observable[Props] = Observable.of(props)
-
-  }
+  class SliderPropsDriver(val props: Props) extends Driver[Unit]
 
   def makeSliderPropsDriver(props: Props): SliderPropsDriver = new SliderPropsDriver(props)
 

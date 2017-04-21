@@ -4,14 +4,14 @@ import com.campudus.scycle.Scycle.{Sinks, Sources}
 import com.campudus.scycle.dom.{DomDriver, _}
 import com.campudus.scycle.examples.ScycleApp.{Props, SliderPropsDriver}
 import org.scalajs.dom
-import rxscalajs.Observable
+import rxscalajs.{Observable, Subject}
 
 object LabeledSlider {
 
   def apply(sources: Sources): Sinks = {
-    val sliderProps = sources("props").asInstanceOf[SliderPropsDriver].sliderProps
+    val sliderProps = sources("props").asInstanceOf[SliderPropsDriver]
     val domDriver = sources("dom").asInstanceOf[DomDriver]
-    val slider = new LabeledSlider(sliderProps, domDriver)
+    val slider = new LabeledSlider(sliderProps.props, domDriver)
 
     Map(
       "dom" -> slider.view
@@ -19,30 +19,26 @@ object LabeledSlider {
   }
 }
 
-class LabeledSlider(props$: Observable[Props], domDriver: DomDriver) {
+class LabeledSlider(props: Props, domDriver: DomDriver) {
 
   dom.console.log("intent of LabeledSlider, domSelector=", domDriver.domSelector)
-  private val intent$ = domDriver
-    .select(".labeled-slider")
-    .events("input")
-    .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
+
+  private val intent$: Observable[Int] = {
+    domDriver
+      .select(".labeled-slider")
+      .events("input")
+      .map(_.target.asInstanceOf[org.scalajs.dom.html.Input].value.toInt)
+      .startWith(props.value)
+  }
 
   dom.console.log("model of LabeledSlider using intent$=", intent$.toString)
-  private val model$ = {
-    props$.combineLatestWith(intent$) {
-      (props, newValue) => {
-        dom.console.log("in model, changing", props.value, "to", newValue)
-        props.copy(value = newValue)
-      }
+  private val model$: Observable[Props] = {
+    for {
+      newValue <- intent$.startWith(props.value)
+    } yield {
+      dom.console.log("in model, changing to", newValue)
+      props.copy(value = newValue)
     }
-//    // FIXME props.value is always start value instead of older value -> combineLatest ?
-//    for {
-//      props <- props$
-//      newValue <- intent$.startWith(props.value)
-//    } yield {
-//      dom.console.log("in model, changing", props.value, "to", newValue)
-//      props.copy(value = newValue)
-//    }
   }
 
   val view: Observable[Hyperscript] = model$.map(props => {
