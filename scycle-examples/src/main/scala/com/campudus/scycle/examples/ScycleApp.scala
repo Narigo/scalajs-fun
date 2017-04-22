@@ -45,11 +45,12 @@ object ScycleApp extends JSApp {
 
     val vtree$ = weightVTree$.combineLatestWith(heightVTree$){
       (weightVTree, heightVTree) => {
-        dom.console.log("weightVTree", weightVTree.toString)
-        dom.console.log("heightVTree", heightVTree.toString)
         Div(id = "app", children = List(
           Div(id = "weight", children = List(weightVTree)),
-          Div(id = "height", children = List(heightVTree))
+          Div(id = "height", children = List(heightVTree)),
+          Div(children = List(
+            Text("BMI is not yet calculated :)")
+          ))
         ))
       }
     }
@@ -64,7 +65,6 @@ object ScycleApp extends JSApp {
       val newDomSink = for {
         hs <- sinks("dom").asInstanceOf[Observable[Hyperscript]]
       } yield {
-        org.scalajs.dom.console.log("isolate", namespace, hs.toString())
         Div(id = namespace, children = List(hs))
       }
 
