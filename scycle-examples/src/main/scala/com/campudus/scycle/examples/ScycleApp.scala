@@ -43,8 +43,9 @@ object ScycleApp extends JSApp {
     val weightVTree$ = WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
     val heightVTree$ = HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
 
-    val vtree$ = weightVTree$.combineLatestWith(heightVTree$){
-      (weightVTree, heightVTree) => {
+    val vtree$: Observable[Hyperscript] = Observable.combineLatest[Hyperscript](List(weightVTree$, heightVTree$)).map{
+      case weightVTree :: heightVTree :: Nil => {
+
         Div(id = "app", children = List(
           Div(id = "weight", children = List(weightVTree)),
           Div(id = "height", children = List(heightVTree)),
@@ -52,6 +53,7 @@ object ScycleApp extends JSApp {
             Text("BMI is not yet calculated :)")
           ))
         ))
+
       }
     }
 
