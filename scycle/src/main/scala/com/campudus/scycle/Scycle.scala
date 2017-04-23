@@ -16,9 +16,10 @@ object Scycle {
 
   }
 
-  type DriversDefinition = Map[String, Driver[_]]
-  type Sources = Map[String, Driver[_]]
-  type Sinks = Map[String, Observable[_]]
+  type DriversDefinition = Map[Any, Driver[_]]
+  type Sources = Map[Any, Driver[_]]
+  type Sinks = SinksMap // Map[String, Observable[_]]
+  type SinkProxies = Map[Any, Subject[_]]
 
   def run(mainFn: Sources => Sinks, drivers: DriversDefinition): () => Unit = {
 
@@ -26,8 +27,11 @@ object Scycle {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
       val sinkProxies = makeSinkProxies(drivers)
+      org.scalajs.dom.console.log("calling drivers")
       val subscriptions = callDrivers(drivers, sinkProxies)
+      org.scalajs.dom.console.log("calling main")
       val sinks = mainFn(drivers)
+      org.scalajs.dom.console.log("dispose setup")
       val disposeReplication = replicateMany(sinks, sinkProxies)
 
       val result = () => {
@@ -35,6 +39,7 @@ object Scycle {
         disposeReplication()
       }
 
+      org.scalajs.dom.console.log("result")
       result
     }
   }
@@ -46,17 +51,22 @@ object Scycle {
     }
   }
 
-  private def replicateMany(sinks: Sinks, sinkProxies: Map[String, Subject[_]]): () => Unit = {
+  private def replicateMany(sinks: Sinks, sinkProxies: SinkProxies): () => Unit = {
 
     type X = Any
 
-    val disposeFunctions = sinks.keys
+    val disposeFunctions = sinks.inner.keys
       .filter(name => {
-        sinkProxies.exists(_._1 == name)
+        org.scalajs.dom.console.log(s"filtering sinks for $name")
+        sinkProxies.exists(a => {
+        org.scalajs.dom.console.log(s"is ${a._1} == $name ? ${a._1 == name}")
+          a._1 == name
+        })
       })
       .map(name => {
-        val subs = sinks(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
-        val latest$ = sinks(name).lastOrElse(null)
+        org.scalajs.dom.console.log("got a sink")
+        val subs = sinks.inner(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
+        val latest$ = sinks.inner(name).lastOrElse(null)
         val dispose = subs.unsubscribe _
         latest$.map(x => {
           sinkProxies(name).asInstanceOf[Observer[X]].next(x)
@@ -71,18 +81,18 @@ object Scycle {
     println(error)
   }
 
-  private def disposeSubscriptions(subscriptions: Map[String, AnonymousSubscription]): Unit = {
+  private def disposeSubscriptions(subscriptions: Map[Any, AnonymousSubscription]): Unit = {
     subscriptions.foreach(_._2.unsubscribe())
   }
 
   private def callDrivers(
     drivers: DriversDefinition,
-    sinkProxies: Map[String, Subject[_]]
-  ): Map[String, AnonymousSubscription] = {
+    sinkProxies: SinkProxies
+  ): Map[Any, AnonymousSubscription] = {
 
     type X = Nothing
 
-    drivers.foldLeft(Map[String, AnonymousSubscription]()){
+    drivers.foldLeft(Map[Any, AnonymousSubscription]()){
       case (m, (name, driver)) =>
         val proxyObservable = sinkProxies(name).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
@@ -90,13 +100,27 @@ object Scycle {
     }
   }
 
-  private def makeSinkProxies(drivers: DriversDefinition): Map[String, Subject[_]] = {
+  private def makeSinkProxies(drivers: DriversDefinition): SinkProxies = {
     org.scalajs.dom.console.log("test before makeSinkProxies.foldLeft")
-    drivers.foldLeft(Map[String, Subject[_]]()){
+    drivers.foldLeft(Map[Any, Subject[_]]()){
       case (m, (name, driver)) =>
         org.scalajs.dom.console.log("test in makeSinkProxies.foldLeft")
         m + (name -> driver.createSubject())
     }
+  }
+
+  class SinkMapper[K, V <: Observable[_]]
+
+  class SinksMap(val inner: Map[Any, Observable[_]] = Map.empty) {
+
+    def get[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): Option[V] = {
+      inner.get(k)
+        .asInstanceOf[Option[V]]
+    }
+    def apply[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): V = get(k).get
+
+    def +[K, V <: Observable[_]](kv: (K, V))(implicit ev: SinkMapper[K, V]): SinksMap = new SinksMap(inner + kv)
+    def -[K](k: K): SinksMap = new SinksMap(inner - k)
   }
 
 }

@@ -2,9 +2,9 @@ package com.campudus.scycle.examples
 
 import com.campudus.scycle.Scycle.{Sinks, _}
 import com.campudus.scycle._
-import com.campudus.scycle.dom.DomDriver.makeDomDriver
+import com.campudus.scycle.examples.LabeledSlider._
+import com.campudus.scycle.dom.DomDriver._
 import com.campudus.scycle.dom._
-import org.scalajs.dom
 import rxscalajs.Observable
 
 import scala.scalajs.js.JSApp
@@ -20,39 +20,47 @@ object ScycleApp extends JSApp {
     Scycle.run(logic, drivers)
   }
 
-  val drivers: DriversDefinition = Map[String, Driver[_]](
-    "dom" -> makeDomDriver("#app")
+  val drivers: DriversDefinition = Map[Any, Driver[_]](
+    Dom -> makeDomDriver("#app")
   )
 
   def logic(sources: Sources): Sinks = {
+    org.scalajs.dom.console.log("hello in app")
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
     val heightSliderProps = Props("Height", "cm", 140, 220, 170)
 
-    val weightSources = Map(
-      "dom" -> sources("dom").asInstanceOf[DomDriver].select("#weight"),
+    val weightSources = Map[Any, Driver[_]](
+      Dom -> sources(Dom).asInstanceOf[DomDriver].select("#weight"),
       "props" -> makeSliderPropsDriver(weightSliderProps)
     )
-    val heightSources = Map(
-      "dom" -> sources("dom").asInstanceOf[DomDriver].select("#height"),
+    val heightSources = Map[Any, Driver[_]](
+      Dom -> sources(Dom).asInstanceOf[DomDriver].select("#height"),
       "props" -> makeSliderPropsDriver(heightSliderProps)
     )
 
+    org.scalajs.dom.console.log("before labeledslider")
     val WeightSlider = LabeledSlider(weightSources)
     val HeightSlider = LabeledSlider(heightSources)
+    org.scalajs.dom.console.log("after labeledslider")
 
-    val weightVTree$ = WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
-    val heightVTree$ = HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
+    val weightVTree$ = WeightSlider(DomDriver.Dom)
+    val heightVTree$ = HeightSlider(DomDriver.Dom)
+    org.scalajs.dom.console.log("after weightslider/heightslider dom get")
 
-    val weightValue$ = WeightSlider("value").asInstanceOf[Observable[Int]]
-    val heightValue$ = HeightSlider("value").asInstanceOf[Observable[Int]]
+    val weightValue$ = WeightSlider(LabeledSlider.SliderValue)
+    val heightValue$ = HeightSlider(LabeledSlider.SliderValue)
+    org.scalajs.dom.console.log("after weightslider/heightslider value get")
 
     val bmi$ = Observable.combineLatest(List(weightValue$, heightValue$)).map({
       case weight :: height :: Nil =>
         val heightMeters = height * 0.01
-        Math.round(weight / (heightMeters * heightMeters))
+        val bmi = Math.round(weight / (heightMeters * heightMeters))
+        org.scalajs.dom.console.log(s"current bmi is $bmi")
+        bmi
     })
+    org.scalajs.dom.console.log("after bmi calculation")
 
-    val vtree$ = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$)).map{
+    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$)).map{
       case weightVTree :: heightVTree :: bmi :: Nil =>
         Div(id = "app", children = List(
           Div(id = "weight", children = List(weightVTree.asInstanceOf[Hyperscript])),
@@ -63,21 +71,8 @@ object ScycleApp extends JSApp {
         ))
     }
 
-    Map("dom" -> vtree$)
-  }
-
-  private def isolate(apply: Sources => Sinks)(namespace: String): Sources => Sinks = {
-    (sources: Sources) => {
-      val isolatedSources: Sources = sources + ("dom" -> sources("dom").asInstanceOf[DomDriver].select(s"#$namespace"))
-      val sinks: Sinks = apply(isolatedSources)
-      val newDomSink = for {
-        hs <- sinks("dom").asInstanceOf[Observable[Hyperscript]]
-      } yield {
-        Div(id = namespace, children = List(hs))
-      }
-
-      sinks + ("dom" -> newDomSink)
-    }
+    org.scalajs.dom.console.log("resulting in sinkMap")
+    new SinksMap() + (Dom -> vtree$)
   }
 
   case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
