@@ -13,7 +13,8 @@ object LabeledSlider {
     val slider = new LabeledSlider(sliderProps.props, domDriver)
 
     Map(
-      "dom" -> slider.view
+      "dom" -> slider.view,
+      "value" -> slider.intent$
     )
   }
 }

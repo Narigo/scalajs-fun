@@ -43,18 +43,24 @@ object ScycleApp extends JSApp {
     val weightVTree$ = WeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
     val heightVTree$ = HeightSlider("dom").asInstanceOf[Observable[Hyperscript]]
 
-    val vtree$: Observable[Hyperscript] = Observable.combineLatest[Hyperscript](List(weightVTree$, heightVTree$)).map{
-      case weightVTree :: heightVTree :: Nil => {
+    val weightValue$ = WeightSlider("value").asInstanceOf[Observable[Int]]
+    val heightValue$ = HeightSlider("value").asInstanceOf[Observable[Int]]
 
+    val bmi$ = Observable.combineLatest(List(weightValue$, heightValue$)).map({
+      case weight :: height :: Nil =>
+        val heightMeters = height * 0.01
+        Math.round(weight / (heightMeters * heightMeters))
+    })
+
+    val vtree$ = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$)).map{
+      case weightVTree :: heightVTree :: bmi :: Nil =>
         Div(id = "app", children = List(
-          Div(id = "weight", children = List(weightVTree)),
-          Div(id = "height", children = List(heightVTree)),
+          Div(id = "weight", children = List(weightVTree.asInstanceOf[Hyperscript])),
+          Div(id = "height", children = List(heightVTree.asInstanceOf[Hyperscript])),
           Div(children = List(
-            Text("BMI is not yet calculated :)")
+            Text(s"BMI is $bmi")
           ))
         ))
-
-      }
     }
 
     Map("dom" -> vtree$)
