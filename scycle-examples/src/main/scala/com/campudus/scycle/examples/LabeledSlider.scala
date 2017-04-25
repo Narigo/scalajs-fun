@@ -45,7 +45,7 @@ class LabeledSlider(props: Props, domDriver: DomDriver) {
 
   private val model$: Observable[Props] = {
     for {
-      newValue <- intent$.startWith(props.value)
+      newValue <- intent$
     } yield {
       props.copy(value = newValue)
     }
