@@ -16,14 +16,14 @@ object Scycle {
 
   }
 
-  type DriversDefinition = Map[Any, Driver[_]]
-  type Sources = Map[Any, Driver[_]]
-  type Sinks = SinksMap // Map[String, Observable[_]]
+  type DriversDefinition = SourcesMap
+  type Sources = SourcesMap
+  type Sinks = SinksMap
   type SinkProxies = Map[Any, Subject[_]]
 
   def run(mainFn: Sources => Sinks, drivers: DriversDefinition): () => Unit = {
 
-    if (drivers.isEmpty) {
+    if (drivers.inner.isEmpty) {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
       val sinkProxies = makeSinkProxies(drivers)
@@ -59,7 +59,7 @@ object Scycle {
       .filter(name => {
         org.scalajs.dom.console.log(s"filtering sinks for $name")
         sinkProxies.exists(a => {
-        org.scalajs.dom.console.log(s"is ${a._1} == $name ? ${a._1 == name}")
+          org.scalajs.dom.console.log(s"is ${a._1} == $name ? ${a._1 == name}")
           a._1 == name
         })
       })
@@ -92,7 +92,7 @@ object Scycle {
 
     type X = Nothing
 
-    drivers.foldLeft(Map[Any, AnonymousSubscription]()){
+    drivers.inner.foldLeft(Map[Any, AnonymousSubscription]()){
       case (m, (name, driver)) =>
         val proxyObservable = sinkProxies(name).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
@@ -102,7 +102,7 @@ object Scycle {
 
   private def makeSinkProxies(drivers: DriversDefinition): SinkProxies = {
     org.scalajs.dom.console.log("test before makeSinkProxies.foldLeft")
-    drivers.foldLeft(Map[Any, Subject[_]]()){
+    drivers.inner.foldLeft(Map[Any, Subject[_]]()){
       case (m, (name, driver)) =>
         org.scalajs.dom.console.log("test in makeSinkProxies.foldLeft")
         m + (name -> driver.createSubject())
@@ -114,13 +114,25 @@ object Scycle {
   class SinksMap(val inner: Map[Any, Observable[_]] = Map.empty) {
 
     def get[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): Option[V] = {
-      inner.get(k)
-        .asInstanceOf[Option[V]]
+      inner.get(k).asInstanceOf[Option[V]]
     }
+
     def apply[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): V = get(k).get
 
     def +[K, V <: Observable[_]](kv: (K, V))(implicit ev: SinkMapper[K, V]): SinksMap = new SinksMap(inner + kv)
     def -[K](k: K): SinksMap = new SinksMap(inner - k)
+  }
+
+  class SourcesMapper[K, V <: Driver[_]]
+
+  class SourcesMap(val inner: Map[Any, Driver[_]] = Map.empty) {
+
+    def get[K, V <: Driver[_]](k: K)(implicit ev: SourcesMapper[K, V]): Option[V] = inner.get(k).asInstanceOf[Option[V]]
+
+    def apply[K, V <: Driver[_]](k: K)(implicit ev: SourcesMapper[K, V]): V = get(k).get
+
+    def +[K, V <: Driver[_]](kv: (K, V))(implicit ev: SourcesMapper[K, V]): SourcesMap = new SourcesMap(inner + kv)
+    def -[K](k: K): SourcesMap = new SourcesMap(inner - k)
   }
 
 }

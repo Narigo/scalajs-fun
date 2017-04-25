@@ -1,6 +1,6 @@
 package com.campudus.scycle.examples
 
-import com.campudus.scycle.Scycle.{Sinks, _}
+import com.campudus.scycle.Scycle._
 import com.campudus.scycle._
 import com.campudus.scycle.examples.LabeledSlider._
 import com.campudus.scycle.dom.DomDriver._
@@ -20,23 +20,19 @@ object ScycleApp extends JSApp {
     Scycle.run(logic, drivers)
   }
 
-  val drivers: DriversDefinition = Map[Any, Driver[_]](
-    Dom -> makeDomDriver("#app")
-  )
+  val drivers: DriversDefinition = new SourcesMap() + (Dom -> makeDomDriver("#app"))
 
   def logic(sources: Sources): Sinks = {
     org.scalajs.dom.console.log("hello in app")
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
     val heightSliderProps = Props("Height", "cm", 140, 220, 170)
 
-    val weightSources = Map[Any, Driver[_]](
-      Dom -> sources(Dom).asInstanceOf[DomDriver].select("#weight"),
-      "props" -> makeSliderPropsDriver(weightSliderProps)
-    )
-    val heightSources = Map[Any, Driver[_]](
-      Dom -> sources(Dom).asInstanceOf[DomDriver].select("#height"),
-      "props" -> makeSliderPropsDriver(heightSliderProps)
-    )
+    val weightSources = new SourcesMap() +
+      (Dom -> sources(Dom).select("#weight")) +
+      (Props -> makeSliderPropsDriver(weightSliderProps))
+    val heightSources = new SourcesMap() +
+      (Dom -> sources(Dom).select("#height")) +
+      (Props -> makeSliderPropsDriver(heightSliderProps))
 
     org.scalajs.dom.console.log("before labeledslider")
     val WeightSlider = LabeledSlider(weightSources)
@@ -61,10 +57,10 @@ object ScycleApp extends JSApp {
     org.scalajs.dom.console.log("after bmi calculation")
 
     val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$)).map{
-      case weightVTree :: heightVTree :: bmi :: Nil =>
+      case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: Nil =>
         Div(id = "app", children = List(
-          Div(id = "weight", children = List(weightVTree.asInstanceOf[Hyperscript])),
-          Div(id = "height", children = List(heightVTree.asInstanceOf[Hyperscript])),
+          Div(id = "weight", children = List(weightVTree)),
+          Div(id = "height", children = List(heightVTree)),
           Div(children = List(
             Text(s"BMI is $bmi")
           ))
@@ -74,11 +70,5 @@ object ScycleApp extends JSApp {
     org.scalajs.dom.console.log("resulting in sinkMap")
     new SinksMap() + (Dom -> vtree$)
   }
-
-  case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
-
-  class SliderPropsDriver(val props: Props) extends Driver[Unit]
-
-  def makeSliderPropsDriver(props: Props): SliderPropsDriver = new SliderPropsDriver(props)
 
 }

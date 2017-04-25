@@ -1,20 +1,29 @@
 package com.campudus.scycle.examples
 
-import com.campudus.scycle.Scycle.{SinkMapper, Sinks, SinksMap, Sources}
+import com.campudus.scycle.Driver
+import com.campudus.scycle.Scycle._
 import com.campudus.scycle.dom.DomDriver.Dom
 import com.campudus.scycle.dom.{DomDriver, _}
-import com.campudus.scycle.examples.ScycleApp.{Props, SliderPropsDriver}
+import com.campudus.scycle.examples.LabeledSlider.Props
 import rxscalajs.Observable
 
 object LabeledSlider {
+
+  case class Props(label: String, unit: String, min: Int, max: Int, value: Int)
+
+  class SliderPropsDriver(val props: Props) extends Driver[Unit]
+
+  implicit val propsToDriver: SourcesMapper[Props.type, SliderPropsDriver] = new SourcesMapper
+
+  def makeSliderPropsDriver(props: Props): SliderPropsDriver = new SliderPropsDriver(props)
 
   object SliderValue
 
   implicit val sliderValue: SinkMapper[SliderValue.type, Observable[Int]] = new SinkMapper
 
   def apply(sources: Sources): Sinks = {
-    val sliderProps = sources("props").asInstanceOf[SliderPropsDriver]
-    val domDriver = sources(Dom).asInstanceOf[DomDriver]
+    val sliderProps = sources(Props)
+    val domDriver = sources(Dom)
     val slider = new LabeledSlider(sliderProps.props, domDriver)
 
     new SinksMap(Map(
