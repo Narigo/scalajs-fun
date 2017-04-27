@@ -102,7 +102,7 @@ object Scycle {
 
   class SinkMapper[K, V <: Observable[_]]
 
-  class SinksMap(val inner: Map[Any, Observable[_]] = Map.empty) {
+  class SinksMap(private[Scycle] val inner: Map[Any, Observable[_]] = Map.empty) {
 
     def get[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): Option[V] = {
       inner.get(k).asInstanceOf[Option[V]]
@@ -116,7 +116,7 @@ object Scycle {
 
   class SourcesMapper[K, V <: Driver[_]]
 
-  class SourcesMap(val inner: Map[Any, Driver[_]] = Map.empty) {
+  class SourcesMap(private[Scycle] val inner: Map[Any, Driver[_]] = Map.empty) {
 
     def get[K, V <: Driver[_]](k: K)(implicit ev: SourcesMapper[K, V]): Option[V] = inner.get(k).asInstanceOf[Option[V]]
 
