@@ -5,12 +5,7 @@ import rxscalajs.{Observable, Subject}
 
 trait Driver[A] {
 
-  def createSubject(): Subject[A] = {
-    org.scalajs.dom.console.log("in Driver.createSubject()")
-    val s = Subject.apply[A]()
-    org.scalajs.dom.console.log("after Driver.createSubject:Subject.apply()")
-    s
-  }
+  def createSubject(): Subject[A] = Subject.apply[A]()
 
   def subscribe(inputs: Observable[A]): AnonymousSubscription = inputs.subscribe(_ => null)
 

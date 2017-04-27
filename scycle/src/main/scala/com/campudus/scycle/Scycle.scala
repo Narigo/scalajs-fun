@@ -27,11 +27,8 @@ object Scycle {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
       val sinkProxies = makeSinkProxies(drivers)
-      org.scalajs.dom.console.log("calling drivers")
       val subscriptions = callDrivers(drivers, sinkProxies)
-      org.scalajs.dom.console.log("calling main")
       val sinks = mainFn(drivers)
-      org.scalajs.dom.console.log("dispose setup")
       val disposeReplication = replicateMany(sinks, sinkProxies)
 
       val result = () => {
@@ -39,7 +36,6 @@ object Scycle {
         disposeReplication()
       }
 
-      org.scalajs.dom.console.log("result")
       result
     }
   }
@@ -57,14 +53,11 @@ object Scycle {
 
     val disposeFunctions = sinks.inner.keys
       .filter(name => {
-        org.scalajs.dom.console.log(s"filtering sinks for $name")
         sinkProxies.exists(a => {
-          org.scalajs.dom.console.log(s"is ${a._1} == $name ? ${a._1 == name}")
           a._1 == name
         })
       })
       .map(name => {
-        org.scalajs.dom.console.log("got a sink")
         val subs = sinks.inner(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
         val latest$ = sinks.inner(name).lastOrElse(null)
         val dispose = subs.unsubscribe _
@@ -101,10 +94,8 @@ object Scycle {
   }
 
   private def makeSinkProxies(drivers: DriversDefinition): SinkProxies = {
-    org.scalajs.dom.console.log("test before makeSinkProxies.foldLeft")
     drivers.inner.foldLeft(Map[Any, Subject[_]]()){
       case (m, (name, driver)) =>
-        org.scalajs.dom.console.log("test in makeSinkProxies.foldLeft")
         m + (name -> driver.createSubject())
     }
   }
