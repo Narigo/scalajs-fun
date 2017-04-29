@@ -1,7 +1,6 @@
 package com.campudus.scycle.dom
 
-import com.campudus.scycle.Driver
-import com.campudus.scycle.Scycle.{SinkMapper, SourcesMapper}
+import com.campudus.scycle.{Driver, Mapper}
 import com.campudus.scycle.dom.DomDriver.SelectedEvents
 import com.campudus.scycle.vdom.VirtualDom
 import com.campudus.scycle.vdom.VirtualDom.Replacement
@@ -53,14 +52,14 @@ class DomDriver private(val domSelector: String, selectedEvents: SelectedEvents 
 
 }
 
-object DomDriver {
+object DomDriver extends Mapper[DomDriver, Hyperscript] {
+
+  case object Dom
+
+  type Key = Dom.type
 
   def makeDomDriver(domSelector: String) = new DomDriver(domSelector)
 
   type SelectedEvents = mutable.Map[(String, String), (Subject[Event], AnonymousSubscription)]
 
-  object Dom
-
-  implicit val domToHyperscript: SinkMapper[Dom.type, Observable[Hyperscript]] = new SinkMapper
-  implicit val domToDomDriver: SourcesMapper[Dom.type, DomDriver] = new SourcesMapper
 }
