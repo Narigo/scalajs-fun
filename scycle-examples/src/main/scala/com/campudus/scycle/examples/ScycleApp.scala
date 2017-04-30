@@ -5,8 +5,11 @@ import com.campudus.scycle._
 import com.campudus.scycle.examples.LabeledSlider._
 import com.campudus.scycle.dom.DomDriver._
 import com.campudus.scycle.dom._
+import com.campudus.scycle.http.HttpDriver._
+import com.campudus.scycle.http.User
 import rxscalajs.Observable
 
+import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -20,7 +23,9 @@ object ScycleApp extends JSApp {
     Scycle.run(logic, drivers)
   }
 
-  val drivers: DriversDefinition = new SourcesMap() + (Dom -> makeDomDriver("#app"))
+  val drivers: DriversDefinition = new SourcesMap() +
+    (Dom -> makeDomDriver("#app")) +
+    (Http -> makeHttpDriver())
 
   def logic(sources: Sources): Sinks = {
     val weightSliderProps = Props("Weight", "kg", 40, 150, 70)
@@ -50,13 +55,28 @@ object ScycleApp extends JSApp {
         bmi
     })
 
-    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$)).map{
-      case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: Nil =>
+    sources(Http).requestUser(1)
+
+    val user$ = sources(Http).lastResponse$.map(res => {
+      org.scalajs.dom.console.log("lastResponse$ changed", res)
+      if (res == null) {
+        User("test", "test@test.de", "http://test.de")
+      } else {
+        val user = res.response
+        User(user.username.toString, user.email.toString, user.website.toString)
+      }
+    })
+
+    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$)).map{
+      case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
         Div(id = "app", children = List(
           Div(id = "weight", children = List(weightVTree)),
           Div(id = "height", children = List(heightVTree)),
           Div(children = List(
             Text(s"BMI is $bmi")
+          )),
+          Div(children = List(
+            Text(s"User is ${user.name} (${user.email}), ${user.website}")
           ))
         ))
     }
