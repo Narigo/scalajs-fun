@@ -10,13 +10,8 @@ class HttpDriver private extends Driver[Request] {
 
   override def subscribe(requests: Observable[Request]): AnonymousSubscription = {
     requests
-      .flatMap(request => {
-        if (request == null) {
-          Observable.just(null)
-        } else {
-          work(request)
-        }
-      })
+      .map(req => Option(req).map(work))
+      .flatMap(_.getOrElse(Observable.just(null)))
       .subscribe(responses.next _)
   }
 
