@@ -16,7 +16,6 @@ class HttpDriver private extends Driver[Request] {
   }
 
   val responses: Subject[js.Dynamic] = Subject()
-  val lastResponse$: Observable[js.Dynamic] = responses.startWith(null)
 
   def request(req: Request): Observable[js.Dynamic] = {
     Observable
