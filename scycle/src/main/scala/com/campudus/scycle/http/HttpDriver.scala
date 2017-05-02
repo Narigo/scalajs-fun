@@ -10,7 +10,7 @@ class HttpDriver private extends Driver[Request] {
 
   override def subscribe(requests: Observable[Request]): AnonymousSubscription = {
     requests
-      .map(req => Option(req).map(work))
+      .map(req => Option(req).map(request))
       .flatMap(_.getOrElse(Observable.just(null)))
       .subscribe(responses.next _)
   }
@@ -18,13 +18,9 @@ class HttpDriver private extends Driver[Request] {
   val responses: Subject[js.Dynamic] = Subject()
   val lastResponse$: Observable[js.Dynamic] = responses.startWith(null)
 
-  def requestUser(number: Double): Request = {
-    Get(s"http://jsonplaceholder.typicode.com/users/$number")
-  }
-
-  private def work(request: Request): Observable[js.Dynamic] = {
+  def request(req: Request): Observable[js.Dynamic] = {
     Observable
-      .ajax(request.url)
+      .ajax(req.url)
   }
 
 }

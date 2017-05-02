@@ -6,12 +6,13 @@ import com.campudus.scycle.examples.LabeledSlider._
 import com.campudus.scycle.dom.DomDriver._
 import com.campudus.scycle.dom._
 import com.campudus.scycle.http.HttpDriver._
-import com.campudus.scycle.http.User
+import com.campudus.scycle.http.{Get, User}
 import rxscalajs.Observable
 
 import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
+import scala.util.Random
 
 @JSExport
 object ScycleApp extends JSApp {
@@ -55,10 +56,9 @@ object ScycleApp extends JSApp {
         bmi
     })
 
-    sources(Http).requestUser(1)
+    val request$ = sources(Http).request(Get(s"http://jsonplaceholder.typicode.com/users/${Random.nextInt(10) + 1}"))
 
-    val user$ = sources(Http).lastResponse$.map(res => {
-      org.scalajs.dom.console.log("lastResponse$ changed", res)
+    val user$ = request$.map(res => {
       if (res == null) {
         User("test", "test@test.de", "http://test.de")
       } else {
