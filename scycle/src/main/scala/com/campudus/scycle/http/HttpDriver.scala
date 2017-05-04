@@ -8,19 +8,7 @@ import scala.scalajs.js
 
 class HttpDriver private extends Driver[Request] {
 
-  override def subscribe(requests: Observable[Request]): AnonymousSubscription = {
-    requests
-      .map(req => Option(req).map(request))
-      .flatMap(_.getOrElse(Observable.just(null)))
-      .subscribe(responses.next _)
-  }
-
-  val responses: Subject[js.Dynamic] = Subject()
-
-  def request(req: Request): Observable[js.Dynamic] = {
-    Observable
-      .ajax(req.url)
-  }
+  def request(req: Request): Observable[js.Dynamic] = Observable.ajax(req.url)
 
 }
 
