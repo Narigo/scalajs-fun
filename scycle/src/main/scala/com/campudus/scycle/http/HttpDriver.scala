@@ -2,7 +2,6 @@ package com.campudus.scycle.http
 
 import com.campudus.scycle.{Driver, Mapper}
 import rxscalajs._
-import rxscalajs.subscription.AnonymousSubscription
 
 import scala.scalajs.js
 
@@ -16,7 +15,7 @@ object HttpDriver extends Mapper[HttpDriver, js.Dynamic] {
 
   case object Http
 
-  type Key = Http.type
+  override type Key = Http.type
 
   def makeHttpDriver() = new HttpDriver
 

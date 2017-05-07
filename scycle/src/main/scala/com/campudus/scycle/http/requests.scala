@@ -2,14 +2,10 @@ package com.campudus.scycle.http
 
 sealed trait Request {
 
+  val id: String
+
   val url: String
 
 }
 
-case class Get(url: String) extends Request
-
-case object NonRequest extends Request {
-
-  val url: String = ""
-
-}
+case class Get(id: String, url: String) extends Request

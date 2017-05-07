@@ -9,7 +9,6 @@ import com.campudus.scycle.http.HttpDriver._
 import com.campudus.scycle.http.{Get, User}
 import rxscalajs.Observable
 
-import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 import scala.util.Random
@@ -56,7 +55,9 @@ object ScycleApp extends JSApp {
         bmi
     })
 
-    val request$ = sources(Http).request(Get(s"http://jsonplaceholder.typicode.com/users/${Random.nextInt(10) + 1}"))
+    val clicks$ = sources(Dom).select("#request-user").events("click")
+
+    val request$ = sources(Http).request(Get("user", s"http://jsonplaceholder.typicode.com/users/${Random.nextInt(10) + 1}"))
 
     val user$ = request$.map(res => {
       if (res == null) {
@@ -76,12 +77,15 @@ object ScycleApp extends JSApp {
             Text(s"BMI is $bmi")
           )),
           Div(children = List(
+            Button(id = "request-user", children = List(Text(s"Request user"))),
             Text(s"User is ${user.name} (${user.email}), ${user.website}")
           ))
         ))
     }
 
-    new SinksMap() + (Dom -> vtree$)
+    new SinksMap() +
+      (Dom -> vtree$) +
+      (Http -> clicks$.map(_ => Get("user", s"http://jsonplaceholder.typicode.com/users/${Random.nextInt(10) + 1}")))
   }
 
 }
