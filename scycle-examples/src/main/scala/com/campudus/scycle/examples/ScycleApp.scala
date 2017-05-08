@@ -6,7 +6,7 @@ import com.campudus.scycle.examples.LabeledSlider._
 import com.campudus.scycle.dom.DomDriver._
 import com.campudus.scycle.dom._
 import com.campudus.scycle.http.HttpDriver._
-import com.campudus.scycle.http.{Get, User}
+import com.campudus.scycle.http.{Get, Request, Response, User}
 import rxscalajs.Observable
 
 import scala.scalajs.js.JSApp
@@ -55,21 +55,37 @@ object ScycleApp extends JSApp {
         bmi
     })
 
-    val clicks$ = sources(Dom).select("#request-user").events("click")
+    val clicks$ = sources(Dom).events("click")
 
-    val request$ = sources(Http).request(Get("user", s"http://jsonplaceholder.typicode.com/users/${Random.nextInt(10) + 1}"))
+    val response$$ = sources(Http)
+      .filter(response$ => {
+        val result = response$.request.id == "user"
+        org.scalajs.dom.console.log("Filter response$", response$.request.url, result)
+        result
+      })
+      .map(x => {
+        org.scalajs.dom.console.log("test??", x.request.url)
+        x
+      })
 
-    val user$ = request$.map(res => {
+    val response$: Observable[Response] = response$$.switch
+    val user$ = response$.map(res => {
       if (res == null) {
         User("test", "test@test.de", "http://test.de")
       } else {
         val user = res.response
         User(user.username.toString, user.email.toString, user.website.toString)
       }
-    })
+    }).startWith(null)
 
-    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$)).map{
+    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$)).map({
       case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
+        val userText: List[Hyperscript] = if (user == null) {
+          Nil
+        } else {
+          List(Text(s"User is ${user.name} (${user.email}), ${user.website}"))
+        }
+
         Div(id = "app", children = List(
           Div(id = "weight", children = List(weightVTree)),
           Div(id = "height", children = List(heightVTree)),
@@ -77,15 +93,18 @@ object ScycleApp extends JSApp {
             Text(s"BMI is $bmi")
           )),
           Div(children = List(
-            Button(id = "request-user", children = List(Text(s"Request user"))),
-            Text(s"User is ${user.name} (${user.email}), ${user.website}")
-          ))
-        ))
-    }
+            Button(id = "request-user", children = List(Text(s"Request user")))
+          ) ::: userText))
+        )
+    })
 
     new SinksMap() +
       (Dom -> vtree$) +
-      (Http -> clicks$.map(_ => Get("user", s"http://jsonplaceholder.typicode.com/users/${Random.nextInt(10) + 1}")))
+      (Http -> clicks$.map(_ => {
+        val randomInt = Random.nextInt(10) + 1
+        org.scalajs.dom.console.log("clicked button, requesting new user", randomInt)
+        Get("user", s"http://jsonplaceholder.typicode.com/users/$randomInt").asInstanceOf[Request]
+      }))
   }
 
 }

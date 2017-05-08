@@ -100,7 +100,7 @@ object Scycle {
     }
   }
 
-  class SinkMapper[K, V <: Observable[_]]
+  class SinkMapper[K, +V <: Observable[_]]
 
   class SinksMap(private[Scycle] val inner: Map[Any, Observable[_]] = Map.empty) {
 
@@ -114,7 +114,7 @@ object Scycle {
     def -[K](k: K): SinksMap = new SinksMap(inner - k)
   }
 
-  class SourcesMapper[K, V <: Driver[_]]
+  class SourcesMapper[K, +V <: Driver[_]]
 
   class SourcesMap(private[Scycle] val inner: Map[Any, Driver[_]] = Map.empty) {
 

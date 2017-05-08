@@ -3,7 +3,7 @@ package com.campudus.scycle
 import com.campudus.scycle.Scycle.{SinkMapper, SourcesMapper}
 import rxscalajs.Observable
 
-abstract class Mapper[Source <: Driver[_], Sink] {
+abstract class Mapper[+Source <: Driver[_], +Sink] {
 
   type Key
 

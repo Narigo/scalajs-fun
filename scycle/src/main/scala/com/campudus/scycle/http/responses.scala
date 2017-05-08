@@ -1,9 +1,12 @@
 package com.campudus.scycle.http
 
-sealed trait Response
+import rxscalajs.Observable
 
-case class TextResponse(url: String, body: String) extends Response
+import scala.scalajs.js
 
-case class UserResponse(url: String, user: User) extends Response
+case class ResponseObservable(request: Request, observable: Observable[Response])
+  extends Observable[Response](observable.inner)
+
+case class Response(id: String, url: String, response: js.Dynamic)
 
 case class User(name: String, email: String, website: String)
