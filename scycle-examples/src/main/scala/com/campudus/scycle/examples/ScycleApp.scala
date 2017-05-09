@@ -68,22 +68,24 @@ object ScycleApp extends JSApp {
         x
       })
 
-    val response$: Observable[Response] = response$$.switch
-    val user$ = response$.map(res => {
-      if (res == null) {
-        User("test", "test@test.de", "http://test.de")
-      } else {
-        val user = res.response
-        User(user.username.toString, user.email.toString, user.website.toString)
-      }
+    val user$ = response$$.map(res$ => {
+      org.scalajs.dom.console.log("A response to map to user", res$.request.url)
+      res$.map(res => {
+        if (res == null) {
+          User("test", "test@test.de", "http://test.de")
+        } else {
+          val user = res.response
+          User(user.username.toString, user.email.toString, user.website.toString)
+        }
+      })
     }).startWith(null)
 
     val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$)).map({
       case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
-        val userText: List[Hyperscript] = if (user == null) {
-          Nil
+        val userText: Text = if (user == null) {
+          Text(s"No user")
         } else {
-          List(Text(s"User is ${user.name} (${user.email}), ${user.website}"))
+          Text(s"User is ${user.name} (${user.email}), ${user.website}")
         }
 
         Div(id = "app", children = List(
@@ -93,9 +95,10 @@ object ScycleApp extends JSApp {
             Text(s"BMI is $bmi")
           )),
           Div(children = List(
-            Button(id = "request-user", children = List(Text(s"Request user")))
-          ) ::: userText))
-        )
+            Button(id = "request-user", children = List(Text(s"Request user"))),
+            userText
+          ))
+        ))
     })
 
     new SinksMap() +
