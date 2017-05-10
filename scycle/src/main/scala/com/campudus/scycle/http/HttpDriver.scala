@@ -23,7 +23,7 @@ class HttpDriver private extends Driver[Request] {
         )
       })
       .subscribe(response => {
-        org.scalajs.dom.console.log("Pushing into response$$")
+        org.scalajs.dom.console.log("Pushing", response.request.url, "into response$$")
         responses$$.next(response)
       })
   }
@@ -31,9 +31,9 @@ class HttpDriver private extends Driver[Request] {
   def filter(predicate: ResponseObservable => Boolean): Observable[ResponseObservable] = {
     org.scalajs.dom.console.log("Filtering ResponseObservable")
     val obs = responses$$.filter(predicate)
-    obs.subscribe(sth => {
-      org.scalajs.dom.console.log("Something went through the filter!", sth.request.url)
-    })
+    //    obs.subscribe(sth => {
+    //      org.scalajs.dom.console.log("Something went through the filter!", sth.request.url)
+    //    })
     obs
   }
 

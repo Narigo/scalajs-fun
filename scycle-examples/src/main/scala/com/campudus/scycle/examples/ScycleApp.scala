@@ -60,13 +60,17 @@ object ScycleApp extends JSApp {
     val response$$ = sources(Http)
       .filter(response$ => {
         val result = response$.request.id == "user"
-        org.scalajs.dom.console.log("Filter response$", response$.request.url, result)
+        org.scalajs.dom.console.log("Filter response$ results in url=", response$.request.url, "and result:", result)
         result
       })
       .map(x => {
         org.scalajs.dom.console.log("test??", x.request.url)
         x
       })
+
+    response$$.subscribe(_ => {
+      org.scalajs.dom.console.log("subscribe in app")
+    })
 
     val user$ = response$$.map(res$ => {
       org.scalajs.dom.console.log("A response to map to user", res$.request.url)
@@ -101,13 +105,15 @@ object ScycleApp extends JSApp {
         ))
     })
 
+    val userRequest$ = clicks$.map(_ => {
+      val randomInt = Random.nextInt(10) + 1
+      org.scalajs.dom.console.log("clicked button, requesting new user", randomInt)
+      Get("user", s"http://jsonplaceholder.typicode.com/users/$randomInt").asInstanceOf[Request]
+    })
+
     new SinksMap() +
       (Dom -> vtree$) +
-      (Http -> clicks$.map(_ => {
-        val randomInt = Random.nextInt(10) + 1
-        org.scalajs.dom.console.log("clicked button, requesting new user", randomInt)
-        Get("user", s"http://jsonplaceholder.typicode.com/users/$randomInt").asInstanceOf[Request]
-      }))
+      (Http -> userRequest$)
   }
 
 }
