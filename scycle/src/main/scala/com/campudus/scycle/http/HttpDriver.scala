@@ -15,7 +15,6 @@ class HttpDriver private extends Driver[Request] {
           org.scalajs.dom.console.log("Got a response!", response)
           Response(request.id, request.url, response)
         })
-        obs.subscribe(_ => {})
 
         ResponseObservable(
           request,

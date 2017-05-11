@@ -68,24 +68,30 @@ object ScycleApp extends JSApp {
         x
       })
 
-    response$$.subscribe(_ => {
-      org.scalajs.dom.console.log("subscribe in app")
+    response$$.subscribe(res => {
+      org.scalajs.dom.console.log("subscribe in app yields", res.request.url)
     })
 
-    val user$ = response$$.map(res$ => {
+    val user$ = response$$.flatMap(res$ => {
       org.scalajs.dom.console.log("A response to map to user", res$.request.url)
       res$.map(res => {
+        org.scalajs.dom.console.log("The response = ", res.response)
         if (res == null) {
           User("test", "test@test.de", "http://test.de")
         } else {
-          val user = res.response
+          val user = res.response.response
           User(user.username.toString, user.email.toString, user.website.toString)
         }
       })
     }).startWith(null)
 
+    user$.subscribe(user => {
+      org.scalajs.dom.console.log("user subscription yields", Option(user).toString)
+    })
+
     val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$)).map({
       case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
+        org.scalajs.dom.console.log("A response to map to user", user.toString)
         val userText: Text = if (user == null) {
           Text(s"No user")
         } else {
