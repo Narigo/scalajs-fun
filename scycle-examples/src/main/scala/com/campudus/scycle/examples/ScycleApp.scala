@@ -68,18 +68,20 @@ object ScycleApp extends JSApp {
         x
       })
 
-    response$$.subscribe(res => {
-      org.scalajs.dom.console.log("subscribe in app yields", res.request.url)
-    })
+//    response$$.subscribe(res => {
+//      org.scalajs.dom.console.log("subscribe in app yields", res.request.url)
+//    })
 
     val user$ = response$$.flatMap(res$ => {
       org.scalajs.dom.console.log("A response to map to user", res$.request.url)
       res$.map(res => {
         org.scalajs.dom.console.log("The response = ", res.response)
         if (res == null) {
+          org.scalajs.dom.console.log("result in test user")
           User("test", "test@test.de", "http://test.de")
         } else {
           val user = res.response.response
+          org.scalajs.dom.console.log("result in correct user", user)
           User(user.username.toString, user.email.toString, user.website.toString)
         }
       })
@@ -91,13 +93,16 @@ object ScycleApp extends JSApp {
 
     val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$)).map({
       case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
-        org.scalajs.dom.console.log("A response to map to user", user.toString)
+        org.scalajs.dom.console.log(s"A vtree user!", user.toString)
         val userText: Text = if (user == null) {
+          org.scalajs.dom.console.log("user is null")
           Text(s"No user")
         } else {
+          org.scalajs.dom.console.log("user is not null")
           Text(s"User is ${user.name} (${user.email}), ${user.website}")
         }
 
+        org.scalajs.dom.console.log("some stuff")
         Div(id = "app", children = List(
           Div(id = "weight", children = List(weightVTree)),
           Div(id = "height", children = List(heightVTree)),
