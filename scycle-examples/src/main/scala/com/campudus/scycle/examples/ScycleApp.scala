@@ -68,10 +68,6 @@ object ScycleApp extends JSApp {
         x
       })
 
-//    response$$.subscribe(res => {
-//      org.scalajs.dom.console.log("subscribe in app yields", res.request.url)
-//    })
-
     val user$ = response$$.flatMap(res$ => {
       org.scalajs.dom.console.log("A response to map to user", res$.request.url)
       res$.map(res => {

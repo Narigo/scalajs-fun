@@ -4,6 +4,8 @@ import com.campudus.scycle.{Driver, Mapper}
 import rxscalajs._
 import rxscalajs.subscription.AnonymousSubscription
 
+import scala.scalajs.js
+
 class HttpDriver private extends Driver[Request] {
 
   private val responses$$: Subject[ResponseObservable] = Subject()
@@ -11,7 +13,7 @@ class HttpDriver private extends Driver[Request] {
   override def subscribe(inputs: Observable[Request]): AnonymousSubscription = {
     inputs
       .map(request => {
-        val obs = Observable.ajax(request.url).map(response => {
+        val obs = requestUrl(request).map(response => {
           org.scalajs.dom.console.log("Got a response!", response)
           Response(request.id, request.url, response)
         })
@@ -30,10 +32,11 @@ class HttpDriver private extends Driver[Request] {
   def filter(predicate: ResponseObservable => Boolean): Observable[ResponseObservable] = {
     org.scalajs.dom.console.log("Filtering ResponseObservable")
     val obs = responses$$.filter(predicate)
-    //    obs.subscribe(sth => {
-    //      org.scalajs.dom.console.log("Something went through the filter!", sth.request.url)
-    //    })
     obs
+  }
+
+  private def requestUrl(request: Request): Observable[js.Dynamic] = {
+    Observable.ajax(request.url)
   }
 
 }
