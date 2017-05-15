@@ -69,9 +69,7 @@ object ScycleApp extends JSApp {
       })
 
     val user$ = response$$.flatMap(res$ => {
-      org.scalajs.dom.console.log("######### A response to map to user", res$.request.url)
-      val newRes$ = res$.map(res => {
-        org.scalajs.dom.console.log("######## The response = ", res.response)
+      res$.map(res => {
         if (res == null) {
           org.scalajs.dom.console.log("result in test user")
           User("test", "test@test.de", "http://test.de")
@@ -81,30 +79,19 @@ object ScycleApp extends JSApp {
           User(user.username.toString, user.email.toString, user.website.toString)
         }
       })
-      org.scalajs.dom.console.log("######### after map")
-      newRes$.subscribe(sth => {
-        org.scalajs.dom.console.log("######### subscribe in res", sth.toString)
-      })
-      org.scalajs.dom.console.log("######### before returning the result")
-      newRes$
-    }).startWith(null)
+    }).startWith(User("Tester", "test@test.test", "test.test"))
 
-    user$.subscribe(user => {
-      org.scalajs.dom.console.log("user subscription yields", Option(user).toString)
-    })
-
-    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$/*, user$*/))
+    val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$))
       .map({
-        case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) /*:: (user: Any)*/ :: Nil =>
-          /*        org.scalajs.dom.console.log(s"A vtree user!", user.toString)
-                  val userText: Text = if (user == null) {
-                    org.scalajs.dom.console.log("user is null")
-                    Text(s"No user")
-                  } else {
-                    org.scalajs.dom.console.log("user is not null")
-                    Text(s"User is ${user.name} (${user.email}), ${user.website}")
-                  }
-          */ val userText = Text("No user")
+        case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
+          org.scalajs.dom.console.log(s"A vtree user!", user.toString)
+          val userText: Text = if (user == null) {
+            org.scalajs.dom.console.log("user is null")
+            Text(s"No user")
+          } else {
+            org.scalajs.dom.console.log("user is not null")
+            Text(s"User is ${user.name} (${user.email}), ${user.website}")
+          }
 
           org.scalajs.dom.console.log("some stuff")
           Div(id = "app", children = List(
