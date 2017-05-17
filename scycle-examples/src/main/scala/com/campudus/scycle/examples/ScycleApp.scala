@@ -55,7 +55,7 @@ object ScycleApp extends JSApp {
         bmi
     })
 
-    val clicks$ = sources(Dom).events("click")
+    val clicks$ = sources(Dom).select("#request-user").events("click")
 
     val response$$ = sources(Http)
       .filter(response$ => {
