@@ -55,41 +55,25 @@ object ScycleApp extends JSApp {
         bmi
     })
 
-    val clicks$ = sources(Dom).select("#request-user").events("click")
+    val requestUserClicks$ = sources(Dom).select("#request-user").events("click")
 
     val response$$ = sources(Http)
-      .filter(response$ => {
-        val result = response$.request.id == "user"
-        org.scalajs.dom.console.log("Filter response$ results in url=", response$.request.url, "and result:", result)
-        result
-      })
-      .map(x => {
-        org.scalajs.dom.console.log("test??", x.request.url)
-        x
-      })
+      .filter(_.request.id == "user")
 
     val user$ = response$$.flatMap(res$ => {
-      res$.map(res => {
-        if (res == null) {
-          org.scalajs.dom.console.log("result in test user")
-          None
-        } else {
-          val user = res.response.response
-          org.scalajs.dom.console.log("result in correct user", user)
-          Some(User(user.username.toString, user.email.toString, user.website.toString))
-        }
-      })
+      res$.map(Option.apply).map(_.map(res => {
+        val user = res.response.response
+        Some(User(user.username.toString, user.email.toString, user.website.toString))
+      }))
     }).startWith(None)
 
     val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$))
       .map({
         case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: Option[User]) :: Nil =>
-          org.scalajs.dom.console.log(s"A vtree user!", user.toString)
           val userText: Text = user
             .map(u => Text(s"User is ${u.name} (${u.email}), ${u.website}"))
             .getOrElse(Text("No user"))
 
-          org.scalajs.dom.console.log("some stuff")
           Div(id = "app", children = List(
             Div(id = "weight", children = List(weightVTree)),
             Div(id = "height", children = List(heightVTree)),
@@ -103,7 +87,7 @@ object ScycleApp extends JSApp {
           ))
       })
 
-    val userRequest$ = clicks$.map(_ => {
+    val userRequest$ = requestUserClicks$.map(_ => {
       val randomInt = Random.nextInt(10) + 1
       org.scalajs.dom.console.log("clicked button, requesting new user", randomInt)
       Get("user", s"http://jsonplaceholder.typicode.com/users/$randomInt").asInstanceOf[Request]
