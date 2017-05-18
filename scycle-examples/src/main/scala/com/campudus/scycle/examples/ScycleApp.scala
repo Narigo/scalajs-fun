@@ -72,26 +72,22 @@ object ScycleApp extends JSApp {
       res$.map(res => {
         if (res == null) {
           org.scalajs.dom.console.log("result in test user")
-          User("test", "test@test.de", "http://test.de")
+          None
         } else {
           val user = res.response.response
           org.scalajs.dom.console.log("result in correct user", user)
-          User(user.username.toString, user.email.toString, user.website.toString)
+          Some(User(user.username.toString, user.email.toString, user.website.toString))
         }
       })
-    }).startWith(User("Tester", "test@test.test", "test.test"))
+    }).startWith(None)
 
     val vtree$: Observable[Hyperscript] = Observable.combineLatest(List(weightVTree$, heightVTree$, bmi$, user$))
       .map({
-        case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: User) :: Nil =>
+        case (weightVTree: Hyperscript) :: (heightVTree: Hyperscript) :: (bmi: Long) :: (user: Option[User]) :: Nil =>
           org.scalajs.dom.console.log(s"A vtree user!", user.toString)
-          val userText: Text = if (user == null) {
-            org.scalajs.dom.console.log("user is null")
-            Text(s"No user")
-          } else {
-            org.scalajs.dom.console.log("user is not null")
-            Text(s"User is ${user.name} (${user.email}), ${user.website}")
-          }
+          val userText: Text = user
+            .map(u => Text(s"User is ${u.name} (${u.email}), ${u.website}"))
+            .getOrElse(Text("No user"))
 
           org.scalajs.dom.console.log("some stuff")
           Div(id = "app", children = List(
