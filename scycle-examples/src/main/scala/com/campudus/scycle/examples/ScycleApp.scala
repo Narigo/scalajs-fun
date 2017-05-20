@@ -50,9 +50,7 @@ object ScycleApp extends JSApp {
     val bmi$ = Observable.combineLatest(List(weightValue$, heightValue$)).map({
       case weight :: height :: Nil =>
         val heightMeters = height * 0.01
-        val bmi = Math.round(weight / (heightMeters * heightMeters))
-        org.scalajs.dom.console.log(s"current bmi is $bmi")
-        bmi
+        Math.round(weight / (heightMeters * heightMeters))
     })
 
     val requestUserClicks$ = sources(Dom).select("#request-user").events("click")
@@ -60,10 +58,10 @@ object ScycleApp extends JSApp {
     val response$$ = sources(Http)
       .filter(_.request.id == "user")
 
-    val user$ = response$$.flatMap(res$ => {
+    val user$: Observable[Option[User]] = response$$.flatMap(res$ => {
       res$.map(Option.apply).map(_.map(res => {
         val user = res.response.response
-        Some(User(user.username.toString, user.email.toString, user.website.toString))
+        User(user.username.toString, user.email.toString, user.website.toString)
       }))
     }).startWith(None)
 
