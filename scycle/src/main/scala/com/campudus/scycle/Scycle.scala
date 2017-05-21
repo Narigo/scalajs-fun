@@ -89,7 +89,6 @@ object Scycle {
       case (m, (name, driver)) =>
         val proxyObservable = sinkProxies(name).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
-        org.scalajs.dom.console.log("subscribed to driver", name.toString)
         m + (name -> subscription)
     }
   }
