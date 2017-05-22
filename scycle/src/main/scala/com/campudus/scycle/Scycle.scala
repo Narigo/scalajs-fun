@@ -70,10 +70,6 @@ object Scycle {
     () => disposeFunctions.foreach(_.apply())
   }
 
-  private def logToConsoleError(error: Any): Unit = {
-    println(error)
-  }
-
   private def disposeSubscriptions(subscriptions: Map[Any, AnonymousSubscription]): Unit = {
     subscriptions.foreach(_._2.unsubscribe())
   }
