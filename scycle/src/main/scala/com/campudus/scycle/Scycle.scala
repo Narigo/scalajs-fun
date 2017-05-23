@@ -1,5 +1,7 @@
 package com.campudus.scycle
 
+import com.campudus.scycle.dom.DomDriver
+import com.campudus.scycle.http.HttpDriver
 import rxscalajs.subscription.AnonymousSubscription
 import rxscalajs.{Observable, Observer, _}
 
@@ -126,9 +128,10 @@ object Scycle {
 
     def apply[K, V <: Driver[_]](tuples: (K, V)*): SourcesMap = {
       tuples.foldLeft(new SourcesMap())((m: SourcesMap, kv) => {
-        val ev = implicitly[SourcesMapper[kv._1.type, kv._2.type]]
-
-        m.+(kv)(ev)
+        kv match {
+          case (k: DomDriver.Dom.type, v: DomDriver) => m + (k, v)
+          case (k: HttpDriver.Http.type, v: HttpDriver) => m + (k, v)
+        }
       })
     }
 
