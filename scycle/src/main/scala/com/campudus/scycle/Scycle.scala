@@ -122,4 +122,16 @@ object Scycle {
     def -[K](k: K): SourcesMap = new SourcesMap(inner - k)
   }
 
+  object SourcesMap {
+
+    def apply[K, V <: Driver[_]](tuples: (K, V)*): SourcesMap = {
+      tuples.foldLeft(new SourcesMap())((m: SourcesMap, kv) => {
+        val ev = implicitly[SourcesMapper[kv._1.type, kv._2.type]]
+
+        m.+(kv)(ev)
+      })
+    }
+
+  }
+
 }

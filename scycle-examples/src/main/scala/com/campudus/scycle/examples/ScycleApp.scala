@@ -34,9 +34,10 @@ object ScycleApp extends JSApp {
     val weightSources = new SourcesMap() +
       (Dom -> sources(Dom).select("#weight")) +
       (Props -> makeSliderPropsDriver(weightSliderProps))
-    val heightSources = new SourcesMap() +
-      (Dom -> sources(Dom).select("#height")) +
-      (Props -> makeSliderPropsDriver(heightSliderProps))
+    val heightSources = SourcesMap(
+      Dom -> sources(Dom).select("#height"),
+      Props -> makeSliderPropsDriver(heightSliderProps)
+    )
 
     val WeightSlider = LabeledSlider(weightSources)
     val HeightSlider = LabeledSlider(heightSources)
