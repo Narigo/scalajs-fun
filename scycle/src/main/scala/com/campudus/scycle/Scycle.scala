@@ -1,7 +1,7 @@
 package com.campudus.scycle
 
-import com.campudus.scycle.dom.DomDriver
-import com.campudus.scycle.http.HttpDriver
+import com.campudus.scycle.dom.{DomDriver, Hyperscript}
+import com.campudus.scycle.http.{HttpDriver, Request}
 import rxscalajs.subscription.AnonymousSubscription
 import rxscalajs.{Observable, Observer, _}
 
@@ -110,6 +110,19 @@ object Scycle {
 
     def +[K, V <: Observable[_]](kv: (K, V))(implicit ev: SinkMapper[K, V]): SinksMap = new SinksMap(inner + kv)
     def -[K](k: K): SinksMap = new SinksMap(inner - k)
+  }
+
+  object SinksMap {
+
+    def apply[K, V <: Observable[_]](tuples: (K, V)*): SinksMap = {
+      tuples.foldLeft(new SinksMap())((m: SinksMap, kv) => {
+        kv match {
+          case (k: DomDriver.Dom.type, v: Observable[Hyperscript]) => m + (k, v)
+          case (k: HttpDriver.Http.type, v: Observable[Request]) => m + (k, v)
+        }
+      })
+    }
+
   }
 
   class SourcesMapper[K, +V <: Driver[_]]

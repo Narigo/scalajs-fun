@@ -91,9 +91,10 @@ object ScycleApp extends JSApp {
       Get("user", s"http://jsonplaceholder.typicode.com/users/$randomInt").asInstanceOf[Request]
     })
 
-    new SinksMap() +
-      (Dom -> vtree$) +
-      (Http -> userRequest$)
+    SinksMap(
+      Dom -> vtree$,
+      Http -> userRequest$
+    )
   }
 
 }
