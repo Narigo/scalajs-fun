@@ -15,7 +15,6 @@ class DomDriver private(val domSelector: String, selectedEvents: SelectedEvents 
 
   override def subscribe(inputs: Observable[Hyperscript]): AnonymousSubscription = {
     inputs.subscribe(hs => {
-      console.log("got a hyperscript to show", hs.toNode)
       val container = document.querySelector(domSelector)
       if (container == null) {
         console.log("NO CONTAINER FOUND WITH", domSelector)
