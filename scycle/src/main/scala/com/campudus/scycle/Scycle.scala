@@ -115,7 +115,7 @@ object Scycle {
   object SinksMap {
 
     def apply[K, V <: Observable[_]](tuples: (K, V)*): SinksMap = {
-      tuples.foldLeft(new SinksMap())((m: SinksMap, kv) => {
+      tuples.foldLeft(new SinksMap())((m, kv) => {
         kv match {
           case (k: DomDriver.Dom.type, v: Observable[Hyperscript]) => m + (k, v)
           case (k: HttpDriver.Http.type, v: Observable[Request]) => m + (k, v)
@@ -140,7 +140,7 @@ object Scycle {
   object SourcesMap {
 
     def apply[K, V <: Driver[_]](tuples: (K, V)*): SourcesMap = {
-      tuples.foldLeft(new SourcesMap())((m: SourcesMap, kv) => {
+      tuples.foldLeft(new SourcesMap())((m, kv) => {
         kv match {
           case (k: DomDriver.Dom.type, v: DomDriver) => m + (k, v)
           case (k: HttpDriver.Http.type, v: HttpDriver) => m + (k, v)
