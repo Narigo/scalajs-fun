@@ -42,13 +42,6 @@ object Scycle {
     }
   }
 
-  def side[X](someNext: X => _): X => X = {
-    x => {
-      someNext(x)
-      x
-    }
-  }
-
   private def replicateMany(sinks: Sinks, sinkProxies: SinkProxies): () => Unit = {
 
     type X = Any
@@ -139,11 +132,12 @@ object Scycle {
 
   object SourcesMap {
 
-    def apply[K, V <: Driver[_]](tuples: (K, V)*): SourcesMap = {
+    def apply[K, V <: Driver[_]](tuples: (K, V)*)(implicit fn: (SourcesMap, K, V) => SourcesMap): SourcesMap = {
       tuples.foldLeft(new SourcesMap())((m, kv) => {
         kv match {
           case (k: DomDriver.Dom.type, v: DomDriver) => m + (k, v)
           case (k: HttpDriver.Http.type, v: HttpDriver) => m + (k, v)
+          case (k, v) => fn(m, k, v)
         }
       })
     }

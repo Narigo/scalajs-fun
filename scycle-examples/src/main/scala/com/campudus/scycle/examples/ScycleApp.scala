@@ -16,6 +16,14 @@ import scala.util.Random
 @JSExport
 object ScycleApp extends JSApp {
 
+  implicit def sourceFn[K, V <: Driver[_]](m: SourcesMap, k: K, v: V)(implicit ev: SourcesMapper[K, V]): SourcesMap = {
+    m + (k, v)
+  }
+
+  implicit def sinkFn[K, V <: Observable[_]](m: SinksMap, k: K, v: V)(implicit ev: SinkMapper[K, V]): SinksMap = {
+    m + (k, v)
+  }
+
   @JSExport
   def main(): Unit = {
     println("main export")
