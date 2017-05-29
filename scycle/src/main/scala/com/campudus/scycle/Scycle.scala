@@ -4,6 +4,7 @@ import com.campudus.scycle.dom.{DomDriver, Hyperscript}
 import com.campudus.scycle.http.{HttpDriver, Request}
 import rxscalajs.subscription.AnonymousSubscription
 import rxscalajs.{Observable, Observer, _}
+import shapeless._
 
 object Scycle {
 
@@ -18,14 +19,14 @@ object Scycle {
 
   }
 
-  type DriversDefinition = SourcesMap
-  type Sources = SourcesMap
-  type Sinks = SinksMap
+  type DriversDefinition = MyHMap[SourcesMapper]
+  type Sources = MyHMap[SourcesMapper]
+  type Sinks = MyHMap[SinkMapper]
   type SinkProxies = Map[Any, Subject[_]]
 
   def run(mainFn: Sources => Sinks, drivers: DriversDefinition): () => Unit = {
 
-    if (drivers.inner.isEmpty) {
+    if (drivers.isEmpty) {
       throw new IllegalArgumentException("Scycle needs at least one driver to work.")
     } else {
       val sinkProxies = makeSinkProxies(drivers)
@@ -46,15 +47,15 @@ object Scycle {
 
     type X = Any
 
-    val disposeFunctions = sinks.inner.keys
+    val disposeFunctions = sinks.keys
       .filter(name => {
         sinkProxies.exists(a => {
           a._1 == name
         })
       })
       .map(name => {
-        val subs = sinks.inner(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
-        val latest$ = sinks.inner(name).lastOrElse(null)
+        val subs = sinks(name).subscribe(sinkProxies(name).asInstanceOf[Observer[X]])
+        val latest$ = sinks(name).lastOrElse(null)
         val dispose = subs.unsubscribe _
         latest$.map(x => {
           sinkProxies(name).asInstanceOf[Observer[X]].next(x)
@@ -76,7 +77,7 @@ object Scycle {
 
     type X = Nothing
 
-    drivers.inner.foldLeft(Map[Any, AnonymousSubscription]()){
+    drivers.foldLeft(Map[Any, AnonymousSubscription]()){
       case (m, (name, driver)) =>
         val proxyObservable = sinkProxies(name).asInstanceOf[Observable[X]]
         val subscription = driver.subscribe(proxyObservable)
@@ -85,7 +86,7 @@ object Scycle {
   }
 
   private def makeSinkProxies(drivers: DriversDefinition): SinkProxies = {
-    drivers.inner.foldLeft(Map[Any, Subject[_]]()){
+    drivers.foldLeft(Map[Any, Subject[_]]()){
       case (m, (name, driver)) =>
         m + (name -> driver.createSubject())
     }
@@ -93,53 +94,23 @@ object Scycle {
 
   class SinkMapper[K, +V <: Observable[_]]
 
-  class SinksMap(private[Scycle] val inner: Map[Any, Observable[_]] = Map.empty) {
-
-    def get[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): Option[V] = {
-      inner.get(k).asInstanceOf[Option[V]]
-    }
-
-    def apply[K, V <: Observable[_]](k: K)(implicit ev: SinkMapper[K, V]): V = get(k).get
-
-    def +[K, V <: Observable[_]](kv: (K, V))(implicit ev: SinkMapper[K, V]): SinksMap = new SinksMap(inner + kv)
-    def -[K](k: K): SinksMap = new SinksMap(inner - k)
-  }
-
-  object SinksMap {
-
-    def apply[K, V <: Observable[_]](tuples: (K, V)*): SinksMap = {
-      tuples.foldLeft(new SinksMap())((m, kv) => {
-        kv match {
-          case (k: DomDriver.Dom.type, v: Observable[Hyperscript]) => m + (k, v)
-          case (k: HttpDriver.Http.type, v: Observable[Request]) => m + (k, v)
-        }
-      })
-    }
-
-  }
-
   class SourcesMapper[K, +V <: Driver[_]]
 
-  class SourcesMap(private[Scycle] val inner: Map[Any, Driver[_]] = Map.empty) {
+  class MyHMap[R[_, _]](inner: HMap[R]) {
 
-    def get[K, V <: Driver[_]](k: K)(implicit ev: SourcesMapper[K, V]): Option[V] = inner.get(k).asInstanceOf[Option[V]]
-
-    def apply[K, V <: Driver[_]](k: K)(implicit ev: SourcesMapper[K, V]): V = get(k).get
-
-    def +[K, V <: Driver[_]](kv: (K, V))(implicit ev: SourcesMapper[K, V]): SourcesMap = new SourcesMap(inner + kv)
-    def -[K](k: K): SourcesMap = new SourcesMap(inner - k)
-  }
-
-  object SourcesMap {
-
-    def apply[K, V <: Driver[_]](tuples: (K, V)*)(implicit fn: (SourcesMap, K, V) => SourcesMap): SourcesMap = {
-      tuples.foldLeft(new SourcesMap())((m, kv) => {
-        kv match {
-          case (k: DomDriver.Dom.type, v: DomDriver) => m + (k, v)
-          case (k: HttpDriver.Http.type, v: HttpDriver) => m + (k, v)
-          case (k, v) => fn(m, k, v)
-        }
-      })
+    var size = 0
+    var keys = List[Any]()
+    def apply[K, V](k: K)(implicit ev: R[K, V]): V = inner.get(k).get
+    def isEmpty = size == 0
+    def +[K, V](k: K, v: V)(implicit ev: R[K, V]) = {
+      size += 1
+      keys = k :: keys
+      inner + (k, v)
+    }
+    def -[K, V](k: K, v: V)(implicit ev: R[K, V]) = {
+      size -= 1
+      keys = keys.filter(_ != k)
+      inner - (k, v)
     }
 
   }

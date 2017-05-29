@@ -7,6 +7,7 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.github.lukajcb" %%% "rxscala-js" % "0.13.6",
+    "com.chuusai" %%% "shapeless" % "2.3.2",
     "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
   ),
   jsDependencies ++= Seq(
